@@ -10,7 +10,7 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 
 ### Madau et al. (2014)
 
-P. Madau and M. Dickinson, Cosmic Star-Formation History, _Annual Review of Astronomy and Astrophysics_, Volume 52, Issue 1, 18 JUne 2014, Pages 415-486, https://doi.org/10.1146/annurev-astro-081811-125615
+P. Madau and M. Dickinson, Cosmic Star-Formation History, _Annual Review of Astronomy and Astrophysics_, Volume 52, Issue 1, 18 June 2014, Pages 415-486, https://doi.org/10.1146/annurev-astro-081811-125615
 
 ### Sotillo-Ramos et al. (2021)
 
