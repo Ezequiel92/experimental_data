@@ -15,3 +15,7 @@ P. Madau and M. Dickinson, Cosmic Star-Formation History, _Annual Review of Astr
 ### Sotillo-Ramos et al. (2021)
 
 D. Sotillo-Ramos, M. A. Lara-López, A. M. Pérez-García, R. Pérez-Martínez, A. M. Hopkins, B. W. Holwerda, J. Liske, A. R. López-Sánchez, M. S. Owers and K. A. Pimbblet, Galaxy and mass assembly (GAMA): The environmental impact on SFR and metallicity in galaxy groups, _Monthly Notices of the Royal Astronomical Society_, Volume 508, Issue 2, December 2021, Pages 1817–1830, [https://doi.org/10.1093/mnras/stab2641](https://doi.org/10.1093/mnras/stab2641)
+
+### Wu et al. (2021)
+
+Y.-Z. Wu, W. Zhang, Estimating the metallicity of star-forming early-type galaxies, _Monthly Notices of the Royal Astronomical Society_, Volume 503, Issue 2, May 2021, Pages 2340–2348, [https://doi.org/10.1093/mnras/stab512](https://doi.org/10.1093/mnras/stab512)
