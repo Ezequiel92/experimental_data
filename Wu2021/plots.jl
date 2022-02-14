@@ -9,16 +9,16 @@ using FITSIO, Unitful, UnitfulAstro, DataFrames, CairoMakie
 
 # ╔═╡ c9af5533-1b90-4191-9d3f-e48ecc795e98
 begin
-	mass = FITS("./data/mass.fit")
+	mass = FITS("./data/mass.fits")
 	sfr = FITS("./data/sfr.fits")
-	oxygen = FITS("./oxygen.fits")
+	oxygen = FITS("./data/oxygen.fits")
 	
-	df = DataFrame(
+	df = identity.(DataFrame(
 		logM = read(mass[2], "AVG"),    # log10(M / M⊙)
 		logSFR = read(sfr[2], "AVG"),   # log10(SFR / M⊙ yr^-1)
 		logOH = read(oxygen[2], "AVG"), # 12 + log10(O / H)
 		flag = read(sfr[2], "FLAG"),
-	)
+	))
 	df[!, Not(:flag)]
 end
 
