@@ -1,4 +1,6 @@
-# 🔭 Experimental data
+<div align="center">
+    <h1>🔭 Experimental data</h1>
+</div>
 
 Experimental measurements to check against the simulations.
 
