@@ -2,7 +2,7 @@
     <h1>🔭 Experimental data</h1>
 </div>
 
-Experimental measurements to check against the simulations.
+Experimental measurements in computer readable formats, to use as checks against simulations.
 
 ## Sources
 
