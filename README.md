@@ -24,7 +24,7 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 
 ### Whitaker et al. (2014)
 
-K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M. Fumagalli, I. G. Momcheva, G. B. Brammer, I. Labbé, E. J. Nelson and J. R. Rigby, Constraining the low-mass slope of the star formation sequence at 0.5 < z < 2.5, _The Astrophysical Journal_, Volume 795, Number 2, 17 October 17 2014, Pages 104. [https://doi.org/10.1088/0004-637x/795/2/104](https://doi.org/10.1088/0004-637x/795/2/104)
+K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M. Fumagalli, I. G. Momcheva, G. B. Brammer, I. Labbé, E. J. Nelson and J. R. Rigby, Constraining the low-mass slope of the star formation sequence at 0.5 < z < 2.5, _The Astrophysical Journal_, Volume 795, Number 2, 17 October 2014, Pages 104. [https://doi.org/10.1088/0004-637x/795/2/104](https://doi.org/10.1088/0004-637x/795/2/104)
 
 ### The 3D-HST Survey
 
