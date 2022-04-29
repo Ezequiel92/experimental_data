@@ -33,5 +33,3 @@ K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M.
 ### To-do
 
 [Parente et al. 2022](https://doi.org/10.48550/arXiv.2204.11884)
-
-[Renzini et al. 2015](https://iopscience.iop.org/article/10.1088/2041-8205/801/2/L29)
