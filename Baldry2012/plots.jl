@@ -4,201 +4,40 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, DataFramesMeta, FITSIO
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using CairoMakie, LaTeXStrings, DataFrames, CSV
 
-# ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
-md"""
-# 3D-HST project
+# ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+raw_data = CSV.read("./data.csv", DataFrame)
 
-[Archived data](https://archive.stsci.edu/prepds/3d-hst/)
-"""
-
-# ╔═╡ 30b5b786-9feb-4387-918b-9f26c85d0681
-begin
-	aegis = readdlm("./sfr_data/aegis_3dhst.v4.1.sfr", Float64, skipstart=11)
-	cosmos = readdlm("./sfr_data/cosmos_3dhst.v4.1.sfr", Float64, skipstart=11)
-	goodsn = readdlm("./sfr_data/goodsn_3dhst.v4.1.sfr", Float64, skipstart=11)
-	goodss = readdlm("./sfr_data/goodss_3dhst.v4.1.sfr", Float64, skipstart=11)
-	uds = readdlm("./sfr_data/uds_3dhst.v4.1.sfr", Float64, skipstart=11)
-	
-	head = ["id", "sfr", "sfr_IR", "sfr_UV"]
-	
-	df_aegis = DataFrame(aegis[:, 1:4], vec(head))
-	df_cosmos = DataFrame(cosmos[:, 1:4], vec(head))
-	df_goodsn = DataFrame(goodsn[:, 1:4], vec(head))
-	df_goodss = DataFrame(goodss[:, 1:4], vec(head))
-	df_uds = DataFrame(uds[:, 1:4], vec(head))
-
-	dataframes = sort.([df_aegis, df_cosmos, df_goodsn, df_goodss, df_uds], :id)
-
-	mass = FITS("./mass_data/3dhst_master.phot.v4.1.cat.FITS")[2]
-	
-	df_mass = sort(identity.(DataFrame(
-		id = read(mass, "id"),
-		field = read(mass, "field"),
-		log_mass = read(mass, "lmass"),
-	)), [:field, :id])
-
-	fields = sort(unique(df_mass[:, :field]))
-
-	for (data, field) in zip(dataframes, fields)
-		data[!, :log_mass] = @subset(df_mass, :field .== field)[:, :log_mass]
-	end
-end;
-
-# ╔═╡ 105261ea-22b1-4506-b6c5-9a44ed636921
+# ╔═╡ a324e8e5-2dd0-4666-968a-4ddb0511462c
 let
-	sfr = [@subset(df, :sfr .> 0, :log_mass .> 0) for df in dataframes]
+	ϕ = raw_data[:, "phi"] .* 10^(-3)
+	mass = raw_data[:, "log_M_mid_point"]
+	error = raw_data[:, "error"] .* 10^(-3)
+
+	deleteat!(ϕ, collect(mass .< 8))
+	deleteat!(error, collect(mass .< 8))
+    filter!(x -> x > 8, mass)
+
+	# https://physics.stackexchange.com/questions/619143/error-propagation-with-log-base-10
+	error = (error ./ ϕ) ./ log(10)
+	ϕ = log10.(ϕ)
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
 		xlabel = L"\log(M_\star / M_\odot)", 
-		ylabel = L"\mathrm{SFR \, / \, M_\odot \, yr^{-1}}", 
-		title = L"\mathrm{SFR}",
-		titlesize = 28,
-		xlabelsize = 22,
-		ylabelsize = 22,
+		ylabel = L"\log(\phi \, / \, \mathrm{dex^{−1} \, Mpc^{−3}})", 
+		xlabelsize = 24,
+		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
-		yscale = log10,
 	)
 
-	colors = [:red, :blue, :green, :orange, :cyan]
-
-	for (data, color) in zip(sfr, colors)
-		scatter!(
-			ax, 
-			data[!, :log_mass], data[!, :sfr],
-			markersize = 2;
-			color,
-		) 
-	end
-
-	group_size = [
-		MarkerElement(
-			marker = :circle, 
-			markersize = 12; 
-			color
-		) for (field, color) in zip(fields, colors)
-	]
-
-	Legend(
-		f[1, 1], 
-		group_size, 
-		fields, 
-		tellheight = false,
-        tellwidth = false,
-        margin = (10, 10, 10, 10),
-        halign = :right, 
-		valign = :bottom,
-	)
-
-	f
-end
-
-# ╔═╡ a5d4a488-dbbb-4294-8a9b-17cfcb6c4225
-let
-	sfr = [@subset(df, :sfr_IR .> 0, :log_mass .> 0) for df in dataframes]
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
-		ylabel = L"\mathrm{SFR \, / \, M_\odot \, yr^{-1}}", 
-		title = L"\mathrm{SFR \,\, IR}",
-		titlesize = 28,
-		xlabelsize = 22,
-		ylabelsize = 22,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
-		yscale = log10,
-	)
-
-	colors = [:red, :blue, :green, :orange, :cyan]
-
-	for (data, color) in zip(sfr, colors)
-		scatter!(
-			ax, 
-			data[!, :log_mass], data[!, :sfr_IR],
-			markersize = 2;
-			color,
-		) 
-	end
-
-	group_size = [
-		MarkerElement(
-			marker = :circle, 
-			markersize = 12; 
-			color
-		) for (field, color) in zip(fields, colors)
-	]
-
-	Legend(
-		f[1, 1], 
-		group_size, 
-		fields, 
-		tellheight = false,
-        tellwidth = false,
-        margin = (10, 10, 10, 10),
-        halign = :right, 
-		valign = :bottom,
-	)
-
-	f
-end
-
-# ╔═╡ 0022116b-9268-4ccd-aa26-54936acaca3c
-let
-	sfr = [@subset(df, :sfr_UV .> 0, :log_mass .> 0) for df in dataframes]
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
-		ylabel = L"\mathrm{SFR \, / \, M_\odot \, yr^{-1}}", 
-		title = L"\mathrm{SFR \,\, UV}",
-		titlesize = 28,
-		xlabelsize = 22,
-		ylabelsize = 22,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
-		yscale = log10,
-	)
-
-	colors = [:red, :blue, :green, :orange, :cyan]
-
-	for (data, color) in zip(sfr, colors)
-		scatter!(
-			ax, 
-			data[!, :log_mass], data[!, :sfr_UV],
-			markersize = 2;
-			color,
-		) 
-	end
-
-	group_size = [
-		MarkerElement(
-			marker = :circle, 
-			markersize = 12; 
-			color
-		) for (field, color) in zip(fields, colors)
-	]
-
-	Legend(
-		f[1, 1], 
-		group_size, 
-		fields, 
-		tellheight = false,
-        tellwidth = false,
-        margin = (10, 10, 10, 10),
-        halign = :right, 
-		valign = :bottom,
-	)
+	stairs!(ax, mass, ϕ, step = :center, color = :red)
+	errorbars!(ax, mass, ϕ, error, color = :red)
 
 	f
 end
@@ -206,18 +45,15 @@ end
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 
 [compat]
+CSV = "~0.10.4"
 CairoMakie = "~0.7.5"
 DataFrames = "~1.3.3"
-DataFramesMeta = "~0.11.0"
-FITSIO = "~0.16.12"
 LaTeXStrings = "~1.3.0"
 """
 
@@ -289,17 +125,11 @@ git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
 
-[[deps.CFITSIO]]
-deps = ["CFITSIO_jll"]
-git-tree-sha1 = "8425c47db102577eefb93cb37b4480e750116b0d"
-uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
-version = "1.4.1"
-
-[[deps.CFITSIO_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "9c91a9358de42043c3101e3a29e60883345b0b39"
-uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
-version = "4.0.0+0"
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings"]
+git-tree-sha1 = "873fb188a4b9d76549b81465b1f75c82aaf59238"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.4"
 
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
@@ -319,11 +149,6 @@ git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
 
-[[deps.Chain]]
-git-tree-sha1 = "339237319ef4712e6e5df7758d0bccddf5c237d9"
-uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-version = "0.4.10"
-
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "9950387274246d08af38f6eef8cb5480862a435f"
@@ -335,6 +160,12 @@ deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
 git-tree-sha1 = "bf98fa45a0a4cee295de98d4c1462be26345b9a1"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
 version = "0.1.2"
+
+[[deps.CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.0"
 
 [[deps.ColorBrewer]]
 deps = ["Colors", "JSON", "Test"]
@@ -398,12 +229,6 @@ git-tree-sha1 = "6c19003824cbebd804a51211fd3bbd81bf1ecad5"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 version = "1.3.3"
 
-[[deps.DataFramesMeta]]
-deps = ["Chain", "DataFrames", "MacroTools", "OrderedCollections", "Reexport"]
-git-tree-sha1 = "f1d89a07475dc4b03c08543d1c6b4b2945f33eca"
-uuid = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
-version = "0.11.0"
-
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
 git-tree-sha1 = "3daef5523dd2e769dad2365274f760ff5f282c7d"
@@ -435,9 +260,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "5a4168170ede913a2cd679e53c2123cb4b889795"
+git-tree-sha1 = "221ff6c6c9ede484e9f8be4974697187c06eb06b"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.53"
+version = "0.25.55"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -491,17 +316,17 @@ git-tree-sha1 = "c6033cc3892d0ef5bb9cd29b7f2f0331ea5184ea"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+0"
 
-[[deps.FITSIO]]
-deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
-git-tree-sha1 = "e6033823834ec0070125120d4d4a1234f1826a47"
-uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-version = "0.16.12"
-
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
 git-tree-sha1 = "80ced645013a5dbdc52cf70329399c35ce007fae"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.13.0"
+
+[[deps.FilePathsBase]]
+deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
+git-tree-sha1 = "129b104185df66e408edd6625d480b7f9e9823a0"
+uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
+version = "0.9.18"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
@@ -634,6 +459,12 @@ version = "1.0.0"
 git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.2"
+
+[[deps.InlineStrings]]
+deps = ["Parsers"]
+git-tree-sha1 = "61feba885fac3a407465726d0c330b3055df897f"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.1.2"
 
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -814,12 +645,6 @@ git-tree-sha1 = "e595b205efd49508358f7dc670a940c790204629"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
 version = "2022.0.0+0"
 
-[[deps.MacroTools]]
-deps = ["Markdown", "Random"]
-git-tree-sha1 = "3d3e902b31198a27340d0bf00d6ac452866021cf"
-uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.9"
-
 [[deps.Makie]]
 deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Showoff", "SignedDistanceFields", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "UnicodeFun"]
 git-tree-sha1 = "63de3b8a5c1f764e4e3a036c7752a632b4f0b8d1"
@@ -962,9 +787,9 @@ version = "0.11.8"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
-git-tree-sha1 = "6df5f47afdc50e38356312368731b0b2105f3e86"
+git-tree-sha1 = "e925a64b8585aa9f4e3047b8d2cdc3f0e79fd4e4"
 uuid = "f57f5aa1-a3ce-4bc8-8ab9-96f992907883"
-version = "0.3.15"
+version = "0.3.16"
 
 [[deps.Packing]]
 deps = ["GeometryBasics"]
@@ -1120,6 +945,12 @@ git-tree-sha1 = "0b4b7f1393cff97c33891da2a0bf69c6ed241fda"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.1.0"
 
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "6a2f7d70512d205ca8c7ee31bfa9f142fe74310c"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.3.12"
+
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
@@ -1172,9 +1003,9 @@ version = "0.1.1"
 
 [[deps.Static]]
 deps = ["IfElse"]
-git-tree-sha1 = "b1f1f60bf4f25d8b374480fb78c7b9785edf95fd"
+git-tree-sha1 = "91181e5820a400d1171db4382aa36e7fd19bee27"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.6.2"
+version = "0.6.3"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
@@ -1246,9 +1077,9 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TiffImages]]
 deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "OffsetArrays", "PkgVersion", "ProgressMeter", "UUIDs"]
-git-tree-sha1 = "aaa19086bc282630d82f818456bc40b4d314307d"
+git-tree-sha1 = "f90022b44b7bf97952756a6b6737d1a0024a3233"
 uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
-version = "0.5.4"
+version = "0.5.5"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -1268,6 +1099,12 @@ deps = ["REPL"]
 git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
+
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
 
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1401,11 +1238,8 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╠═30b5b786-9feb-4387-918b-9f26c85d0681
-# ╟─105261ea-22b1-4506-b6c5-9a44ed636921
-# ╟─a5d4a488-dbbb-4294-8a9b-17cfcb6c4225
-# ╟─0022116b-9268-4ccd-aa26-54936acaca3c
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╠═27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+# ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
