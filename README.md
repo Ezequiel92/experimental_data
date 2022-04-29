@@ -34,6 +34,4 @@ K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M.
 
 [Parente et al. 2022](https://doi.org/10.48550/arXiv.2204.11884)
 
-[Leja et al. 2019](https://iopscience.iop.org/article/10.3847/1538-4357/ab1d5a)
-
 [Renzini et al. 2015](https://iopscience.iop.org/article/10.1088/2041-8205/801/2/L29)
