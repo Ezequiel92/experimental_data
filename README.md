@@ -30,10 +30,10 @@ K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M.
 
 [https://archive.stsci.edu/prepds/3d-hst/](https://archive.stsci.edu/prepds/3d-hst/)
 
+### Baldry et al. (2012)
+
+I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P. Norberg, A. S. G. Robotham, S. Brough, A. M. Hopkins, S. P. Bamford, J. A. Peacock, J. Bland-Hawthorn, C. J. Conselice, S. M. Croom, D. H. Jones, H. R. Parkinson, C. C. Popescu, M. Prescott, R. G. Sharp, R. J. Tuffs, Galaxy And Mass Assembly (GAMA): the galaxy stellar mass function at z < 0.06, _Monthly Notices of the Royal Astronomical Society_, Volume 421, Issue 1, March 2012, Pages 621–634, [https://doi.org/10.1111/j.1365-2966.2012.20340.x](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
+
 ### To-do
 
 [Parente et al. 2022](https://doi.org/10.48550/arXiv.2204.11884)
-
-[Leja et al. 2019](https://iopscience.iop.org/article/10.3847/1538-4357/ab1d5a)
-
-[Renzini et al. 2015](https://iopscience.iop.org/article/10.1088/2041-8205/801/2/L29)
