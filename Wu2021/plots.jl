@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 0eb72a20-8b67-11ec-2556-57ab54e8e928
-using FITSIO, Unitful, UnitfulAstro, DataFrames, CairoMakie
+using FITSIO, DataFrames, CairoMakie
 
 # ╔═╡ c9af5533-1b90-4191-9d3f-e48ecc795e98
 begin
@@ -72,15 +72,11 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
 CairoMakie = "~0.7.5"
 DataFrames = "~1.3.3"
 FITSIO = "~0.16.12"
-Unitful = "~1.11.0"
-UnitfulAstro = "~1.1.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -232,12 +228,6 @@ version = "3.43.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-
-[[deps.ConstructionBase]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "f74e9d5388b8620b4cee35d4c5a618dd4dc547f4"
-uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
-version = "1.3.0"
 
 [[deps.Contour]]
 deps = ["StaticArrays"]
@@ -1120,24 +1110,6 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
-[[deps.Unitful]]
-deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "b649200e887a487468b71821e2644382699f1b0f"
-uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.11.0"
-
-[[deps.UnitfulAngles]]
-deps = ["Dates", "Unitful"]
-git-tree-sha1 = "d6cfdb6ddeb388af1aea38d2b9905fa014d92d98"
-uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
-version = "0.6.2"
-
-[[deps.UnitfulAstro]]
-deps = ["Unitful", "UnitfulAngles"]
-git-tree-sha1 = "c4e1c470a94063b911fd1b1a204cd2bb34a8cd15"
-uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
-version = "1.1.1"
-
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "de67fa59e33ad156a590055375a30b23c40299d3"
@@ -1272,7 +1244,7 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═0eb72a20-8b67-11ec-2556-57ab54e8e928
 # ╠═c9af5533-1b90-4191-9d3f-e48ecc795e98
-# ╠═f2f70f68-b2fe-44ec-a9e8-1f3306979f09
-# ╠═f6f96531-02d5-4455-ae80-fa6dc2a7dc02
+# ╟─f2f70f68-b2fe-44ec-a9e8-1f3306979f09
+# ╟─f6f96531-02d5-4455-ae80-fa6dc2a7dc02
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

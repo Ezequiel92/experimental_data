@@ -15,10 +15,12 @@ let
 	ϕ = raw_data[:, "phi"] .* 10^(-3)
 	mass = raw_data[:, "log_M_mid_point"]
 	error = raw_data[:, "error"] .* 10^(-3)
+	widths = raw_data[:, "bin_width"]
 
 	deleteat!(ϕ, collect(mass .< 8))
 	deleteat!(error, collect(mass .< 8))
-    filter!(x -> x > 8, mass)
+	deleteat!(widths, collect(mass .< 8))
+    filter!(x -> x >= 8, mass)
 
 	# https://physics.stackexchange.com/questions/619143/error-propagation-with-log-base-10
 	error = (error ./ ϕ) ./ log(10)
@@ -36,8 +38,15 @@ let
 		yticklabelsize = 18,
 	)
 
-	stairs!(ax, mass, ϕ, step = :center, color = :red)
-	errorbars!(ax, mass, ϕ, error, color = :red)
+	stairs!(ax, mass, ϕ, step = :center, color = :black, linewidth = 0.5)
+	crossbar!(
+		ax, 
+		mass, ϕ, 
+		ϕ .- error, ϕ .+ error, 
+		gap = 0, 
+		width = widths, 
+		color = :red,
+	)
 
 	f
 end

@@ -26,14 +26,21 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 
 K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M. Fumagalli, I. G. Momcheva, G. B. Brammer, I. Labbé, E. J. Nelson and J. R. Rigby, Constraining the low-mass slope of the star formation sequence at 0.5 < z < 2.5, _The Astrophysical Journal_, Volume 795, Number 2, 17 October 2014, Pages 104. [https://doi.org/10.1088/0004-637x/795/2/104](https://doi.org/10.1088/0004-637x/795/2/104)
 
-### The 3D-HST Survey
-
-[https://archive.stsci.edu/prepds/3d-hst/](https://archive.stsci.edu/prepds/3d-hst/)
-
 ### Baldry et al. (2012)
 
 I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P. Norberg, A. S. G. Robotham, S. Brough, A. M. Hopkins, S. P. Bamford, J. A. Peacock, J. Bland-Hawthorn, C. J. Conselice, S. M. Croom, D. H. Jones, H. R. Parkinson, C. C. Popescu, M. Prescott, R. G. Sharp, R. J. Tuffs, Galaxy And Mass Assembly (GAMA): the galaxy stellar mass function at z < 0.06, _Monthly Notices of the Royal Astronomical Society_, Volume 421, Issue 1, March 2012, Pages 621–634, [https://doi.org/10.1111/j.1365-2966.2012.20340.x](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
 
+### The 3D-HST Survey
+
+[https://archive.stsci.edu/prepds/3d-hst/](https://archive.stsci.edu/prepds/3d-hst/)
+
+### SDSS value-added catalogs
+
+[https://www.sdss.org/](https://www.sdss.org/)
+
+The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is to heavy, but it is available [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits).
+
 ### To-do
 
+[Tomczak et al. 2014](https://iopscience.iop.org/article/10.1088/0004-637X/783/2/85)
 [Parente et al. 2022](https://doi.org/10.48550/arXiv.2204.11884)

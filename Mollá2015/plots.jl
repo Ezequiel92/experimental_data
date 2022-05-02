@@ -1,11 +1,11 @@
 ### A Pluto.jl notebook ###
-# v0.19.0
+# v0.19.3
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using CairoMakie, CSV, DataFrames, LaTeXStrings, Unitful, UnitfulAstro
+using CairoMakie, CSV, DataFrames, LaTeXStrings
 
 # ╔═╡ 7c4df739-86e9-429a-bbb6-842679a93b44
 begin
@@ -172,16 +172,12 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
 CSV = "~0.10.4"
 CairoMakie = "~0.7.5"
 DataFrames = "~1.3.3"
 LaTeXStrings = "~1.3.0"
-Unitful = "~1.11.0"
-UnitfulAstro = "~1.1.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -333,12 +329,6 @@ version = "3.43.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-
-[[deps.ConstructionBase]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "f74e9d5388b8620b4cee35d4c5a618dd4dc547f4"
-uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
-version = "1.3.0"
 
 [[deps.Contour]]
 deps = ["StaticArrays"]
@@ -1233,24 +1223,6 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
-[[deps.Unitful]]
-deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "b649200e887a487468b71821e2644382699f1b0f"
-uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.11.0"
-
-[[deps.UnitfulAngles]]
-deps = ["Dates", "Unitful"]
-git-tree-sha1 = "d6cfdb6ddeb388af1aea38d2b9905fa014d92d98"
-uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
-version = "0.6.2"
-
-[[deps.UnitfulAstro]]
-deps = ["Unitful", "UnitfulAngles"]
-git-tree-sha1 = "c4e1c470a94063b911fd1b1a204cd2bb34a8cd15"
-uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
-version = "1.1.1"
-
 [[deps.WeakRefStrings]]
 deps = ["DataAPI", "InlineStrings", "Parsers"]
 git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
@@ -1391,7 +1363,7 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
 # ╠═7c4df739-86e9-429a-bbb6-842679a93b44
-# ╠═c742cdb6-8057-4c6f-aeee-e9c6c5a38118
+# ╟─c742cdb6-8057-4c6f-aeee-e9c6c5a38118
 # ╟─118c5e5e-9845-44f2-b37b-45b39898198a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
