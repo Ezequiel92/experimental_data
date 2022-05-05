@@ -2,7 +2,7 @@
     <h1>🔭 Experimental data</h1>
 </div>
 
-Experimental measurements in computer readable formats, and plotted in [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebooks.
+Experimental measurements in computer readable formats inside [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebooks.
 
 ## Sources
 
@@ -43,4 +43,7 @@ The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because i
 ### To-do
 
 [Tomczak et al. 2014](https://iopscience.iop.org/article/10.1088/0004-637X/783/2/85)
+
 [Parente et al. 2022](https://doi.org/10.48550/arXiv.2204.11884)
+
+[Puertas et al. 2022](https://arxiv.org/abs/2205.01203)
