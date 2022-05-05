@@ -38,7 +38,7 @@ I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P.
 
 [https://www.sdss.org/](https://www.sdss.org/)
 
-The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is to heavy, but it is available [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits).
+The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is to heavy. It can be downloaded [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits).
 
 ### To-do
 
