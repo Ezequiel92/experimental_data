@@ -36,7 +36,7 @@ A. R. Tomczak, R. F. Quadri, K.-V. H. Tran, I. Labbé, C. M. Straatman, C. Papov
 
 ### Tremonti et al. (2004)
 
-C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. White, M. Seibert, E. W. Peng, D. J. Schlegel, A. Uomoto, M. Fukugita and J. Brinkmann, The origin of the mass‐metallicity relation: Insights from 53,000 star‐forming galaxies in the sloan digital sky survey, _The Astrophysical Journal_, Volume 613, Issue 2, May 2004, Pages 898–913, [https://doi.org/10.1086/423264](https://doi.org/10.1086/423264)
+C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. White, M. Seibert, E. W. Peng, D. J. Schlegel, A. Uomoto, M. Fukugita and J. Brinkmann, The Origin of the Mass-Metallicity Relation: Insights from 53,000 Star-forming Galaxies in the Sloan Digital Sky Survey, _The Astrophysical Journal_, Volume 613, Issue 2, May 2004, Pages 898–913, [https://doi.org/10.1086/423264](https://doi.org/10.1086/423264)
 
 ### The 3D-HST Survey
 
