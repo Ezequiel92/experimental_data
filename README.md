@@ -28,7 +28,11 @@ K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M.
 
 ### Baldry et al. (2012)
 
-I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P. Norberg, A. S. G. Robotham, S. Brough, A. M. Hopkins, S. P. Bamford, J. A. Peacock, J. Bland-Hawthorn, C. J. Conselice, S. M. Croom, D. H. Jones, H. R. Parkinson, C. C. Popescu, M. Prescott, R. G. Sharp, R. J. Tuffs, Galaxy And Mass Assembly (GAMA): the galaxy stellar mass function at z < 0.06, _Monthly Notices of the Royal Astronomical Society_, Volume 421, Issue 1, March 2012, Pages 621–634, [https://doi.org/10.1111/j.1365-2966.2012.20340.x](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
+I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P. Norberg, A. S. G. Robotham, S. Brough, A. M. Hopkins, S. P. Bamford, J. A. Peacock, J. Bland-Hawthorn, C. J. Conselice, S. M. Croom, D. H. Jones, H. R. Parkinson, C. C. Popescu, M. Prescott, R. G. Sharp and R. J. Tuffs, Galaxy And Mass Assembly (GAMA): the galaxy stellar mass function at z < 0.06, _Monthly Notices of the Royal Astronomical Society_, Volume 421, Issue 1, March 2012, Pages 621–634, [https://doi.org/10.1111/j.1365-2966.2012.20340.x](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
+
+### Tomczak et al. (2014)
+
+A. R. Tomczak, R. F. Quadri, K.-V. H. Tran, I. Labbé, C. M. Straatman, C. Papovich, K. Glazebrook, R. Allen, G. B. Brammer, G. G. Kacprzak, L. Kawinwanichakij, D. D. Kelson, P. J. McCarthy, N. Mehrtens, A. J. Monson, S. E. Persson, L. R. Spitler, V. Tilvi and P. van Dokkum, GALAXY STELLAR MASS FUNCTIONS FROM ZFOURGE/CANDELS: AN EXCESS OF LOW-MASS GALAXIES SINCE z = 2 AND THE RAPID BUILDUP OF QUIESCENT GALAXIES, _The Astrophysical Journal_, Volume 783, Issue 2, February 2014, Pages 85, [https://doi.org/10.1088/0004-637x/783/2/85](https://doi.org/10.1088/0004-637x/783/2/85)
 
 ### The 3D-HST Survey
 
@@ -41,8 +45,6 @@ I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P.
 The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is to heavy. It can be downloaded [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits).
 
 ### To-do
-
-[Tomczak et al. 2014](https://iopscience.iop.org/article/10.1088/0004-637X/783/2/85)
 
 [Parente et al. 2022](https://doi.org/10.48550/arXiv.2204.11884)
 
