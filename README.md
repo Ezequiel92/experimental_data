@@ -56,8 +56,6 @@ The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because i
 
 [Puertas et al. 2022](https://arxiv.org/abs/2205.01203) (Table 1)
 
-[Zahid et al. 2014](https://doi.org/10.1088/0004-637X/791/2/130)
-
 [Sánchez et al. 2017](https://doi.org/10.1093/mnras/stx808)
 
 [Belfiore et al. 2017](https://doi.org/10.1093/mnras/stx789)
