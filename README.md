@@ -42,7 +42,7 @@ C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. Wh
 
 F. Mannucci, G. Cresci, R. Maiolino, A. Marconi, A. Gnerucci, A fundamental relation between mass, star formation rate and metallicity in local and high-redshift galaxies, _Monthly Notices of the Royal Astronomical Society_, Volume 408, Issue 4, November 2010, Pages 2115–2127, [https://doi.org/10.1111/j.1365-2966.2010.17291.x](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
 
-### Zahidet al. (2014)
+### Zahid et al. (2014)
 
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, [https://doi.org/10.1088/0004-637x/791/2/130](https://doi.org/10.1088/0004-637x/791/2/130)
 
