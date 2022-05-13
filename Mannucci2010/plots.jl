@@ -5,57 +5,178 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements
+using  DelimitedFiles, GLMakie, LaTeXStrings, DataFrames
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# Tremonti et al. (2004) best fit
+# Mannucci et al. (2010) best fit
 
 ## M-Z relation: 
 
-``12 + \log(O / H) = a + b \, x + c \, x^2``
+``12 + \log(O / H) = a + b \, x + c \, x^2 + d \, x^3 + e \, x^4``
 
-where ``x = \log(M_\star / M_\odot)``.
+where ``x = \log(M_\star / M_\odot) - 10``.
+
+## M-Z-SFR relation:
+
+``12 + \log(O / H) = a + b \, x + c \, y + d \, x^2 + e \, x \, y + f \, y^2``
+
+where ``y = \log(SFR / M_\odot \, yr^{-1})``.
+
+## Z-μ relation:
+
+``12 + \log(O / H) = a + b \, z + c \, z^2 + d \, z^3 + e \, z^4``
+
+where ``z = \mu_{0.32} - 10`` and ``\mu_\alpha = \log(M_\star / M_\odot) - \alpha \, \log(SFR / M_\odot \, yr^{-1})``.
 """
 
 # ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-fit = DataFrame(Relation = "M-Z", a = -1.492, b = 1.847, c = -0.08026)
+fit = DataFrame(
+	Relation = ["M-Z", "M-Z-SFR", "Z-mu"], 
+	a = [8.96, 8.9, 8.9], 
+	b = [0.31, 0.37, 0.39], 
+	c = [-0.23, -0.14, -0.2], 
+	d = [-0.017, -0.19, -0.077], 
+	e = [0.046, 0.12, 0.064],
+	f = [missing, -0.054, missing],
+)
 
-# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
-md"## Raw data"
-
-# ╔═╡ 34ce6570-6566-4981-908a-81eabcbca7bf
-raw_data = readdlm("./data/raw_table_03.txt")
-
-# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
+# ╔═╡ e1980dd7-549d-4770-8205-afe2a2120d9a
 let
-	MZ = x -> fit[1, :a] + fit[1, :b] * x + fit[1, :c] * x^2
-	mass = raw_data[:, 1]
-	P50 = raw_data[:, 4]
-	P25 = raw_data[:, 2]
-	P975 = raw_data[:, 6]
+	MZ = x -> fit[1, :a] + fit[1, :b] * x + fit[1, :c] * x^2 + fit[1, :d] * x^3 + fit[1, :e] * x^4
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
+		xlabel = L"\log(M_\star / M_\odot) - 10", 
 		ylabel = L"12 + \log(\mathrm{O / H})", 
+		title = "Mass - Metallicity relation",
+		titlesize = 28,
 		xlabelsize = 20,
 		ylabelsize = 20,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
 
-	lines!(ax, mass, MZ, color = :red)
-	scatter!(ax, mass, P50, color = :blue)
-	errorbars!(
-		ax, 
-		mass, P50, 
-		P50 .- P25, P975 .- P50, 
-		whiskerwidth = 10, 
-		color= :blue,
+	lines!(ax, -1..1, MZ, color = :red)
+
+	f
+end
+
+# ╔═╡ 92ee56f1-4ffc-4880-b654-2af1803a7ecc
+let
+	MZSFR = (x, y) -> fit[2, :a] + fit[2, :b] * x + fit[2, :c] * y + fit[2, :d] * x^2 + fit[2, :e] * x * y + fit[2, :f] * y^2
+
+	xs = ys = LinRange(-1, 1, 100)
+	zs = [MZSFR(x, y) for x in xs, y in ys]
+	
+	f = Figure()
+	
+		ax = Axis3(
+		f[1,1], 
+		xlabel = L"\log(M_\star / M_\odot) - 10", 
+		ylabel = L"\log(SFR / M_\odot \, yr^{-1})",
+		zlabel = L"12 + \log(\mathrm{O / H})", 
+		title = "Mass - Metallicity - SFR relation",
+		titlesize = 28,
+		xlabelsize = 20,
+		ylabelsize = 20,
+		zlabelsize = 20,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+		zticklabelsize = 18,
+		aspect=(1,1,1),
 	)
+
+	surface!(ax, xs, ys, zs, color = xs)
+
+	f
+end
+
+# ╔═╡ d5d72028-0074-4a85-844b-22039058de69
+let
+	Mμ = x -> fit[3, :a] + fit[3, :b] * x + fit[3, :c] * x^2 + fit[3, :d] * x^3 + fit[3, :e] * x^4
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\mu_{0.32} - 10", 
+		ylabel = L"12 + \log(\mathrm{O / H})", 
+		title = "μ - Metallicity relation",
+		titlesize = 28,
+		xlabelsize = 20,
+		ylabelsize = 20,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+
+	lines!(ax, -1..1, Mμ, color = :red)
+
+	f
+end
+
+# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
+md"## Raw data"
+
+# ╔═╡ 34ce6570-6566-4981-908a-81eabcbca7bf
+raw_data = readdlm("./data/clean_table_01.txt", '&')
+
+# ╔═╡ 130c74b6-9e16-443d-a593-ba9542c27dd7
+begin
+	logM = filter(x -> isa(x, AbstractFloat), raw_data[1, :])
+	logSFR = filter(x -> isa(x, AbstractFloat), raw_data[:, 1])
+	metal_full = replace(
+		x -> isa(x, AbstractFloat) ? x : NaN, 
+		raw_data[2:end, 2:end],
+	)
+	metal = metal_full[1:3:end, :]
+	metal_error = metal_full[2:3:end, :]
+	galaxy_per_bin = metal_full[3:3:end, :]
+
+	df_metal = DataFrame(hcat(logSFR, metal), ["logSFR", string.(logM)...])
+	df_metal_error = DataFrame(
+		hcat(logSFR, metal_error), 
+		["logSFR", string.(logM)...],
+	)
+	df_galaxy_pb = DataFrame(
+		hcat(logSFR, galaxy_per_bin), 
+		["logSFR", string.(logM)...],
+	)
+end
+
+# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
+let
+	
+	X = Vector{Float64}(undef, length(metal))
+	Y = Vector{Float64}(undef, length(metal))
+	Z = Vector{Float64}(undef, length(metal))
+	for i in 1:size(metal, 1)
+		for j in 1:size(metal, 2)
+			Y[(i - 1) * size(metal, 2) + j] = logSFR[i]
+			X[(i - 1) * size(metal, 2) + j] = logM[j]
+			Z[(i - 1) * size(metal, 2) + j] = metal[i, j]
+		end
+	end
+	
+	f = Figure()
+	
+	ax = Axis3(
+		f[1,1], 
+		xlabel = L"\log(M_\star / M_\odot)",
+		ylabel = L"\log(SFR / M_\odot \, yr^{-1})",
+		zlabel = L"12 + \log(\mathrm{O / H})", 
+		xlabelsize = 20,
+		ylabelsize = 20,
+		zlabelsize = 20,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+		zticklabelsize = 18,
+		aspect=(1,1,1), 
+	)
+
+	meshscatter!(ax, X, Y, Z, markersize = 0.015, color = X)
 
 	f
 end
@@ -63,17 +184,15 @@ end
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
-CairoMakie = "~0.8.0"
 DataFrames = "~1.3.4"
+GLMakie = "~0.6.0"
 LaTeXStrings = "~1.3.0"
-Measurements = "~2.7.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -137,18 +256,6 @@ version = "1.0.8+0"
 git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
-
-[[deps.Cairo]]
-deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
-git-tree-sha1 = "d0b3f8b4ad16cb0a2988c6788646a5e6a17b6b1b"
-uuid = "159f3aea-2a34-519c-b102-8c37f9878175"
-version = "1.0.5"
-
-[[deps.CairoMakie]]
-deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA"]
-git-tree-sha1 = "dadcbb178b3c4246a258ee08ad8a026706c9c6f8"
-uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.8.0"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -381,6 +488,24 @@ version = "1.0.10+0"
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
+[[deps.GLFW]]
+deps = ["GLFW_jll"]
+git-tree-sha1 = "35dbc482f0967d8dceaa7ce007d16f9064072166"
+uuid = "f7f18e0c-5ee9-5ccd-a5bf-e8befd85ed98"
+version = "3.4.1"
+
+[[deps.GLFW_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
+git-tree-sha1 = "51d2dfe8e590fbd74e7a842cf6d13d8a2f45dc01"
+uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
+version = "3.3.6+0"
+
+[[deps.GLMakie]]
+deps = ["ColorTypes", "Colors", "FileIO", "FixedPointNumbers", "FreeTypeAbstraction", "GLFW", "GeometryBasics", "LinearAlgebra", "Makie", "Markdown", "MeshIO", "ModernGL", "Observables", "Printf", "Serialization", "ShaderAbstractions", "StaticArrays"]
+git-tree-sha1 = "208bab44099062d88ebd68346c7a14f52ce350fb"
+uuid = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+version = "0.6.0"
+
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
 git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"
@@ -598,6 +723,12 @@ git-tree-sha1 = "64613c82a59c120435c067c2b809fc61cf5166ae"
 uuid = "d4300ac3-e22c-5743-9152-c294e39db1e4"
 version = "1.8.7+0"
 
+[[deps.Libglvnd_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_libXext_jll"]
+git-tree-sha1 = "7739f837d6447403596a75d19ed01fd08d6f56bf"
+uuid = "7e76a0d4-f3c7-5321-8279-8d96eeed0f29"
+version = "1.3.0+3"
+
 [[deps.Libgpg_error_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "c333716e46366857753e273ce6a69ee0945a6db9"
@@ -677,11 +808,11 @@ version = "0.2.1"
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 
-[[deps.Measurements]]
-deps = ["Calculus", "LinearAlgebra", "Printf", "RecipesBase", "Requires"]
-git-tree-sha1 = "88cd033eb781c698e75ae0b680e5cef1553f0856"
-uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
-version = "2.7.1"
+[[deps.MeshIO]]
+deps = ["ColorTypes", "FileIO", "GeometryBasics", "Printf"]
+git-tree-sha1 = "8be09d84a2d597c7c0c34d7d604c039c9763e48c"
+uuid = "7269a6da-0436-5bbc-96c2-40638cbb6118"
+version = "0.4.10"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
@@ -691,6 +822,12 @@ version = "1.0.2"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+
+[[deps.ModernGL]]
+deps = ["Libdl"]
+git-tree-sha1 = "344f8896e55541e30d5ccffcbf747c98ad57ca47"
+uuid = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
+version = "1.1.4"
 
 [[deps.MosaicViews]]
 deps = ["MappedArrays", "OffsetArrays", "PaddedViews", "StackViews"]
@@ -805,12 +942,6 @@ git-tree-sha1 = "03a7a85b76381a3d04c7a1656039197e70eda03d"
 uuid = "5432bcbf-9aad-5242-b902-cca2824c8663"
 version = "0.5.11"
 
-[[deps.Pango_jll]]
-deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "3a121dfbba67c94a5bec9dde613c3d0cbcf3a12b"
-uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
-version = "1.50.3+0"
-
 [[deps.Parsers]]
 deps = ["Dates"]
 git-tree-sha1 = "1285416549ccfcdf0c50d4997a94331e88d68413"
@@ -898,11 +1029,6 @@ git-tree-sha1 = "dc84268fe0e3335a62e315a3a7cf2afa7178a734"
 uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
 version = "0.4.3"
 
-[[deps.RecipesBase]]
-git-tree-sha1 = "6bf3f380ff52ce0832ddd3a2a7b9538ed1bcca7d"
-uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.2.1"
-
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
@@ -954,6 +1080,12 @@ version = "1.1.0"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.ShaderAbstractions]]
+deps = ["ColorTypes", "FixedPointNumbers", "GeometryBasics", "LinearAlgebra", "Observables", "StaticArrays", "StructArrays", "Tables"]
+git-tree-sha1 = "6b5bba824b515ec026064d1e7f5d61432e954b71"
+uuid = "65257c39-d410-5151-9873-9b3e5be5013e"
+version = "0.2.9"
 
 [[deps.SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -1125,6 +1257,12 @@ git-tree-sha1 = "4e490d5c960c314f33885790ed410ff3a94ce67e"
 uuid = "0c0b7dd1-d40b-584c-a123-a41640f87eec"
 version = "1.0.9+4"
 
+[[deps.Xorg_libXcursor_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXfixes_jll", "Xorg_libXrender_jll"]
+git-tree-sha1 = "12e0eb3bc634fa2080c1c37fccf56f7c22989afd"
+uuid = "935fb764-8cf2-53bf-bb30-45bb1f8bf724"
+version = "1.2.0+4"
+
 [[deps.Xorg_libXdmcp_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "4fe47bd2247248125c428978740e18a681372dd4"
@@ -1136,6 +1274,30 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
 git-tree-sha1 = "b7c0aa8c376b31e4852b360222848637f481f8c3"
 uuid = "1082639a-0dae-5f34-9b06-72781eeb8cb3"
 version = "1.3.4+4"
+
+[[deps.Xorg_libXfixes_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
+git-tree-sha1 = "0e0dc7431e7a0587559f9294aeec269471c991a4"
+uuid = "d091e8ba-531a-589c-9de9-94069b037ed8"
+version = "5.0.3+4"
+
+[[deps.Xorg_libXi_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXext_jll", "Xorg_libXfixes_jll"]
+git-tree-sha1 = "89b52bc2160aadc84d707093930ef0bffa641246"
+uuid = "a51aa0fd-4e3c-5386-b890-e753decda492"
+version = "1.7.10+4"
+
+[[deps.Xorg_libXinerama_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXext_jll"]
+git-tree-sha1 = "26be8b1c342929259317d8b9f7b53bf2bb73b123"
+uuid = "d1454406-59df-5ea1-beac-c340f2130bc3"
+version = "1.1.4+4"
+
+[[deps.Xorg_libXrandr_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll"]
+git-tree-sha1 = "34cea83cb726fb58f325887bf0612c6b3fb17631"
+uuid = "ec84b674-ba8e-5d96-8ba1-2a689ba10484"
+version = "1.5.2+4"
 
 [[deps.Xorg_libXrender_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll"]
@@ -1230,8 +1392,12 @@ version = "3.5.0+0"
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
 # ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
+# ╟─e1980dd7-549d-4770-8205-afe2a2120d9a
+# ╟─92ee56f1-4ffc-4880-b654-2af1803a7ecc
+# ╟─d5d72028-0074-4a85-844b-22039058de69
 # ╟─072bddde-dece-4d9f-990b-e374038ba7e6
 # ╠═34ce6570-6566-4981-908a-81eabcbca7bf
-# ╠═118c5e5e-9845-44f2-b37b-45b39898198a
+# ╟─130c74b6-9e16-443d-a593-ba9542c27dd7
+# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
