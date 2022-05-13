@@ -38,6 +38,10 @@ A. R. Tomczak, R. F. Quadri, K.-V. H. Tran, I. Labbé, C. M. Straatman, C. Papov
 
 C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. White, M. Seibert, E. W. Peng, D. J. Schlegel, A. Uomoto, M. Fukugita and J. Brinkmann, The Origin of the Mass-Metallicity Relation: Insights from 53,000 Star-forming Galaxies in the Sloan Digital Sky Survey, _The Astrophysical Journal_, Volume 613, Issue 2, May 2004, Pages 898–913, [https://doi.org/10.1086/423264](https://doi.org/10.1086/423264)
 
+### Mannucci et al. (2010)
+
+F. Mannucci, G. Cresci, R. Maiolino, A. Marconi, A. Gnerucci, A fundamental relation between mass, star formation rate and metallicity in local and high-redshift galaxies, _Monthly Notices of the Royal Astronomical Society_, Volume 408, Issue 4, November 2010, Pages 2115–2127, [https://doi.org/10.1111/j.1365-2966.2010.17291.x](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
+
 ### The 3D-HST Survey
 
 [https://archive.stsci.edu/prepds/3d-hst/](https://archive.stsci.edu/prepds/3d-hst/)
