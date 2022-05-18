@@ -46,6 +46,10 @@ F. Mannucci, G. Cresci, R. Maiolino, A. Marconi, A. Gnerucci, A fundamental rela
 
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, [https://doi.org/10.1088/0004-637x/791/2/130](https://doi.org/10.1088/0004-637x/791/2/130)
 
+### Sánchez et al. (2017)
+
+S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher, R. A. Marino, L. Galbany, J. Bland-Hawthorn, M. Cano-Díaz, R. García-Benito, C. López-Cobá, S. Zibetti, J. M. Vilchez, J. Iglésias-Páramo, C. Kehrig, A. R. López Sánchez, S. Duarte Puertas, B. Ziegler, The mass–metallicity relation revisited with CALIFA, _Monthly Notices of the Royal Astronomical Society_, Volume 469, Issue 2, August 2017, Pages 2121–2140, [https://doi.org/10.1093/mnras/stx808](https://doi.org/10.1093/mnras/stx808)
+
 ### The 3D-HST Survey
 
 [https://archive.stsci.edu/prepds/3d-hst/](https://archive.stsci.edu/prepds/3d-hst/)
@@ -59,7 +63,5 @@ The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because i
 ### To-do
 
 [Puertas et al. 2022](https://arxiv.org/abs/2205.01203) (Table 1)
-
-[Sánchez et al. 2017](https://doi.org/10.1093/mnras/stx808)
 
 [Belfiore et al. 2017](https://doi.org/10.1093/mnras/stx789)
