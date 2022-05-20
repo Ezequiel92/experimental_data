@@ -79,7 +79,7 @@ S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher,
 
 #### Data products
 
-- Stellar mass, global star formation rate, global metallicity and global specific star formation rate fits.
+- Fits for the stellar mass, global star formation rate, global metallicity, and global specific star formation rate.
 
 #### Source
 
@@ -89,7 +89,7 @@ D. Sotillo-Ramos, M. A. Lara-López, A. M. Pérez-García, R. Pérez-Martínez, 
 
 #### Data products
 
-- Galaxy stellar mass function and fits for it.
+- Measurements and fits for the galaxy stellar mass function.
 
 #### Source
 
@@ -109,17 +109,31 @@ C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. Wh
 
 ### [Whitaker et al. (2014)](https://doi.org/10.1088/0004-637x/795/2/104)
 
+#### Data products
+
+- Fits for the stellar mass, global star formation rate, global specific star formation rate, and redshift.
+
 #### Source
 
 K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M. Fumagalli, I. G. Momcheva, G. B. Brammer, I. Labbé, E. J. Nelson and J. R. Rigby, Constraining the low-mass slope of the star formation sequence at 0.5 < z < 2.5, _The Astrophysical Journal_, Volume 795, Number 2, 17 October 2014, Pages 104, doi: 10.1088/0004-637x/795/2/104
 
 ### [Wu et al. (2021)](https://doi.org/10.1093/mnras/stab512)
 
+#### Data products
+
+- Stellar mass.
+- Global metallicity.
+- Global star formation rate.
+
 #### Source
 
 Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type galaxies, _Monthly Notices of the Royal Astronomical Society_, Volume 503, Issue 2, May 2021, Pages 2340–2348, doi: 10.1093/mnras/stab512
 
 ### [Zahid et al. (2014)](https://doi.org/10.1088/0004-637x/791/2/130)
+
+#### Data products
+
+- Fit for the stellar mass, redshift, and metallicity.
 
 #### Source
 
@@ -128,3 +142,5 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 ### To-do
 
 [Puertas et al. 2022](https://arxiv.org/abs/2205.01203) (Table 1)
+
+[Alfalfa](http://egg.astro.cornell.edu/alfalfa/data/index.php)

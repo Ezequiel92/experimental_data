@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -9,7 +9,9 @@ using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements
 
 # ╔═╡ 77665012-5a65-4f89-9183-24d96fa5e62c
 md"""
-Whitaker et al. (2014)
+# Whitaker et al. (2014)
+
+[Tables](https://doi.org/10.1088/0004-637X/795/2/104)
 """
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
@@ -58,10 +60,12 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
 		ylabel = L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
-		xlabelsize = 22,
-		ylabelsize = 22,
+		title = L"\mathrm{SFR \,\, vs. \,\, Mass}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
@@ -154,10 +158,12 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
 		ylabel = L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
-		xlabelsize = 22,
-		ylabelsize = 22,
+		title = L"\mathrm{SFR \,\, vs. \,\, Mass}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
@@ -265,6 +271,8 @@ let
 		f[1,1], 
 		xlabel = L"z", 
 		ylabel = L"\log(\mathrm{sSFR \, / \, yr^{-1}})", 
+		title = L"\mathrm{sSFR \,\, vs. \,\, redshift}",
+		titlesize = 28,
 		xlabelsize = 24,
 		ylabelsize = 24,
 		xticklabelsize = 18,
@@ -300,6 +308,8 @@ let
 		f[1,1], 
 		xlabel = L"z", 
 		ylabel = L"\log(\mathrm{sSFR \, / \, yr^{-1}})", 
+		title = L"\mathrm{sSFR \,\, vs. \,\, redshift}",
+		titlesize = 28,
 		xlabelsize = 24,
 		ylabelsize = 24,
 		xticklabelsize = 18,
@@ -1494,11 +1504,11 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─77665012-5a65-4f89-9183-24d96fa5e62c
+# ╠═77665012-5a65-4f89-9183-24d96fa5e62c
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
 # ╟─94e89198-c47d-4606-a1de-6c7c05852363
 # ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-# ╟─105261ea-22b1-4506-b6c5-9a44ed636921
+# ╠═105261ea-22b1-4506-b6c5-9a44ed636921
 # ╟─c5d20dc1-247c-4c32-b0b8-71082e3850c1
 # ╟─b5580551-9ee7-400a-9774-f682eb860c85
 # ╟─6ca21bae-b334-4cb1-a0cb-33e54e9bb19a

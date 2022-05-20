@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -7,9 +7,16 @@ using InteractiveUtils
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
 using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements, Colors
 
+# ╔═╡ 6b70529a-5941-4c64-92ee-2add064119a4
+md"""
+# Zahid et al. (2014)
+
+[Table 2](https://iopscience.iop.org/0004-637X/791/2/130/suppdata/apj498704t2_ascii.txt?doi=10.1088/0004-637X/791/2/130)
+"""
+
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# Zahid et al. (2014) best fit
+# Fits
 
 ## M-Z relation: 
 
@@ -77,12 +84,12 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
 		ylabel = L"12 + \log(\mathrm{O / H})", 
-		title = "Full fit",
+		title = L"\mathrm{Full \,\, fit}",
 		titlesize = 28,
-		xlabelsize = 20,
-		ylabelsize = 20,
+		xlabelsize = 24,
+		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
@@ -117,12 +124,12 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(M_\star / M_\odot)", 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
 		ylabel = L"12 + \log(\mathrm{O / H})", 
-		title = "Z0 and γ fixed",
+		title = L"\mathrm{Z0 \,\, and \,\, \gamma \,\, fixed}",
 		titlesize = 28,
-		xlabelsize = 20,
-		ylabelsize = 20,
+		xlabelsize = 24,
+		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
@@ -160,9 +167,11 @@ let
 	ax = Axis(
 		f[1,1], 
 		xlabel = L"\log(1 + z)", 
-		ylabel = L"\log(M_0 / M_\odot)",
-		xlabelsize = 20,
-		ylabelsize = 20,
+		ylabel = L"\log(\mathrm{M_0 / M_\odot})",
+		title = L"\mathrm{Mass \,\, vs. \,\, redshift}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
@@ -202,7 +211,7 @@ LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
-CairoMakie = "~0.8.0"
+CairoMakie = "~0.8.2"
 Colors = "~0.12.8"
 DataFrames = "~1.3.4"
 LaTeXStrings = "~1.3.0"
@@ -279,9 +288,9 @@ version = "1.0.5"
 
 [[deps.CairoMakie]]
 deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA"]
-git-tree-sha1 = "dadcbb178b3c4246a258ee08ad8a026706c9c6f8"
+git-tree-sha1 = "cb87c60a56059760d53a4f0dd3b822b20a448a9d"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.8.0"
+version = "0.8.2"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -321,9 +330,9 @@ version = "3.18.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "63d1e802de0c4882c00aee5cb16f9dd4d6d7c59c"
+git-tree-sha1 = "a985dc37e357a3b22b260a5def99f3530fb415d3"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.1"
+version = "0.11.2"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
@@ -563,9 +572,9 @@ version = "2.8.1+1"
 
 [[deps.HypergeometricFunctions]]
 deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
-git-tree-sha1 = "65e4589030ef3c44d3b90bdc5aac462b4bb05567"
+git-tree-sha1 = "cb7099a0109939f16a4d3b572ba8396b1f6c7c31"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.3.8"
+version = "0.3.10"
 
 [[deps.ImageCore]]
 deps = ["AbstractFFTs", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Graphics", "MappedArrays", "MosaicViews", "OffsetArrays", "PaddedViews", "Reexport"]
@@ -574,10 +583,10 @@ uuid = "a09fc81d-aa75-5fe9-8630-4744c3626534"
 version = "0.9.3"
 
 [[deps.ImageIO]]
-deps = ["FileIO", "IndirectArrays", "JpegTurbo", "Netpbm", "OpenEXR", "PNGFiles", "QOI", "Sixel", "TiffImages", "UUIDs"]
-git-tree-sha1 = "539682309e12265fbe75de8d83560c307af975bd"
+deps = ["FileIO", "IndirectArrays", "JpegTurbo", "LazyModules", "Netpbm", "OpenEXR", "PNGFiles", "QOI", "Sixel", "TiffImages", "UUIDs"]
+git-tree-sha1 = "d9a03ffc2f6650bd4c831b285637929d99a4efb5"
 uuid = "82e4d734-157c-48bb-816b-45c225c6df19"
-version = "0.6.2"
+version = "0.6.5"
 
 [[deps.Imath_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -613,9 +622,9 @@ version = "0.13.6"
 
 [[deps.IntervalSets]]
 deps = ["Dates", "Statistics"]
-git-tree-sha1 = "eb381d885e30ef859068fce929371a8a5d06a914"
+git-tree-sha1 = "ad841eddfb05f6d9be0bff1fa48dcae32f134a2d"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
-version = "0.6.1"
+version = "0.6.2"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
@@ -700,6 +709,11 @@ version = "1.3.0"
 deps = ["Artifacts", "Pkg"]
 uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
 
+[[deps.LazyModules]]
+git-tree-sha1 = "f4d24f461dacac28dcd1f63ebd88a8d9d0799389"
+uuid = "8cdb02fc-e678-4876-92c5-9defec4f444e"
+version = "0.3.0"
+
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
@@ -776,15 +790,15 @@ version = "2022.0.0+0"
 
 [[deps.Makie]]
 deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Showoff", "SignedDistanceFields", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "UnicodeFun"]
-git-tree-sha1 = "db85d20ceac91740e2911fb5b856bd5f8b243e9a"
+git-tree-sha1 = "048aec015ad88eb5c642d731e3e23f1b805ae8b3"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.17.0"
+version = "0.17.2"
 
 [[deps.MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "89b7c3a86ce743555c98485965af72d3e0f03055"
+git-tree-sha1 = "cd999cfcda9ae0dd564a968087005d25359344c9"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.3.0"
+version = "0.3.1"
 
 [[deps.MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -855,9 +869,9 @@ version = "0.5.1"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "aee446d0b3d5764e35289762f6a18e8ea041a592"
+git-tree-sha1 = "52addd9e91df8a6a5781e5c7640787525fd48056"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.11.0"
+version = "1.11.2"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1125,9 +1139,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "5ba658aeecaaf96923dce0da9e703bd1fe7666f9"
+git-tree-sha1 = "bc40f042cfcc56230f781d92db71f0e21496dffd"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.1.4"
+version = "2.1.5"
 
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
@@ -1159,9 +1173,9 @@ version = "0.33.16"
 
 [[deps.StatsFuns]]
 deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "ca9f8a0c9f2e41431dc5b7697058a3f8f8b89498"
+git-tree-sha1 = "5783b877201a82fc0014cbf381e7e6eb130473a4"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "1.0.0"
+version = "1.0.1"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
@@ -1361,6 +1375,7 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
+# ╟─6b70529a-5941-4c64-92ee-2add064119a4
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
 # ╟─32ffc13b-75dd-4986-beba-8766e7c6719b
 # ╟─072bddde-dece-4d9f-990b-e374038ba7e6
