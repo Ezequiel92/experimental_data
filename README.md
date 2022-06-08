@@ -23,6 +23,20 @@ Experimental measurements and results made computationaly available in [Pluto.jl
 
 I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P. Norberg, A. S. G. Robotham, S. Brough, A. M. Hopkins, S. P. Bamford, J. A. Peacock, J. Bland-Hawthorn, C. J. Conselice, S. M. Croom, D. H. Jones, H. R. Parkinson, C. C. Popescu, M. Prescott, R. G. Sharp and R. J. Tuffs, Galaxy And Mass Assembly (GAMA): the galaxy stellar mass function at z < 0.06, _Monthly Notices of the Royal Astronomical Society_, Volume 421, Issue 1, March 2012, Pages 621–634, doi: 10.1111/j.1365-2966.2012.20340.x
 
+### [Feldmann (2020)](https://doi.org/10.1038/s42005-020-00493-0)
+
+#### Data products
+
+- Redshift.
+- Global star formation rate.
+- Stellar mass.
+- Molecular Hydrogen mass.
+- Atomic Hydrogen mass.
+
+#### Reference
+
+R. Feldmann, The link between star formation and gas in nearby galaxies, _Communications Physics_, Volume 3, Issue 1, December 2020, Pages 226, doi: 10.1038/s42005-020-00493-0
+
 ### [Mannucci et al. (2010)](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
 
 #### Data products
@@ -61,6 +75,16 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 #### Reference
 
 S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher, R. A. Marino, L. Galbany, J. Bland-Hawthorn, M. Cano-Díaz, R. García-Benito, C. López-Cobá, S. Zibetti, J. M. Vilchez, J. Iglésias-Páramo, C. Kehrig, A. R. López Sánchez, S. Duarte Puertas, B. Ziegler, The mass–metallicity relation revisited with CALIFA, _Monthly Notices of the Royal Astronomical Society_, Volume 469, Issue 2, August 2017, Pages 2121–2140, doi: 10.1093/mnras/stx808
+
+### [Schreiber et al. (2015)](https://doi.org/10.1051/0004-6361/201425017)
+
+#### Data products
+
+- Global star formation rate vs. stellar mass fits.
+
+#### Reference
+
+C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. Magnelli, T. Wang, H. Aussel, E. Daddi, S. Juneau, X. Shu, M. T. Sargent, V. Buat, S. M. Faber, H. C. Ferguson, M. Giavalisco, A. M. Koekemoer, G. Magdis, G. E. Morrison, C. Papovich, P. Santini and D. Scott, The Herschel view of the dominant mode of galaxy growth from z = 4 to the present day, _Astronomy & Astrophysics_, Volume 575, March 2015, Pages A74, doi: 10.1051/0004-6361/201425017
 
 ### [SDSS value-added catalogs](https://www.sdss.org/)
 
@@ -129,6 +153,39 @@ K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M.
 #### Reference
 
 Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type galaxies, _Monthly Notices of the Royal Astronomical Society_, Volume 503, Issue 2, May 2021, Pages 2340–2348, doi: 10.1093/mnras/stab512
+
+### [xCOLD GASS](http://www.star.ucl.ac.uk/xCOLDGASS)
+
+#### Data products
+
+- Stellar mass.
+- Stellar mass surface density.
+- Global metallicity.
+- Global star formation rate.
+- Redshift.
+- Molecular Hydrogen mass.
+- Molecular Hydrogen mass fraction.
+
+#### Reference
+
+[xCOLD GASS publications](http://www.star.ucl.ac.uk/xCOLDGASS/publications.html)
+[Catalog description](http://www.star.ucl.ac.uk/xCOLDGASS/xCOLDGASS_README.rtf)
+
+### [xGASS](https://xgass.icrar.org/)
+
+#### Data products
+
+- Stellar mass.
+- Stellar mass surface density.
+- Atomic Hydrogen mass.
+- Global star formation rate.
+- Redshift.
+- Gas mass fraction.
+
+#### Reference
+
+[xGASS publications](https://xgass.icrar.org/publications.html)
+[Catalog description](https://xgass.icrar.org/assets/data/xGASS_representative_sample.readme)
 
 ### [Zahid et al. (2014)](https://doi.org/10.1088/0004-637x/791/2/130)
 
