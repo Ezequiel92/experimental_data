@@ -110,7 +110,7 @@ C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. M
 - Global stellar age.
 - Global star formation rate.
 
-⚠ Note: The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is too heavy. It can be downloaded [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits)
+⚠ Note: The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is too heavy. It can be downloaded [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits).
 
 ### [Sotillo-Ramos et al. (2021)](https://doi.org/10.1093/mnras/stab2641)
 
