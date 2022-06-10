@@ -9,21 +9,24 @@ using DelimitedFiles, CairoMakie, LaTeXStrings, FITSIO
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# xGASS
+# xCOLD GASS
 
-[xGASS data](https://xgass.icrar.org/assets/data/xGASS_representative_sample.fits)
+[xCOLD GASS data](http://www.star.ucl.ac.uk/xCOLDGASS/data/xCOLDGASS_PubCat.fits)
 """
 
 # ╔═╡ 30b5b786-9feb-4387-918b-9f26c85d0681
 begin
-	data = FITS("./data/xGASS_representative_sample.fits")[2]
-	sfr = read(data, "SFR_best")
-	sfr_err = read(data, "SFRerr_best")
-	log_mass = read(data, "lgMstar")
-	log_msd = read(data, "lgmust")
-	redshift = read(data, "zHI")
-	atomic_mass = read(data, "lgMHI")
-	frac_gas = read(data, "lgGF")
+	data = FITS("./data/xCOLDGASS_PubCat.fits")[2]
+	
+	sfr = read(data, "LOGSFR_BEST")
+	sfr_err = read(data, "LOGSFR_ERR")
+	log_mass = read(data, "LOGMSTAR")
+	log_msd = read(data, "LOGMUST")
+	redshift = read(data, "Z_SDSS")
+	molecular_mass = read(data, "LOGMH2")
+	molecular_mass_err = read(data, "LOGMH2_ERR")
+	frac_mol_mass = read(data, "LOGMH2MS")
+	metallicity = read(data, "Z_PP04_O3N2")
 end;
 
 # ╔═╡ 105261ea-22b1-4506-b6c5-9a44ed636921
@@ -1195,6 +1198,6 @@ version = "3.5.0+0"
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
 # ╠═30b5b786-9feb-4387-918b-9f26c85d0681
-# ╠═105261ea-22b1-4506-b6c5-9a44ed636921
+# ╟─105261ea-22b1-4506-b6c5-9a44ed636921
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

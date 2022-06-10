@@ -76,6 +76,19 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 
 S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher, R. A. Marino, L. Galbany, J. Bland-Hawthorn, M. Cano-Díaz, R. García-Benito, C. López-Cobá, S. Zibetti, J. M. Vilchez, J. Iglésias-Páramo, C. Kehrig, A. R. López Sánchez, S. Duarte Puertas, B. Ziegler, The mass–metallicity relation revisited with CALIFA, _Monthly Notices of the Royal Astronomical Society_, Volume 469, Issue 2, August 2017, Pages 2121–2140, doi: 10.1093/mnras/stx808
 
+### [Sánchez et al. (2019)](https://doi.org/10.1093/mnras/stz019)
+
+#### Data products
+
+- Global star formation rate.
+- Stellar mass.
+- Global metallicity.
+- Fits for the data.
+
+#### Reference
+
+S. F. Sánchez, J. K. Barrera-Ballesteros, C. López-Cobá, S. Brough, J. J. Bryant, J. Bland-Hawthorn, S. M. Croom, J. van de Sande, L. Cortese, M. Goodwin, J. S. Lawrence, A. R. López-Sánchez, S. M. Sweet, M. S. Owers, S. N. Richards, C. J. Walcher and SAMI Team, The SAMI galaxy survey: exploring the gas-phase mass–metallicity relation, _Monthly Notices of the Royal Astronomical Society_, Volume 484, Issue 3, April 2019, Pages 3042–3070, doi: 10.1093/mnras/stz019
+
 ### [Schreiber et al. (2015)](https://doi.org/10.1051/0004-6361/201425017)
 
 #### Data products

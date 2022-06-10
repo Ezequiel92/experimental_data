@@ -1,43 +1,69 @@
 ### A Pluto.jl notebook ###
 # v0.19.8
 
+#> [frontmatter]
+
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using DelimitedFiles, CairoMakie, LaTeXStrings, FITSIO
+using  CSV, CairoMakie, LaTeXStrings, DataFrames, Colors, FITSIO, Measurements
+
+# ╔═╡ dfeea049-a273-45b2-9245-7a6fa9a1c820
+function parse_measurement(data::Vector)::Vector{Measurement{Float64}}
+	return [
+		measurement(
+			parse(Float64, match(r".*(?= \$\\pm)", val).match),
+			parse(Float64, match(r"(?<=\\pm\$ ).*", val).match),
+		) for val in data
+	]
+end;
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# xCOLD GASS
+# Sánchez et al. (2019)
 
-[xCOLD GASS data](http://www.star.ucl.ac.uk/xCOLDGASS/data/xCOLDGASS_PubCat.fits)
+[SAMI galaxy survey](https://academic.oup.com/view-large/130412311)
+
+[Table 1](https://academic.oup.com/view-large/130412182)
+
+[Table 4](https://academic.oup.com/view-large/130412213)
+
+[Table 5](https://academic.oup.com/view-large/130412215)
+
+[Table 7](https://academic.oup.com/view-large/130412227)
 """
 
-# ╔═╡ 30b5b786-9feb-4387-918b-9f26c85d0681
-begin
-	data = FITS("./data/xCOLDGASS_PubCat.fits")[2]
-	
-	sfr = read(data, "LOGSFR_BEST")
-	sfr_err = read(data, "LOGSFR_ERR")
-	log_mass = read(data, "LOGMSTAR")
-	log_msd = read(data, "LOGMUST")
-	redshift = read(data, "Z_SDSS")
-	molecular_mass = read(data, "LOGMH2")
-	molecular_mass_err = read(data, "LOGMH2_ERR")
-	frac_mol_mass = read(data, "LOGMH2MS")
-	metallicity = read(data, "Z_PP04_O3N2")
-end;
+# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
+md"## Measurements"
 
-# ╔═╡ 105261ea-22b1-4506-b6c5-9a44ed636921
+# ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+begin
+	raw_gd = FITS("./data/published_table.fits")[2]
+	cols = FITSIO.colnames(raw_gd)
+	global_data = DataFrame()
+	for i in 2:2:(length(cols)-1)
+		global_data[:, cols[i]] = map(
+			x -> isnan(Measurements.value(x)) ? NaN : x, read(raw_gd, cols[i]) .± read(raw_gd, cols[i+1])
+		)
+	end
+	global_data
+end
+
+# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
 let
+	log_mass = Measurements.value.(global_data[!, "log_mass"])
+	log_sfr = Measurements.value.(global_data[!, "log_sfr"])
+	log_mass_err = Measurements.uncertainty.(global_data[!, "log_mass"])
+	log_sfr_err = Measurements.uncertainty.(global_data[!, "log_sfr"])
+	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\mathrm{redshift}",
-		ylabel = L"\log(\mathrm{M_\star / M_\odot})", 
-		title = L"\mathrm{Mass \,\, vs. \,\, z}",
+		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
+		ylabel = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})", 
+		title = L"\mathrm{SFR \,\, vs. \,\, Mass}",
 		titlesize = 28,
 		xlabelsize = 24,
 		ylabelsize = 24,
@@ -45,23 +71,415 @@ let
 		yticklabelsize = 18,
 	)
 
-	scatter!(ax, redshift, log_mass, markersize = 4) 
+	errorbars!(
+		ax, 
+		log_mass, log_sfr, 
+		log_sfr_err, 
+		whiskerwidth = 8, 
+		color= :blue,
+	)
+	errorbars!(
+		ax, 
+		log_mass, log_sfr, 
+		log_mass_err, 
+		whiskerwidth = 8, 
+		color= :blue, 
+		direction = :x,
+	)
+	scatter!(ax, log_mass, log_sfr, color = :red, markersize = 5)
 
+	f
+end
+
+# ╔═╡ 704e36c5-24b8-421c-aef6-3ae8e05f28ad
+md"## Fits"
+
+# ╔═╡ d469d49f-e678-4ba9-abe9-5b08e4cbbd17
+md"""
+### Mass Metallicity relation (MZR)
+
+#### Best fit
+
+``y = a + b \, (x - c) \, \exp(-(x - c))``
+
+#### Polynomial fit
+
+``y = \displaystyle\sum_{i = 0}^{3} p_i \, x^i``
+
+where ``y = 12 + \log(\mathrm{O / H})``, ``x = \log(\mathrm{M_\star / M_\odot}) − 8`` and ``c = 3.5``.
+"""
+
+# ╔═╡ 0d31d0c2-afc0-4685-86e5-a0bfe21afc4c
+begin
+	raw_table_1 = CSV.read("./data/table_1.csv", DataFrame, header=2, comment="%")
+	table_1 = DataFrame(
+		indicator = raw_table_1[:, "Indicator"],
+		a = parse_measurement(raw_table_1[:, "\$a\$"]),
+		b = parse_measurement(raw_table_1[:, "\$b\$"]),
+		p0 = parse_measurement(raw_table_1[:, "\$p_0\$"]),
+		p1 = parse_measurement(raw_table_1[:, "\$p_1\$"]),
+		p2 = parse_measurement(raw_table_1[:, "\$p_2\$"]),
+		p3 = parse_measurement(raw_table_1[:, "\$p_3\$"]),
+	)
+end
+
+# ╔═╡ cf8df0da-1760-464e-9531-42ba2ef2c7aa
+let
+	c = 3.5
+	indicators = table_1[:, :indicator]
+	a_s = Measurements.value.(table_1[:, :a])
+	b_s = Measurements.value.(table_1[:, :b])
+ 	y_s = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot}) - 8", 
+		ylabel = L"12 + \log(\mathrm{O / H})", 
+		title = L"\mathrm{MZR  \,\, best  \,\, fit}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators), 
+		[RGB(1,1,1), RGB(0,0,0)], 
+		dropseed = true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 0.5:0.05:3, y; color, linewidth = 3, label)
+	end
+
+	axislegend(ax, position = :rb, nbanks = 3, orientation = :horizontal)
+
+	f
+end
+
+# ╔═╡ 5705382a-bad5-4c65-b1fe-12f3ff20d872
+let
+	indicators = table_1[:, :indicator]
+	p0_s = Measurements.value.(table_1[:, :p0])
+	p1_s = Measurements.value.(table_1[:, :p1])
+	p2_s = Measurements.value.(table_1[:, :p2])
+	p3_s = Measurements.value.(table_1[:, :p3])
+ 	y_s = [
+		x -> p0 + p1 * x + p2 * x^2 + p3 * x^3 for (p0, p1, p2, p3) 
+		in zip(p0_s, p1_s, p2_s, p3_s)
+	]
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot}) - 8", 
+		ylabel = L"12 + \log(\mathrm{O / H})", 
+		title = L"\mathrm{MZR \,\, polynomial \,\, fit}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators), 
+		[RGB(1,1,1), RGB(0,0,0)], 
+		dropseed = true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 0.5:0.05:3, y; color, linewidth = 3, label)
+	end
+
+	axislegend(ax, position = :lt, nbanks = 3, orientation = :horizontal)
+
+	f
+end
+
+# ╔═╡ 3932dd4a-e683-4f18-bbc6-b7e65eabe867
+md"""
+### Fundamental Mass Metallicity relation (FMR)
+
+#### Best fit
+
+``y = a + b \, (x - c) \, \exp(-(x - c))``
+
+#### Polynomial fit
+
+``y = \displaystyle\sum_{i = 0}^{3} p_i \, x^i``
+
+where 
+
+``y = 12 + \log(\mathrm{O / H})``
+
+``x = μ - 8``
+
+``μ = \log(\mathrm{M_\star / M_\odot}) − 0.32 \, \log(\mathrm{SFR / M_\odot \, yr^{-1}})``
+
+``c = 3.5``.
+"""
+
+# ╔═╡ 3d2e76f8-6092-44af-a4d4-6e02e23311e5
+begin
+	raw_table_4 = CSV.read("./data/table_4.csv", DataFrame, header=2, comment="%")
+	table_4 = DataFrame(
+		indicator = raw_table_4[:, "Indicator"],
+		a = parse_measurement(raw_table_4[:, "\$a\$"]),
+		b = parse_measurement(raw_table_4[:, "\$b\$"]),
+		p0 = parse_measurement(raw_table_4[:, "\$p_0\$"]),
+		p1 = parse_measurement(raw_table_4[:, "\$p_1\$"]),
+		p2 = parse_measurement(raw_table_4[:, "\$p_2\$"]),
+		p3 = parse_measurement(raw_table_4[:, "\$p_3\$"]),
+	)
+end
+
+# ╔═╡ 2266aa08-eec0-4b18-92ab-64ebdcbb92f5
+let
+	c = 3.5
+	indicators = table_4[:, :indicator]
+	a_s = Measurements.value.(table_4[:, :a])
+	b_s = Measurements.value.(table_4[:, :b])
+ 	y_s = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\mu - 8", 
+		ylabel = L"12 + \log(\mathrm{O / H})", 
+		title = L"\mathrm{FMR  \,\, best  \,\, fit}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators), 
+		[RGB(1,1,1), RGB(0,0,0)], 
+		dropseed = true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 1:0.05:3, y; color, linewidth = 3, label)
+	end
+
+	axislegend(ax, position = :rb, nbanks = 3, orientation = :horizontal)
+
+	f
+end
+
+# ╔═╡ ab335c39-0907-4bad-b659-724f7122303c
+let
+	indicators = table_4[:, :indicator]
+	p0_s = Measurements.value.(table_4[:, :p0])
+	p1_s = Measurements.value.(table_4[:, :p1])
+	p2_s = Measurements.value.(table_4[:, :p2])
+	p3_s = Measurements.value.(table_4[:, :p3])
+ 	y_s = [
+		x -> p0 + p1 * x + p2 * x^2 + p3 * x^3 for (p0, p1, p2, p3) 
+		in zip(p0_s, p1_s, p2_s, p3_s)
+	]
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log(\mathrm{M_\star / M_\odot}) - 8", 
+		ylabel = L"12 + \log(\mathrm{O / H})", 
+		title = L"\mathrm{FMR  \,\, polynomial  \,\, fit}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators), 
+		[RGB(1,1,1), RGB(0,0,0)], 
+		dropseed = true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 1:0.05:3, y; color, linewidth = 3, label)
+	end
+
+	axislegend(ax, position = :lt, nbanks = 3, orientation = :horizontal)
+
+	f
+end
+
+# ╔═╡ 96a8cf9f-be9e-499e-ab48-0d72f02318f7
+md"""
+### Fundamental Mass Metallicity relation d (FMRd)
+
+#### Best fit
+
+``y = a + b \, (x + d \, s - c) \, \exp(-(x + d \, s - c))``
+
+#### Polynomial fit
+
+``y = \displaystyle\sum_{i = 0}^{3} p_i \, x_d^i``
+
+where 
+
+``y = 12 + \log(\mathrm{O / H})``
+
+``x = \log(\mathrm{M_\star / M_\odot}) - 8``
+
+``s = \log(\mathrm{SFR / M_\odot \, yr^{-1}})`` 
+
+``c = 3.5``
+"""
+
+# ╔═╡ eb67f33e-c523-43d4-b752-2207aeebdbd0
+begin
+	raw_table_5 = CSV.read("./data/table_5.csv", DataFrame, header=2, comment="%")
+	table_5 = DataFrame(
+		indicator = raw_table_5[:, "Indicator"],
+		a = parse_measurement(raw_table_5[:, "\$a\$"]),
+		b = parse_measurement(raw_table_5[:, "\$b\$"]),
+		d = parse_measurement(raw_table_5[:, "\$d\$"]),
+		dp = parse_measurement(raw_table_5[:, "\$dp\$"]),
+	)
+end
+
+# ╔═╡ b5ba7173-2217-4483-af30-cce18381b69f
+let
+	# x = L"\log(M_\star / M_\odot) - 8"
+	# y = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})"
+	# z = L"12 + \log(\mathrm{O / H})"
+	
+	c = 3.5
+	indicators = table_5[:, :indicator]
+	a_s = Measurements.value.(table_5[:, :a])
+	b_s = Measurements.value.(table_5[:, :b])
+	d_s = Measurements.value.(table_5[:, :d])
+ 	z_s = [
+		(x, y) -> a + b * (x + d * y - c) * exp(-(x + d * y - c)) for 
+		(a, b, d) in zip(a_s, b_s, d_s)
+	]
+	
+	f = Figure(resolution = (1200, 800))
+
+	colors = distinguishable_colors(
+		length(indicators), 
+		[RGB(1,1,1), RGB(0,0,0)], 
+		dropseed = true,
+	)
+
+	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
+		ax = Axis3(
+			f[mod1(i, 3), mod1(i, 4)], 
+			xlabel = L"x", 
+			ylabel = L"y", 
+			zlabel = L"z", 
+			xticklabelsize = 15,
+			yticklabelsize = 15,
+			zticklabelsize = 15;
+			title,
+			titlesize = 20,
+		)
+		surface!(ax, 1:0.05:3, -1.5:0.01:-1, z; color, linewidth = 3)
+	end
+	
+	f
+end
+
+# ╔═╡ 255fc776-c31a-4f88-bb98-dd069f3485e8
+md"""
+### Fundamental Mass Metallicity relation d (FMRd)
+
+#### Best fit
+
+``y = α \, s + β \, x + γ``
+
+where 
+
+``y = \log(\mathrm{M_\star / M_\odot})``
+
+``x = 12 + \log(\mathrm{O / H})``
+
+``s = \log(\mathrm{SFR / M_\odot \, yr^{-1}})`` 
+"""
+
+# ╔═╡ 5d3cc3ad-0f29-43b1-a176-417d520586e5
+begin
+	raw_table_7 = CSV.read("./data/table_7.csv", DataFrame, header=2, comment="%")
+	table_7 = DataFrame(
+		indicator = raw_table_7[:, "Indicator"],
+		α = parse_measurement(raw_table_7[:, "\$\\alpha\$"]),
+		β = parse_measurement(raw_table_7[:, "\$\\beta\$"]),
+		γ = parse_measurement(raw_table_7[:, "\$\\gamma\$"]),
+	)
+end
+
+# ╔═╡ 183fca81-6140-4b94-8ce3-9ed8040f7f30
+let
+	# x = L"12 + \log(\mathrm{O / H})"
+	# y = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})"
+	# z = L"\log(M_\star / M_\odot)"
+
+	indicators = table_7[:, :indicator]
+	α_s = Measurements.value.(table_7[:, :α])
+	β_s = Measurements.value.(table_7[:, :β])
+	γ_s = Measurements.value.(table_7[:, :γ])
+ 	z_s = [
+		(x, y) -> α * y + β * x + γ for (α, β, γ) in zip(α_s, β_s, γ_s)
+	]
+	
+	f = Figure(resolution = (1200, 800))
+
+	colors = distinguishable_colors(
+		length(indicators), 
+		[RGB(1,1,1), RGB(0,0,0)], 
+		dropseed = true,
+	)
+
+	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
+		ax = Axis3(
+			f[mod1(i, 3), mod1(i, 4)], 
+			xlabel = L"x", 
+			ylabel = L"y", 
+			zlabel = L"z", 
+			xticklabelsize = 15,
+			yticklabelsize = 15,
+			zticklabelsize = 15;
+			title,
+			titlesize = 20,
+		)
+		surface!(ax, 8:0.01:9, -1.5:0.01:-1, z; color, linewidth = 3)
+	end
+	
 	f
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
-CairoMakie = "~0.8.2"
+CSV = "~0.10.4"
+CairoMakie = "~0.8.4"
+Colors = "~0.12.8"
+DataFrames = "~1.3.4"
 FITSIO = "~0.16.12"
 LaTeXStrings = "~1.3.0"
+Measurements = "~2.7.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -138,6 +556,12 @@ git-tree-sha1 = "9c91a9358de42043c3101e3a29e60883345b0b39"
 uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
 version = "4.0.0+0"
 
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings"]
+git-tree-sha1 = "873fb188a4b9d76549b81465b1f75c82aaf59238"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.4"
+
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
 git-tree-sha1 = "d0b3f8b4ad16cb0a2988c6788646a5e6a17b6b1b"
@@ -146,9 +570,9 @@ version = "1.0.5"
 
 [[deps.CairoMakie]]
 deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA"]
-git-tree-sha1 = "cb87c60a56059760d53a4f0dd3b822b20a448a9d"
+git-tree-sha1 = "abd2e8065e110f9397dc3a6a75a2d2ed1fad28a9"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.8.2"
+version = "0.8.4"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -164,15 +588,21 @@ version = "0.5.1"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "9950387274246d08af38f6eef8cb5480862a435f"
+git-tree-sha1 = "9489214b993cd42d17f44c36e359bf6a7c919abf"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.14.0"
+version = "1.15.0"
 
 [[deps.ChangesOfVariables]]
 deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
 git-tree-sha1 = "1e315e3f4b0b7ce40feded39c73049692126cf53"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
 version = "0.1.3"
+
+[[deps.CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.0"
 
 [[deps.ColorBrewer]]
 deps = ["Colors", "JSON", "Test"]
@@ -188,15 +618,15 @@ version = "3.18.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "a985dc37e357a3b22b260a5def99f3530fb415d3"
+git-tree-sha1 = "0f4e115f6f34bbe43c19751c90a38b2f380637b9"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.11.2"
+version = "0.11.3"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
-git-tree-sha1 = "3f1f500312161f1ae067abe07d13b40f78f32e07"
+git-tree-sha1 = "d08c20eef1f2cbc6e60fd3612ac4340b89fea322"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.9.8"
+version = "0.9.9"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -206,9 +636,9 @@ version = "0.12.8"
 
 [[deps.Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "b153278a25dd42c65abbf4e62344f9d22e59191b"
+git-tree-sha1 = "9be8be1d8a6f44b96482c8af52238ea7987da3e3"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.43.0"
+version = "3.45.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -220,16 +650,27 @@ git-tree-sha1 = "9f02045d934dc030edad45944ea80dbd1f0ebea7"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.5.7"
 
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "fb5f5316dd3fd4c5e7c30a24d50643b73e37cd40"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.10.0"
 
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "daa21eb85147f72e41f6352a57fccea377e310a9"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.3.4"
+
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "cc1a8e22627f33c789ab60b36a9132ac050bbf75"
+git-tree-sha1 = "d1fff3a548102f48987a52a2e0d114fa97d730f0"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.12"
+version = "0.18.13"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -256,9 +697,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "8a6b49396a4058771c5c072239b2e0a76e2e898c"
+git-tree-sha1 = "0ec161f87bf4ab164ff96dfacf4be8ffff2375fd"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.58"
+version = "0.25.62"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -324,6 +765,12 @@ git-tree-sha1 = "9267e5f50b0e12fdfd5a2455534345c4cf2c7f7a"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.14.0"
 
+[[deps.FilePathsBase]]
+deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
+git-tree-sha1 = "129b104185df66e408edd6625d480b7f9e9823a0"
+uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
+version = "0.9.18"
+
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
 git-tree-sha1 = "246621d23d1f43e3b9c368bf3b72b2331a27c286"
@@ -372,6 +819,10 @@ git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
 
+[[deps.Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
 git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"
@@ -392,9 +843,9 @@ version = "2.68.3+2"
 
 [[deps.Graphics]]
 deps = ["Colors", "LinearAlgebra", "NaNMath"]
-git-tree-sha1 = "1c5a84319923bea76fa145d49e93aa4394c73fc2"
+git-tree-sha1 = "d61890399bc535850c4bf08e4e0d3a7ad0f21cbd"
 uuid = "a2bd30eb-e257-5431-a919-1863eab51364"
-version = "1.1.1"
+version = "1.1.2"
 
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -404,9 +855,9 @@ version = "1.3.14+0"
 
 [[deps.GridLayoutBase]]
 deps = ["GeometryBasics", "InteractiveUtils", "Observables"]
-git-tree-sha1 = "e7b3493c3e64d072a9f22c4b24bc51874a3edcdf"
+git-tree-sha1 = "d778af2dcb083169807d43aa9d15f9f7e3909d4c"
 uuid = "3955a311-db13-416c-9275-1d80ed98e5e9"
-version = "0.7.5"
+version = "0.7.7"
 
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
@@ -453,6 +904,12 @@ git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.2"
 
+[[deps.InlineStrings]]
+deps = ["Parsers"]
+git-tree-sha1 = "61feba885fac3a407465726d0c330b3055df897f"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.1.2"
+
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "d979e54b71da82f3a65b62553da4fc3d18c9004c"
@@ -470,16 +927,21 @@ uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 version = "0.13.6"
 
 [[deps.IntervalSets]]
-deps = ["Dates", "Statistics"]
-git-tree-sha1 = "ad841eddfb05f6d9be0bff1fa48dcae32f134a2d"
+deps = ["Dates", "Random", "Statistics"]
+git-tree-sha1 = "57af5939800bce15980bddd2426912c4f83012d8"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
-version = "0.6.2"
+version = "0.7.1"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
-git-tree-sha1 = "336cc738f03e069ef2cac55a104eb823455dca75"
+git-tree-sha1 = "b3364212fb5d870f724876ffcd34dd8ec6d98918"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.4"
+version = "0.1.7"
+
+[[deps.InvertedIndices]]
+git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.1.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -554,9 +1016,9 @@ deps = ["Artifacts", "Pkg"]
 uuid = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
 
 [[deps.LazyModules]]
-git-tree-sha1 = "f4d24f461dacac28dcd1f63ebd88a8d9d0799389"
+git-tree-sha1 = "a560dd966b386ac9ae60bdd3a3d3a326062d3c3e"
 uuid = "8cdb02fc-e678-4876-92c5-9defec4f444e"
-version = "0.3.0"
+version = "0.3.1"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -634,15 +1096,15 @@ version = "2022.0.0+0"
 
 [[deps.Makie]]
 deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Showoff", "SignedDistanceFields", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "UnicodeFun"]
-git-tree-sha1 = "048aec015ad88eb5c642d731e3e23f1b805ae8b3"
+git-tree-sha1 = "8e18e964461bf4e9e2ab5374dd9d7edea0ef7a94"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.17.2"
+version = "0.17.4"
 
 [[deps.MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "cd999cfcda9ae0dd564a968087005d25359344c9"
+git-tree-sha1 = "76b079514ddae2cb3bf839c499678e1ef6c5df78"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.3.1"
+version = "0.3.2"
 
 [[deps.MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -660,13 +1122,19 @@ version = "1.2.0"
 
 [[deps.MathTeXEngine]]
 deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "RelocatableFolders", "Test"]
-git-tree-sha1 = "70e733037bbf02d691e78f95171a1fa08cdc6332"
+git-tree-sha1 = "5c1e3d66b3a36029de4e5ac07ab8bafd5a8041e5"
 uuid = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
-version = "0.2.1"
+version = "0.4.1"
 
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
+
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf", "RecipesBase", "Requires"]
+git-tree-sha1 = "dd8b9e6d7be9731fdaecc813acc5c3083496a251"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.7.2"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
@@ -687,9 +1155,9 @@ version = "0.3.3"
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 
 [[deps.NaNMath]]
-git-tree-sha1 = "b086b7ea07f8e38cf122f5016af580881ac914fe"
+git-tree-sha1 = "737a5957f387b17e74d4ad2f440eb330b39a62c5"
 uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
-version = "0.3.7"
+version = "1.0.0"
 
 [[deps.Netpbm]]
 deps = ["FileIO", "ImageCore"]
@@ -707,9 +1175,9 @@ version = "0.5.1"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
-git-tree-sha1 = "e6c5f47ba51b734a4e264d7183b6750aec459fa0"
+git-tree-sha1 = "b4975062de00106132d0b01b5962c09f7db7d880"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.11.1"
+version = "1.12.5"
 
 [[deps.Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -768,9 +1236,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "027185efff6be268abbaf30cfd53ca9b59e3c857"
+git-tree-sha1 = "3e32c8dbbbe1159a5057c80b8a463369a78dd8d8"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.10"
+version = "0.11.12"
 
 [[deps.PNGFiles]]
 deps = ["Base64", "CEnum", "ImageCore", "IndirectArrays", "OffsetArrays", "libpng_jll"]
@@ -829,11 +1297,23 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.2"
+
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
+git-tree-sha1 = "dfb54c4e414caa595a1f2ed759b160f5a3ddcba5"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "1.3.1"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -871,6 +1351,11 @@ git-tree-sha1 = "dc84268fe0e3335a62e315a3a7cf2afa7178a734"
 uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
 version = "0.4.3"
 
+[[deps.RecipesBase]]
+git-tree-sha1 = "6bf3f380ff52ce0832ddd3a2a7b9538ed1bcca7d"
+uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+version = "1.2.1"
+
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
@@ -878,9 +1363,9 @@ version = "1.2.2"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
-git-tree-sha1 = "cdbd3b1338c72ce29d9584fdbe9e9b70eeb5adca"
+git-tree-sha1 = "307761d71804208c0c62abdbd0ea6822aa5bbefd"
 uuid = "05181044-ff0b-4ac5-8273-598c1e38db00"
-version = "0.1.3"
+version = "0.2.0"
 
 [[deps.Requires]]
 deps = ["UUIDs"]
@@ -910,15 +1395,21 @@ version = "3.4.1"
 
 [[deps.ScanByte]]
 deps = ["Libdl", "SIMD"]
-git-tree-sha1 = "9cc2955f2a254b18be655a4ee70bc4031b2b189e"
+git-tree-sha1 = "c49318f1b9ca3d927ae576d323fa6f724d01ba53"
 uuid = "7b38b023-a4d7-4c5e-8d43-3f3097f304eb"
-version = "0.3.0"
+version = "0.3.1"
 
 [[deps.Scratch]]
 deps = ["Dates"]
 git-tree-sha1 = "0b4b7f1393cff97c33891da2a0bf69c6ed241fda"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.1.0"
+
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "db8481cf5d6278a121184809e9eb1628943c7704"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.3.13"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -960,9 +1451,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "bc40f042cfcc56230f781d92db71f0e21496dffd"
+git-tree-sha1 = "a9e798cae4867e3a41cae2dd9eb60c047f1212db"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.1.5"
+version = "2.1.6"
 
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
@@ -972,9 +1463,9 @@ version = "0.1.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "cd56bf18ed715e8b09f06ef8c6b781e6cdc49911"
+git-tree-sha1 = "383a578bdf6e6721f480e749d503ebc8405a0b22"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.4"
+version = "1.4.6"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -982,9 +1473,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "c82aaa13b44ea00134f8c9c89819477bd3986ecd"
+git-tree-sha1 = "2c11d7290036fe7aac9038ff312d3b3a2a5bf89e"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.3.0"
+version = "1.4.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
@@ -1000,9 +1491,9 @@ version = "1.0.1"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
-git-tree-sha1 = "e75d82493681dfd884a357952bbd7ab0608e1dc3"
+git-tree-sha1 = "9abba8f8fb8458e9adf07c8a2377a070674a24f1"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.7"
+version = "0.6.8"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1063,6 +1554,12 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "de67fa59e33ad156a590055375a30b23c40299d3"
@@ -1071,9 +1568,9 @@ version = "0.5.5"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "1acf5bdf07aa0907e0a37d3718bb88d4b687b74a"
+git-tree-sha1 = "58443b63fb7e465a8a7210828c91c08b92132dff"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.9.12+0"
+version = "2.9.14+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "Pkg", "XML2_jll", "Zlib_jll"]
@@ -1196,8 +1693,25 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
+# ╟─dfeea049-a273-45b2-9245-7a6fa9a1c820
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╠═30b5b786-9feb-4387-918b-9f26c85d0681
-# ╠═105261ea-22b1-4506-b6c5-9a44ed636921
+# ╟─072bddde-dece-4d9f-990b-e374038ba7e6
+# ╟─75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
+# ╟─704e36c5-24b8-421c-aef6-3ae8e05f28ad
+# ╟─d469d49f-e678-4ba9-abe9-5b08e4cbbd17
+# ╟─0d31d0c2-afc0-4685-86e5-a0bfe21afc4c
+# ╟─cf8df0da-1760-464e-9531-42ba2ef2c7aa
+# ╟─5705382a-bad5-4c65-b1fe-12f3ff20d872
+# ╟─3932dd4a-e683-4f18-bbc6-b7e65eabe867
+# ╟─3d2e76f8-6092-44af-a4d4-6e02e23311e5
+# ╟─2266aa08-eec0-4b18-92ab-64ebdcbb92f5
+# ╟─ab335c39-0907-4bad-b659-724f7122303c
+# ╟─96a8cf9f-be9e-499e-ab48-0d72f02318f7
+# ╟─eb67f33e-c523-43d4-b752-2207aeebdbd0
+# ╟─b5ba7173-2217-4483-af30-cce18381b69f
+# ╟─255fc776-c31a-4f88-bb98-dd069f3485e8
+# ╟─5d3cc3ad-0f29-43b1-a176-417d520586e5
+# ╟─183fca81-6140-4b94-8ce3-9ed8040f7f30
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
