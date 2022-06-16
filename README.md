@@ -122,6 +122,16 @@ C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. M
 
 D. Sotillo-Ramos, M. A. Lara-López, A. M. Pérez-García, R. Pérez-Martínez, A. M. Hopkins, B. W. Holwerda, J. Liske, A. R. López-Sánchez, M. S. Owers and K. A. Pimbblet, Galaxy and mass assembly (GAMA): The environmental impact on SFR and metallicity in galaxy groups, _Monthly Notices of the Royal Astronomical Society_, Volume 508, Issue 2, December 2021, Pages 1817–1830, doi: 10.1093/mnras/stab2641
 
+### [Thorne et al. (2021)](https://doi.org/10.1093/mnras/stab1294)
+
+#### Data products
+
+- Fits for the global star formation rate vs stellar mass.
+
+#### Reference
+
+J. E. Thorne, A. S. G. Robotham, L. J. M. Davies, S. Bellstedt, S. P. Driver, M. Bravo, M. N. Bremer, B. W. Holwerda, A. M. Hopkins, C. del P. Lagos, S. Phillipps, M. Siudek, E. N. Taylor, A. H. Wright, Deep Extragalactic VIsible Legacy Survey (DEVILS): SED fitting in the D10-COSMOS field and the evolution of the stellar mass function and SFR–M⋆ relation, _Monthly Notices of the Royal Astronomical Society_, Volume 505, Issue 1, July 2021, Pages 540–567, doi: 10.1093/mnras/stab1294
+
 ### [Tomczak et al. (2014)](https://doi.org/10.1088/0004-637x/783/2/85)
 
 #### Data products
@@ -213,5 +223,7 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 ### To-do
 
 [Puertas et al. 2022](https://arxiv.org/abs/2205.01203) (Table 1)
+
+[DEVILS survey](https://docs.datacentral.org.au/devils/)
 
 [Alfalfa](http://egg.astro.cornell.edu/alfalfa/data/index.php)
