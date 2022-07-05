@@ -375,7 +375,7 @@ let
 		dropseed = true,
 	)
 
-	for (i, (title, z, color)) in pairs(zip(indicators, z_s, colors))
+	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
 		ax = Axis3(
 			f[mod1(i, 3), mod1(i, 4)], 
 			xlabel = L"x", 
@@ -443,7 +443,7 @@ let
 		dropseed = true,
 	)
 
-	for (i, (title, z, color)) in pairs(zip(indicators, z_s, colors))
+	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
 		ax = Axis3(
 			f[mod1(i, 3), mod1(i, 4)], 
 			xlabel = L"x", 
