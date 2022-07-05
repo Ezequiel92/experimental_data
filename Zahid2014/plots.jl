@@ -182,7 +182,7 @@ let
 		dropseed = true,
 	)
 
-	for (i, color) in enumerate(colors)
+	for (i, color) in pairs(colors)
 		scatter!(
 			ax, 
 			[z[i],], 
