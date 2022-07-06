@@ -30,78 +30,78 @@ md"""
 
 # ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
 pol_fit = DataFrame(
-	redshift_range = [[0.5, 1.0], [1.0, 1.5], [1.5, 2.0], [2.0, 2.5]],
-	a = [-27.40 ± 1.91, -26.03 ± 1.69, -24.04 ± 2.08, -19.99 ± 1.87], 
-	b = [5.02 ± 0.39, 4.62 ± 0.34, 4.17 ± 0.40, 3.44 ± 0.36], 
-	c = [-0.22 ± 0.02, -0.19 ± 0.02, -0.16 ± 0.02, -0.13 ± 0.02],
+    redshift_range=[[0.5, 1.0], [1.0, 1.5], [1.5, 2.0], [2.0, 2.5]],
+    a=[-27.40 ± 1.91, -26.03 ± 1.69, -24.04 ± 2.08, -19.99 ± 1.87],
+    b=[5.02 ± 0.39, 4.62 ± 0.34, 4.17 ± 0.40, 3.44 ± 0.36],
+    c=[-0.22 ± 0.02, -0.19 ± 0.02, -0.16 ± 0.02, -0.13 ± 0.02],
 )
 
 # ╔═╡ 105261ea-22b1-4506-b6c5-9a44ed636921
 let
-	fit_a = x -> Measurements.value(
-		pol_fit[1, :a] + pol_fit[1, :b] * x + pol_fit[1, :c] * x^2
-	)
-	fit_b = x -> Measurements.value(
-		pol_fit[2, :a] + pol_fit[2, :b] * x + pol_fit[2, :c] * x^2
-	)
-	fit_c = x -> Measurements.value(
-		pol_fit[3, :a] + pol_fit[3, :b] * x + pol_fit[3, :c] * x^2
-	)
-	fit_d = x -> Measurements.value(
-		pol_fit[4, :a] + pol_fit[4, :b] * x + pol_fit[4, :c] * x^2
-	)
+    fit_a = x -> Measurements.value(
+        pol_fit[1, :a] + pol_fit[1, :b] * x + pol_fit[1, :c] * x^2
+    )
+    fit_b = x -> Measurements.value(
+        pol_fit[2, :a] + pol_fit[2, :b] * x + pol_fit[2, :c] * x^2
+    )
+    fit_c = x -> Measurements.value(
+        pol_fit[3, :a] + pol_fit[3, :b] * x + pol_fit[3, :c] * x^2
+    )
+    fit_d = x -> Measurements.value(
+        pol_fit[4, :a] + pol_fit[4, :b] * x + pol_fit[4, :c] * x^2
+    )
 
-	range_a = pol_fit[1, :redshift_range]
-	range_b = pol_fit[2, :redshift_range]
-	range_c = pol_fit[3, :redshift_range]
-	range_d = pol_fit[4, :redshift_range]
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel = L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
-		title = L"\mathrm{SFR \,\, vs. \,\, Mass}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
-	)
+    range_a = pol_fit[1, :redshift_range]
+    range_b = pol_fit[2, :redshift_range]
+    range_c = pol_fit[3, :redshift_range]
+    range_d = pol_fit[4, :redshift_range]
 
-	lines!(
-		ax, 
-		8..12, fit_a, 
-		color = :blue, 
-		linewidth = 4,
-		label = "$(range_a[1]) < z < $(range_a[2])",
-	)
-	lines!(
-		ax, 
-		8..12, fit_b, 
-		color = :green, 
-		linewidth = 4,
-		label = "$(range_b[1]) < z < $(range_b[2])",
-	)
-	lines!(
-		ax, 
-		8..12, fit_c, 
-		color = :orange, 
-		linewidth = 4,
-		label = "$(range_c[1]) < z < $(range_c[2])",
-	)
-	lines!(
-		ax, 
-		8..12, fit_d, 
-		color = :red, 
-		linewidth = 4,
-		label = "$(range_d[1]) < z < $(range_d[2])",
-	)
+    f = Figure()
 
-	axislegend(ax, position = :rb)
+    ax = Axis(
+        f[1, 1],
+        xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+        ylabel=L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})",
+        title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
+        titlesize=28,
+        xlabelsize=24,
+        ylabelsize=24,
+        xticklabelsize=18,
+        yticklabelsize=18,
+    )
 
-	f
+    lines!(
+        ax,
+        8 .. 12, fit_a,
+        color=:blue,
+        linewidth=4,
+        label="$(range_a[1]) < z < $(range_a[2])",
+    )
+    lines!(
+        ax,
+        8 .. 12, fit_b,
+        color=:green,
+        linewidth=4,
+        label="$(range_b[1]) < z < $(range_b[2])",
+    )
+    lines!(
+        ax,
+        8 .. 12, fit_c,
+        color=:orange,
+        linewidth=4,
+        label="$(range_c[1]) < z < $(range_c[2])",
+    )
+    lines!(
+        ax,
+        8 .. 12, fit_d,
+        color=:red,
+        linewidth=4,
+        label="$(range_d[1]) < z < $(range_d[2])",
+    )
+
+    axislegend(ax, position=:rb)
+
+    f
 end
 
 # ╔═╡ c5d20dc1-247c-4c32-b0b8-71082e3850c1
@@ -113,121 +113,121 @@ md"""
 
 # ╔═╡ b5580551-9ee7-400a-9774-f682eb860c85
 bpl_fit = DataFrame(
-	redshift_range = [[0.5, 1.0], [1.0, 1.5], [1.5, 2.0], [2.0, 2.5]],
-	a_low = [0.94 ± 0.03, 0.99 ± 0.04, 1.04 ± 0.05, 0.91 ± 0.06], 
-	a_high = [0.14 ± 0.08, 0.51 ± 0.07, 0.62 ± 0.06, 0.67 ± 0.06], 
-	b = [1.11 ± 0.03, 1.31 ± 0.02, 1.49 ± 0.02, 1.62 ± 0.02],
+    redshift_range=[[0.5, 1.0], [1.0, 1.5], [1.5, 2.0], [2.0, 2.5]],
+    a_low=[0.94 ± 0.03, 0.99 ± 0.04, 1.04 ± 0.05, 0.91 ± 0.06],
+    a_high=[0.14 ± 0.08, 0.51 ± 0.07, 0.62 ± 0.06, 0.67 ± 0.06],
+    b=[1.11 ± 0.03, 1.31 ± 0.02, 1.49 ± 0.02, 1.62 ± 0.02],
 )
 
 # ╔═╡ 6ca21bae-b334-4cb1-a0cb-33e54e9bb19a
 let
-	fit_a_low = x -> Measurements.value(
-		bpl_fit[1, :a_low] * (x - 10.2) + bpl_fit[1, :b]
-	)
-	fit_a_high = x -> Measurements.value(
-		bpl_fit[1, :a_high] * (x - 10.2) + bpl_fit[1, :b]
-	)
+    fit_a_low = x -> Measurements.value(
+        bpl_fit[1, :a_low] * (x - 10.2) + bpl_fit[1, :b]
+    )
+    fit_a_high = x -> Measurements.value(
+        bpl_fit[1, :a_high] * (x - 10.2) + bpl_fit[1, :b]
+    )
 
-	fit_b_low = x -> Measurements.value(
-		bpl_fit[2, :a_low] * (x - 10.2) + bpl_fit[2, :b]
-	)
-	fit_b_high = x -> Measurements.value(
-		bpl_fit[2, :a_high] * (x - 10.2) + bpl_fit[2, :b]
-	)
+    fit_b_low = x -> Measurements.value(
+        bpl_fit[2, :a_low] * (x - 10.2) + bpl_fit[2, :b]
+    )
+    fit_b_high = x -> Measurements.value(
+        bpl_fit[2, :a_high] * (x - 10.2) + bpl_fit[2, :b]
+    )
 
-	fit_c_low = x -> Measurements.value(
-		bpl_fit[3, :a_low] * (x - 10.2) + bpl_fit[3, :b]
-	)
-	fit_c_high = x -> Measurements.value(
-		bpl_fit[3, :a_high] * (x - 10.2) + bpl_fit[3, :b]
-	)
+    fit_c_low = x -> Measurements.value(
+        bpl_fit[3, :a_low] * (x - 10.2) + bpl_fit[3, :b]
+    )
+    fit_c_high = x -> Measurements.value(
+        bpl_fit[3, :a_high] * (x - 10.2) + bpl_fit[3, :b]
+    )
 
-	fit_d_low = x -> Measurements.value(
-		bpl_fit[4, :a_low] * (x - 10.2) + bpl_fit[4, :b]
-	)
-	fit_d_high = x -> Measurements.value(
-		bpl_fit[4, :a_high] * (x - 10.2) + bpl_fit[4, :b]
-	)
+    fit_d_low = x -> Measurements.value(
+        bpl_fit[4, :a_low] * (x - 10.2) + bpl_fit[4, :b]
+    )
+    fit_d_high = x -> Measurements.value(
+        bpl_fit[4, :a_high] * (x - 10.2) + bpl_fit[4, :b]
+    )
 
-	range_a = bpl_fit[1, :redshift_range]
-	range_b = bpl_fit[2, :redshift_range]
-	range_c = bpl_fit[3, :redshift_range]
-	range_d = bpl_fit[4, :redshift_range]
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel = L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
-		title = L"\mathrm{SFR \,\, vs. \,\, Mass}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
-	)
+    range_a = bpl_fit[1, :redshift_range]
+    range_b = bpl_fit[2, :redshift_range]
+    range_c = bpl_fit[3, :redshift_range]
+    range_d = bpl_fit[4, :redshift_range]
 
-	lines!(
-		ax, 
-		8:0.05:10.2, fit_a_low, 
-		color = :blue, 
-		linewidth = 4,
-		label = "$(range_a[1]) < z < $(range_a[2])",
-	)
-	lines!(
-		ax, 
-		10.2:0.05:12, fit_a_high, 
-		color = :blue, 
-		linewidth = 4,
-		label = "$(range_a[1]) < z < $(range_a[2])",
-	)
-	lines!(
-		ax, 
-		8:0.05:10.2, fit_b_low, 
-		color = :green, 
-		linewidth = 4,
-		label = "$(range_b[1]) < z < $(range_b[2])",
-	)
-	lines!(
-		ax, 
-		10.2:0.05:12, fit_b_high, 
-		color = :green, 
-		linewidth = 4,
-		label = "$(range_b[1]) < z < $(range_b[2])",
-	)
-	lines!(
-		ax, 
-		8:0.05:10.2, fit_c_low, 
-		color = :orange, 
-		linewidth = 4,
-		label = "$(range_c[1]) < z < $(range_c[2])",
-	)
-	lines!(
-		ax, 
-		10.2:0.05:12, fit_c_high, 
-		color = :orange, 
-		linewidth = 4,
-		label = "$(range_c[1]) < z < $(range_c[2])",
-	)
-	lines!(
-		ax, 
-		8:0.05:10.2, fit_d_low, 
-		color = :red, 
-		linewidth = 4,
-		label = "$(range_d[1]) < z < $(range_d[2])",
-	)
-	lines!(
-		ax, 
-		10.2:0.05:12, fit_d_high, 
-		color = :red, 
-		linewidth = 4,
-		label = "$(range_d[1]) < z < $(range_d[2])",
-	)
+    f = Figure()
 
-	axislegend(ax, position = :rb, merge = true)
+    ax = Axis(
+        f[1, 1],
+        xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+        ylabel=L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})",
+        title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
+        titlesize=28,
+        xlabelsize=24,
+        ylabelsize=24,
+        xticklabelsize=18,
+        yticklabelsize=18,
+    )
 
-	f
+    lines!(
+        ax,
+        8:0.05:10.2, fit_a_low,
+        color=:blue,
+        linewidth=4,
+        label="$(range_a[1]) < z < $(range_a[2])",
+    )
+    lines!(
+        ax,
+        10.2:0.05:12, fit_a_high,
+        color=:blue,
+        linewidth=4,
+        label="$(range_a[1]) < z < $(range_a[2])",
+    )
+    lines!(
+        ax,
+        8:0.05:10.2, fit_b_low,
+        color=:green,
+        linewidth=4,
+        label="$(range_b[1]) < z < $(range_b[2])",
+    )
+    lines!(
+        ax,
+        10.2:0.05:12, fit_b_high,
+        color=:green,
+        linewidth=4,
+        label="$(range_b[1]) < z < $(range_b[2])",
+    )
+    lines!(
+        ax,
+        8:0.05:10.2, fit_c_low,
+        color=:orange,
+        linewidth=4,
+        label="$(range_c[1]) < z < $(range_c[2])",
+    )
+    lines!(
+        ax,
+        10.2:0.05:12, fit_c_high,
+        color=:orange,
+        linewidth=4,
+        label="$(range_c[1]) < z < $(range_c[2])",
+    )
+    lines!(
+        ax,
+        8:0.05:10.2, fit_d_low,
+        color=:red,
+        linewidth=4,
+        label="$(range_d[1]) < z < $(range_d[2])",
+    )
+    lines!(
+        ax,
+        10.2:0.05:12, fit_d_high,
+        color=:red,
+        linewidth=4,
+        label="$(range_d[1]) < z < $(range_d[2])",
+    )
+
+    axislegend(ax, position=:rb, merge=true)
+
+    f
 end
 
 # ╔═╡ c92af9ee-6b38-4730-bf39-171aed39f073
@@ -239,96 +239,96 @@ md"""
 
 # ╔═╡ 4b50ca97-eb25-4a47-91e8-c445d177725f
 ssfr_fit = DataFrame(
-	mass_range = [
-		[9.2, 9.4],
-		[9.4, 9.6],
-		[9.6, 9.8],
-		[9.8, 10.0],
-		[10.0, 10.2],
-		[10.2, 10.4],
-		[10.4, 10.6],
-		[10.6, 10.8],
-		[10.8, 11.0],
-		[11.0, 11.2],
-	],
-	log_a_UV_IR = [-9.54 ± 0.15, -9.5 ± 0.14, -9.54 ± 0.07, -9.58 ± 0.03, -9.69 ± 0.03, -9.93 ± 0.08, -10.11 ± 0.1, -10.28 ± 0.15, -10.53 ± 0.17, -10.65 ± 0.11], 
-	b_UV_IR = [1.95 ± 0.24, 1.86 ± 0.22, 1.9 ± 0.12, 1.98 ± 0.04, 2.16 ± 0.04, 2.63 ± 0.12, 2.88 ± 0.16, 3.03 ± 0.24, 3.37 ± 0.26, 3.45 ± 0.17], 
-	log_a_UV_β = [-9.47 ± 0.23, -9.39 ± 0.23, -9.43 ± 0.3, -9.46 ± 0.34, -9.45 ± 0.37, -9.99 ± 0.34, -9.72 ± 0.29, NaN, NaN, NaN], 
-	b_UV_β = [2.1 ± 0.37, 1.78 ± 0.37, 1.77 ± 0.48, 1.7 ± 0.54, 1.43 ± 0.59, 2.31 ± 0.52, 1.52 ± 0.43, NaN, NaN, NaN], 
+    mass_range=[
+        [9.2, 9.4],
+        [9.4, 9.6],
+        [9.6, 9.8],
+        [9.8, 10.0],
+        [10.0, 10.2],
+        [10.2, 10.4],
+        [10.4, 10.6],
+        [10.6, 10.8],
+        [10.8, 11.0],
+        [11.0, 11.2],
+    ],
+    log_a_UV_IR=[-9.54 ± 0.15, -9.5 ± 0.14, -9.54 ± 0.07, -9.58 ± 0.03, -9.69 ± 0.03, -9.93 ± 0.08, -10.11 ± 0.1, -10.28 ± 0.15, -10.53 ± 0.17, -10.65 ± 0.11],
+    b_UV_IR=[1.95 ± 0.24, 1.86 ± 0.22, 1.9 ± 0.12, 1.98 ± 0.04, 2.16 ± 0.04, 2.63 ± 0.12, 2.88 ± 0.16, 3.03 ± 0.24, 3.37 ± 0.26, 3.45 ± 0.17],
+    log_a_UV_β=[-9.47 ± 0.23, -9.39 ± 0.23, -9.43 ± 0.3, -9.46 ± 0.34, -9.45 ± 0.37, -9.99 ± 0.34, -9.72 ± 0.29, NaN, NaN, NaN],
+    b_UV_β=[2.1 ± 0.37, 1.78 ± 0.37, 1.77 ± 0.48, 1.7 ± 0.54, 1.43 ± 0.59, 2.31 ± 0.52, 1.52 ± 0.43, NaN, NaN, NaN],
 )
 
 # ╔═╡ 2fd36509-be3a-4f21-bc2a-11c5dfe5b88b
 let
-	fit_UV_IR(range)  = z -> Measurements.value(
-		ssfr_fit[range, :log_a_UV_IR] + (1 + z) * ssfr_fit[range, :b_UV_IR]
-	)
-	
-	mass_range(range) = ssfr_fit[range, :mass_range]
+    fit_UV_IR(range) = z -> Measurements.value(
+        ssfr_fit[range, :log_a_UV_IR] + (1 + z) * ssfr_fit[range, :b_UV_IR]
+    )
 
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"z", 
-		ylabel = L"\log(\mathrm{sSFR \, / \, yr^{-1}})", 
-		title = L"\mathrm{sSFR \,\, vs. \,\, redshift}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
-	)
+    mass_range(range) = ssfr_fit[range, :mass_range]
 
-	for range in eachindex(ssfr_fit[:, :mass_range])
-		lines!(
-			ax, 
-			0..3, fit_UV_IR(range), 
-			colormap = :rainbow, 
-			linewidth = 4,
-			label = L"%$(mass_range(range)[1]) < M_\star / M_\odot < %$(mass_range(range)[2])",
-		)
-	end
+    f = Figure()
 
-	axislegend(ax, position = :lt, merge = true)
+    ax = Axis(
+        f[1, 1],
+        xlabel=L"z",
+        ylabel=L"\log(\mathrm{sSFR \, / \, yr^{-1}})",
+        title=L"\mathrm{sSFR \,\, vs. \,\, redshift}",
+        titlesize=28,
+        xlabelsize=24,
+        ylabelsize=24,
+        xticklabelsize=18,
+        yticklabelsize=18,
+    )
 
-	f
+    for range in eachindex(ssfr_fit[:, :mass_range])
+        lines!(
+            ax,
+            0 .. 3, fit_UV_IR(range),
+            colormap=:rainbow,
+            linewidth=4,
+            label=L"%$(mass_range(range)[1]) < M_\star / M_\odot < %$(mass_range(range)[2])",
+        )
+    end
+
+    axislegend(ax, position=:lt, merge=true)
+
+    f
 end
 
 # ╔═╡ 84a49a56-c490-4f7c-beb0-99af050026f1
 let
-	fit_UV_β(range)  = z -> Measurements.value(
-		ssfr_fit[range, :log_a_UV_β] + (1 + z) * ssfr_fit[range, :b_UV_β]
-	)
+    fit_UV_β(range) = z -> Measurements.value(
+        ssfr_fit[range, :log_a_UV_β] + (1 + z) * ssfr_fit[range, :b_UV_β]
+    )
 
-	mass_range(range) = ssfr_fit[range, :mass_range]
+    mass_range(range) = ssfr_fit[range, :mass_range]
 
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"z", 
-		ylabel = L"\log(\mathrm{sSFR \, / \, yr^{-1}})", 
-		title = L"\mathrm{sSFR \,\, vs. \,\, redshift}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
-	)
+    f = Figure()
 
-	for range in eachindex(ssfr_fit[:, :mass_range])
-		lines!(
-			ax, 
-			0..3, fit_UV_β(range), 
-			colormap = :rainbow, 
-			linewidth = 4,
-			label = L"%$(mass_range(range)[1]) < M_\star / M_\odot < %$(mass_range(range)[2])",
-		)
-	end
+    ax = Axis(
+        f[1, 1],
+        xlabel=L"z",
+        ylabel=L"\log(\mathrm{sSFR \, / \, yr^{-1}})",
+        title=L"\mathrm{sSFR \,\, vs. \,\, redshift}",
+        titlesize=28,
+        xlabelsize=24,
+        ylabelsize=24,
+        xticklabelsize=18,
+        yticklabelsize=18,
+    )
 
-	axislegend(ax, position = :lt, merge = true)
+    for range in eachindex(ssfr_fit[:, :mass_range])
+        lines!(
+            ax,
+            0 .. 3, fit_UV_β(range),
+            colormap=:rainbow,
+            linewidth=4,
+            label=L"%$(mass_range(range)[1]) < M_\star / M_\odot < %$(mass_range(range)[2])",
+        )
+    end
 
-	f
+    axislegend(ax, position=:lt, merge=true)
+
+    f
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
