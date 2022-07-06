@@ -279,7 +279,7 @@ let
 		yticklabelsize = 18,
 	)
 
-	for range in 1:length(ssfr_fit[:, :mass_range])
+	for range in eachindex(ssfr_fit[:, :mass_range])
 		lines!(
 			ax, 
 			0..3, fit_UV_IR(range), 
@@ -316,7 +316,7 @@ let
 		yticklabelsize = 18,
 	)
 
-	for range in 1:length(ssfr_fit[:, :mass_range])
+	for range in eachindex(ssfr_fit[:, :mass_range])
 		lines!(
 			ax, 
 			0..3, fit_UV_β(range), 
