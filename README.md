@@ -2,7 +2,7 @@
     <h1>🔭 Experimental data</h1>
 </div>
 
-Experimental measurements and results made computationaly available in [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebooks.
+Experimental measurements and results made computationally available in [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebooks.
 
 ## Sources
 
