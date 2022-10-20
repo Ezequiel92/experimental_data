@@ -6,7 +6,7 @@
   - 3D-HST ([web view](3D-HST/plots.html) - [download notebook](3D-HST/plots.jl)).
   - Baldry2012 ([web view](Baldry2012/plots.html) - [download notebook](Baldry2012/plots.jl)).
   - Feldmann2020 ([web view](Feldmann2020/plots.html) - [download notebook](Feldmann2020/plots.jl)).
-  - Mannucci2010 ([web view](Mannucci2010/plots.html) - [download notebook](Mannucci2010/plots.jl)).
+  - Mannucci2010 (cannot be redered in the cloud for now) - [download notebook](Mannucci2010/plots.jl)).
   - Mollá2015 ([web view](Mollá2015/plots.html) - [download notebook](Mollá2015/plots.jl)).
   - Sánchez2017 ([web view](Sánchez2017/plots.html) - [download notebook](Sánchez2017/plots.jl)).
   - Sánchez2019 ([web view](Sánchez2019/plots.html) - [download notebook](Sánchez2019/plots.jl)).
