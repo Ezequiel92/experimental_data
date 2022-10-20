@@ -81,9 +81,14 @@ md"""
 """
 
 # ╔═╡ 57c649e2-13b2-44f7-97fe-a8425216578e
+# ╠═╡ disabled = true
+#=╠═╡
 eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2];
+  ╠═╡ =#
 
 # ╔═╡ f322c9df-371d-4a0b-ae4d-5a8bb5bc4d41
+# ╠═╡ disabled = true
+#=╠═╡
 let
 	LIBRARY = "MILES" # Options: MILES or ELODIE
 	WEIGHT = "mass"   # Options: mass or light
@@ -113,6 +118,7 @@ let
 
 	f
 end
+  ╠═╡ =#
 
 # ╔═╡ e969d495-005e-44fb-8d17-f438038840c9
 md"""
@@ -217,7 +223,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "5ff6d605ac8f617e066b6fad1a8e71bae758aa36"
+project_hash = "1266575fe461a383309d234be24d1a7a5c72bee4"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
