@@ -140,7 +140,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "22e57473431afe5a1fc06023fbbc5982784dd2ac"
+project_hash = "947bf52e93313a16b25388807451a608d3cd538b"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
