@@ -2,7 +2,7 @@
     <h1>🔭 Experimental data</h1>
 </div>
 
-Experimental measurements and results made computationally available in [Pluto](https://github.com/fonsp/Pluto.jl) notebooks.
+Experimental measurements and fits made computationally available in [Pluto](https://github.com/fonsp/Pluto.jl) notebooks.
 
 ## Sources
 
@@ -22,6 +22,16 @@ Experimental measurements and results made computationally available in [Pluto](
 #### Reference
 
 I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P. Norberg, A. S. G. Robotham, S. Brough, A. M. Hopkins, S. P. Bamford, J. A. Peacock, J. Bland-Hawthorn, C. J. Conselice, S. M. Croom, D. H. Jones, H. R. Parkinson, C. C. Popescu, M. Prescott, R. G. Sharp and R. J. Tuffs, Galaxy And Mass Assembly (GAMA): the galaxy stellar mass function at z < 0.06, _Monthly Notices of the Royal Astronomical Society_, Volume 421, Issue 1, March 2012, Pages 621–634, doi: 10.1111/j.1365-2966.2012.20340.x
+
+### [Bigiel et al. (2008)](https://doi.org/10.1088/0004-6256/136/6/2846)
+
+#### Data products
+
+- Fits for the Kennicutt–Schmidt law.
+
+#### Reference
+
+F. Bigiel, A. Leroy, F. Walter, E. Brinks, W. J. G. de Blok, B. Madore, and M. D. Thornley, THE STAR FORMATION LAW IN NEARBY GALAXIES ON SUB-KPC SCALES, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2846, doi: 10.1088/0004-6256/136/6/2846
 
 ### [Feldmann (2020)](https://doi.org/10.1038/s42005-020-00493-0)
 

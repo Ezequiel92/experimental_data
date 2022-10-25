@@ -4,67 +4,203 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
 
-# ╔═╡ 64fcb795-bb09-4dbc-bbe4-6f3df60dced7
+# ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Tremonti et al. (2004)
+# Bigiel et al. (2008)
 
-[Table 3](https://iopscience.iop.org/article/10.1086/423264/fulltext/59589.tables.html?doi=10.1086/423264)
+[Table 2](https://iopscience.iop.org/1538-3881/136/6/2846/suppdata/aj268500t2_ascii.txt?doi=10.1088/0004-6256/136/6/2846)
 """
 
-# ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
+# ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+raw_data = readdlm("./data/aj268500t2_ascii.txt", skipstart=5, header=true);
+
+# ╔═╡ 7b50b0fe-6001-458b-8d89-0e53b161cf53
 md"""
-# Fit
+# Fits 
 
-## M-Z relation: 
+## KS relation: 
 
-``12 + \log(O / H) = a + b \, x + c \, x^2``
+``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{HI,H2,gas}}{10 \, \mathrm{M_\odot\,pc^{-2}}} \right)^N``
 
-where ``x = \log(M_\star / M_\odot)``.
+where ``A = \log_{10}(a)``.
 """
 
-# ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-fit = DataFrame(Relation = "M-Z", a = -1.492, b = 1.847, c = -0.08026)
-
-# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
-md"## Mesurements"
-
-# ╔═╡ 34ce6570-6566-4981-908a-81eabcbca7bf
-raw_data = readdlm("./data/raw_table_03.txt")
-
-# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
+# ╔═╡ a324e8e5-2dd0-4666-968a-4ddb0511462c
 let
-	MZ = x -> fit[1, :a] + fit[1, :b] * x + fit[1, :c] * x^2
-	mass = raw_data[:, 1]
-	P50 = raw_data[:, 4]
-	P25 = raw_data[:, 2]
-	P975 = raw_data[:, 6]
+	data = raw_data[1]
+	
+	labels = data[1:(end-1), 1]
+	A = data[1:(end-1), 2]
+	N = data[1:(end-1), 3]
+	
+	logΣSFR(logΣH, A, N) = A + N * logΣH
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel = L"12 + \log(\mathrm{O / H})",
-		title = L"\mathrm{Metallicity \,\, vs. \,\, Mass}",
+		xlabel = L"\log_{10}(\Sigma_\mathrm{HI,H2,gas} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
+		title = L"\mathrm{H_2 \,\, (750 \, pc)}",
 		titlesize = 28,
 		xlabelsize = 24,
 		ylabelsize = 24,
 		xticklabelsize = 18,
 		yticklabelsize = 18,
 	)
+	
+	for (a, n, label) in zip(A, N, labels)
+		lines!(ax, -1:0.01:2.5, x -> logΣSFR(x, a, n), linewidth = 2; label)
+	end
 
-	lines!(ax, mass, MZ, color = :red)
-	scatter!(ax, mass, P50, color = :blue)
-	errorbars!(
-		ax, 
-		mass, P50, 
-		P50 .- P25, P975 .- P50, 
-		whiskerwidth = 10, 
-		color= :blue,
+	axislegend(ax, position = :rb)
+
+	f
+end
+
+# ╔═╡ fe0aaf10-f5a0-42e4-88e4-39132f117f4e
+let
+	data = raw_data[1]
+	
+	A_error = parse.(Float64, split(data[end, 2], "+or-"))
+	N_error = parse.(Float64, split(data[end, 3], "+or-"))
+
+	A = A_error[1] ± A_error[2]
+	N = N_error[1] ± N_error[2]
+	
+	logΣSFR = [A + N * logΣH for logΣH in -1:0.01:2.5]
+
+	values = Measurements.value.(logΣSFR)
+	uncertainties = Measurements.uncertainty.(logΣSFR)
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log_{10}(\Sigma_\mathrm{H2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
+		title = L"\mathrm{H_2 \,\, (750 \, pc)}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
 	)
+	
+	band!(ax, -1:0.01:2.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, -1:0.01:2.5, values, color=:black, label = L"\mathrm{Average}")
+
+	axislegend(ax, position = :rb)
+
+	f
+end
+
+# ╔═╡ b3f75d55-83db-4c05-bb87-5d18a137adf5
+let
+	data = raw_data[1]
+	
+	labels = data[1:(end-1), 1]
+	A = data[1:(end-1), 5]
+	N = data[1:(end-1), 6]
+	
+	logΣSFR(logΣH, A, N) = A + N * logΣH
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log_{10}(\Sigma_\mathrm{HI + H_2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
+		title = L"\mathrm{HI + H_2 \,\, (750 \, pc)}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+	
+	for (a, n, label) in zip(A, N, labels)
+		lines!(ax, -1:0.01:2.5, x -> logΣSFR(x, a, n), linewidth = 2; label)
+	end
+
+	axislegend(ax, position = :rb)
+
+	f
+end
+
+# ╔═╡ 02f97852-4951-4853-bf20-508d6f859fef
+let
+	data = raw_data[1]
+	
+	A_error = parse.(Float64, split(data[end, 5], "+or-"))
+	N_error = parse.(Float64, split(data[end, 6], "+or-"))
+
+	A = A_error[1] ± A_error[2]
+	N = N_error[1] ± N_error[2]
+	
+	logΣSFR = [A + N * logΣH for logΣH in -1:0.01:2.5]
+
+	values = Measurements.value.(logΣSFR)
+	uncertainties = Measurements.uncertainty.(logΣSFR)
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log_{10}(\Sigma_\mathrm{HI,H2,gas} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
+		title = L"\mathrm{HI + H_2 \,\, (750 \, pc)}",
+		titlesize = 28,
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+	
+	band!(ax, -1:0.01:2.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, -1:0.01:2.5, values, color=:black, label = L"\mathrm{Average}")
+
+	axislegend(ax, position = :rb)
+
+	f
+end
+
+# ╔═╡ 66180e12-3e30-4394-8a24-561d0b282038
+md"""
+# Best fit for the molecular Schmidt law
+
+``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = 10^{−2.1 \pm 0.2} \left( \dfrac{\Sigma_\mathrm{H2}}{10 \, \mathrm{M_\odot\,pc^{-2}}} \right)^{1.0 \pm 0.1}``
+"""
+
+# ╔═╡ 498ca06f-9d00-4b7c-9164-79a74732faea
+let
+	A = 10^(-2.1 ± 0.2)
+	N = 1.0 ± 0.1
+	
+	logΣSFR = [A + N * logΣH for logΣH in -1:0.01:2.5]
+
+	values = Measurements.value.(logΣSFR)
+	uncertainties = Measurements.uncertainty.(logΣSFR)
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel = L"\log_{10}(\Sigma_\mathrm{H2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
+		xlabelsize = 24,
+		ylabelsize = 24,
+		xticklabelsize = 18,
+		yticklabelsize = 18,
+	)
+	
+	band!(ax, -1:0.01:2.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, -1:0.01:2.5, values, color=:black, label = L"\mathrm{Best fit}")
+
+	axislegend(ax, position = :rb)
 
 	f
 end
@@ -73,14 +209,12 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.9.1"
-DataFrames = "~1.4.1"
 LaTeXStrings = "~1.3.0"
 Measurements = "~2.8.0"
 """
@@ -91,7 +225,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "d0c5195679c652470047217111e6e6f1350cc7d1"
+project_hash = "efb3fd4be43806f34978ff26e3273ee916de3671"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -231,21 +365,10 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "46d2680e618f8abd007bce0c3026cb0c4a8f2032"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.12.0"
-
-[[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "558078b0b78278683a7445c626ee78c86b9bb000"
-uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.4.1"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -397,10 +520,6 @@ git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
 
-[[deps.Future]]
-deps = ["Random"]
-uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
-
 [[deps.GeoInterface]]
 deps = ["Extents"]
 git-tree-sha1 = "fb28b5dc239d0174d7297310ef7b84a11804dfab"
@@ -515,11 +634,6 @@ deps = ["Test"]
 git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
-
-[[deps.InvertedIndices]]
-git-tree-sha1 = "bee5f1ef5bf65df56bdd2e40447590b272a5471f"
-uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.1.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -890,23 +1004,11 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
-[[deps.PooledArrays]]
-deps = ["DataAPI", "Future"]
-git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
-uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.2"
-
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
-
-[[deps.PrettyTables]]
-deps = ["Crayons", "Formatting", "Markdown", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "460d9e154365e058c4d886f6f7d6df5ffa1ea80e"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.1.2"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1099,11 +1201,6 @@ deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "Irrati
 git-tree-sha1 = "5783b877201a82fc0014cbf381e7e6eb130473a4"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.0.1"
-
-[[deps.StringManipulation]]
-git-tree-sha1 = "46da2434b41f41ac3594ee9816ce5541c6096123"
-uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.0"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArraysCore", "Tables"]
@@ -1319,12 +1416,15 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─64fcb795-bb09-4dbc-bbe4-6f3df60dced7
-# ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-# ╟─072bddde-dece-4d9f-990b-e374038ba7e6
-# ╠═34ce6570-6566-4981-908a-81eabcbca7bf
-# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
+# ╠═27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+# ╟─7b50b0fe-6001-458b-8d89-0e53b161cf53
+# ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
+# ╟─fe0aaf10-f5a0-42e4-88e4-39132f117f4e
+# ╟─b3f75d55-83db-4c05-bb87-5d18a137adf5
+# ╟─02f97852-4951-4853-bf20-508d6f859fef
+# ╟─66180e12-3e30-4394-8a24-561d0b282038
+# ╟─498ca06f-9d00-4b7c-9164-79a74732faea
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
