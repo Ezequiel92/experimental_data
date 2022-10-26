@@ -47,6 +47,22 @@ F. Bigiel, A. Leroy, F. Walter, E. Brinks, W. J. G. de Blok, B. Madore, and M. D
 
 R. Feldmann, The link between star formation and gas in nearby galaxies, _Communications Physics_, Volume 3, Issue 1, December 2020, Pages 226, doi: 10.1038/s42005-020-00493-0
 
+### Kennicutt-Schmidt law (1959-1998)
+
+#### Data products
+
+- Fit for the Kennicutt–Schmidt law.
+
+#### Reference
+
+M. Schmidt, The Rate of Star Formation, _Astrophysical Journal_, Volume 129, March 1959, Pages 243, doi: [10.1086/146614](https://doi.org/10.1086/146614)
+
+R. C. Kennicutt, Jr., The Star Formation Law in Galactic Disks, _Astrophysical Journal_, Volume 344, September 1989, Pages 685, doi: [10.1086/167834](https://doi.org/10.1086/167834)
+
+R. C. Kennicutt, Jr., The Global Schmidt Law in Star-forming Galaxies, _The Astrophysical Journal_, Volume 498, Issue 2, January 1998, Pages 541, doi: [10.1086/305588](https://doi.org/10.1086/305588)
+
+R. C. Kennicutt, Jr., STAR FORMATION IN GALAXIES ALONG THE HUBBLE SEQUENCE, _Annual Review of Astronomy and Astrophysics_, Volume 36, September 1998, Pages 189-231, doi: [10.1146/annurev.astro.36.1.189](https://doi.org/10.1146/annurev.astro.36.1.189)
+
 ### [Mannucci et al. (2010)](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
 
 #### Data products

@@ -5,182 +5,34 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
-using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
+using CairoMakie, LaTeXStrings, Measurements
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Bigiel et al. (2008)
+# Kennicutt-Schmidt law (1959-1998)
 
-[Table 2](https://iopscience.iop.org/1538-3881/136/6/2846/suppdata/aj268500t2_ascii.txt?doi=10.1088/0004-6256/136/6/2846)
+M. Schmidt (1959) doi: [10.1086/146614](https://doi.org/10.1086/146614)
+
+R. C. Kennicutt, Jr. (1989) doi: [10.1086/167834](https://doi.org/10.1086/167834)
+
+R. C. Kennicutt, Jr. (1998) doi: [10.1086/305588](https://doi.org/10.1086/305588)
+
+R. C. Kennicutt, Jr. (1998) doi: [10.1146/annurev.astro.36.1.189](https://doi.org/10.1146/annurev.astro.36.1.189)
 """
-
-# ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
-raw_data = readdlm("./data/aj268500t2_ascii.txt", skipstart=5, header=true);
-
-# ╔═╡ 7b50b0fe-6001-458b-8d89-0e53b161cf53
-md"""
-# Fits 
-
-## KS relation: 
-
-``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{HI,H2,gas}}{10 \, \mathrm{M_\odot\,pc^{-2}}} \right)^N``
-
-where ``A = \log_{10}(a)``.
-"""
-
-# ╔═╡ a324e8e5-2dd0-4666-968a-4ddb0511462c
-let
-	data = raw_data[1]
-	
-	labels = data[1:(end-1), 1]
-	A = data[1:(end-1), 2]
-	N = data[1:(end-1), 3]
-	
-	logΣSFR(logΣH, A, N) = A + N * logΣH
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log_{10}(\Sigma_\mathrm{HI,H2,gas} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title = L"\mathrm{H_2 \,\, (750 \, pc)}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 20,
-		yticklabelsize = 20,
-	)
-	
-	for (a, n, label) in zip(A, N, labels)
-		lines!(ax, -1:0.01:2.5, x -> logΣSFR(x, a, n), linewidth = 2; label)
-	end
-
-	axislegend(ax, position = :rb)
-
-	f
-end
-
-# ╔═╡ fe0aaf10-f5a0-42e4-88e4-39132f117f4e
-let
-	data = raw_data[1]
-	
-	A_error = parse.(Float64, split(data[end, 2], "+or-"))
-	N_error = parse.(Float64, split(data[end, 3], "+or-"))
-
-	A = A_error[1] ± A_error[2]
-	N = N_error[1] ± N_error[2]
-	
-	logΣSFR = [A + N * logΣH for logΣH in -1:0.01:2.5]
-
-	values = Measurements.value.(logΣSFR)
-	uncertainties = Measurements.uncertainty.(logΣSFR)
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log_{10}(\Sigma_\mathrm{H2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title = L"\mathrm{H_2 \,\, (750 \, pc)}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 20,
-		yticklabelsize = 20,
-	)
-	
-	band!(ax, -1:0.01:2.5, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, -1:0.01:2.5, values, color=:black, label = L"\mathrm{Average}")
-
-	axislegend(ax, position = :rb, labelsize = 24)
-
-	f
-end
-
-# ╔═╡ b3f75d55-83db-4c05-bb87-5d18a137adf5
-let
-	data = raw_data[1]
-	
-	labels = data[1:(end-1), 1]
-	A = data[1:(end-1), 5]
-	N = data[1:(end-1), 6]
-	
-	logΣSFR(logΣH, A, N) = A + N * logΣH
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log_{10}(\Sigma_\mathrm{HI + H_2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title = L"\mathrm{HI + H_2 \,\, (750 \, pc)}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 20,
-		yticklabelsize = 20,
-	)
-	
-	for (a, n, label) in zip(A, N, labels)
-		lines!(ax, -1:0.01:2.5, x -> logΣSFR(x, a, n), linewidth = 2; label)
-	end
-
-	axislegend(ax, position = :rb)
-
-	f
-end
-
-# ╔═╡ 02f97852-4951-4853-bf20-508d6f859fef
-let
-	data = raw_data[1]
-	
-	A_error = parse.(Float64, split(data[end, 5], "+or-"))
-	N_error = parse.(Float64, split(data[end, 6], "+or-"))
-
-	A = A_error[1] ± A_error[2]
-	N = N_error[1] ± N_error[2]
-	
-	logΣSFR = [A + N * logΣH for logΣH in -1:0.01:2.5]
-
-	values = Measurements.value.(logΣSFR)
-	uncertainties = Measurements.uncertainty.(logΣSFR)
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel = L"\log_{10}(\Sigma_\mathrm{HI,H2,gas} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title = L"\mathrm{HI + H_2 \,\, (750 \, pc)}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 20,
-		yticklabelsize = 20,
-	)
-	
-	band!(ax, -1:0.01:2.5, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, -1:0.01:2.5, values, color=:black, label = L"\mathrm{Average}")
-
-	axislegend(ax, position = :rb, labelsize=24)
-
-	f
-end
 
 # ╔═╡ 66180e12-3e30-4394-8a24-561d0b282038
 md"""
-# Best fit for the molecular Schmidt law
+# Best fit (10.1086/305588)
 
-``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = 10^{−2.1 \pm 0.2} \left( \dfrac{\Sigma_\mathrm{H2}}{10 \, \mathrm{M_\odot\,pc^{-2}}} \right)^{1.0 \pm 0.1}``
+``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = (2.5 \pm 0.7) \times 10^{-4} \left( \dfrac{\Sigma_\mathrm{gas}}{\mathrm{M_\odot\,pc^{-2}}} \right)^{1.4 \pm 0.15}``
 """
 
 # ╔═╡ 498ca06f-9d00-4b7c-9164-79a74732faea
 let
-	A = 10^(-2.1 ± 0.2)
-	N = 1.0 ± 0.1
+	A = log10(2.5 ± 0.7) - 4
+	N = 1.4 ± 0.15
 	
-	logΣSFR = [A + N * logΣH for logΣH in -1:0.01:2.5]
+	logΣSFR = [A + N * logΣgas for logΣgas in -0.5:0.01:5.5]
 
 	values = Measurements.value.(logΣSFR)
 	uncertainties = Measurements.uncertainty.(logΣSFR)
@@ -189,7 +41,7 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log_{10}(\Sigma_\mathrm{H2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		xlabel = L"\log_{10}(\Sigma_\mathrm{gas} \, / \, \mathrm{M_\odot\,pc^{-2}})", 
 		ylabel = L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
 		xlabelsize = 24,
 		ylabelsize = 24,
@@ -197,8 +49,8 @@ let
 		yticklabelsize = 20,
 	)
 	
-	band!(ax, -1:0.01:2.5, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, -1:0.01:2.5, values, color=:black, label = L"\mathrm{Best \,\, fit}")
+	band!(ax, -0.5:0.01:5.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, -0.5:0.01:5.5, values, color=:black, label = L"\mathrm{Best \,\, fit}")
 
 	axislegend(ax, position = :rb, labelsize=24)
 
@@ -209,7 +61,6 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
@@ -225,7 +76,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "efb3fd4be43806f34978ff26e3273ee916de3671"
+project_hash = "370a21f78feca28884376743c5fb82cfde456ae2"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -384,10 +235,6 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
-
-[[deps.DelimitedFiles]]
-deps = ["Mmap"]
-uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[deps.DensityInterface]]
 deps = ["InverseFunctions", "Test"]
@@ -1418,12 +1265,6 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
 # ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
-# ╠═27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
-# ╟─7b50b0fe-6001-458b-8d89-0e53b161cf53
-# ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
-# ╟─fe0aaf10-f5a0-42e4-88e4-39132f117f4e
-# ╟─b3f75d55-83db-4c05-bb87-5d18a137adf5
-# ╟─02f97852-4951-4853-bf20-508d6f859fef
 # ╟─66180e12-3e30-4394-8a24-561d0b282038
 # ╟─498ca06f-9d00-4b7c-9164-79a74732faea
 # ╟─00000000-0000-0000-0000-000000000001
