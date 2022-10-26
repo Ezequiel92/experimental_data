@@ -253,3 +253,5 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 [DEVILS survey](https://docs.datacentral.org.au/devils/)
 
 [Alfalfa](http://egg.astro.cornell.edu/alfalfa/data/index.php)
+
+[Luck2011](http://dx.doi.org/10.1088/0004-6256/142/4/136)
