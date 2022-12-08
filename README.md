@@ -259,3 +259,5 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 [Luck2011](http://dx.doi.org/10.1088/0004-6256/142/4/136)
 
 [Jiménez-Donaire2022](https://arxiv.org/abs/2211.16521)
+
+[Langeroodi2022](https://arxiv.org/abs/2212.02491)
