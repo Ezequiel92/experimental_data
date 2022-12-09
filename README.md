@@ -261,3 +261,5 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 [Jiménez-Donaire2022](https://arxiv.org/abs/2211.16521)
 
 [Langeroodi2022](https://arxiv.org/abs/2212.02491)
+
+[Sánchez2022](https://arxiv.org/abs/2212.03738)
