@@ -35,6 +35,16 @@ I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P.
 
 F. Bigiel, A. Leroy, F. Walter, E. Brinks, W. J. G. de Blok, B. Madore, and M. D. Thornley, THE STAR FORMATION LAW IN NEARBY GALAXIES ON SUB-KPC SCALES, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2846, doi: 10.1088/0004-6256/136/6/2846
 
+### [Chung et al. (2009)](https://doi.org/10.1088/0067-0049/184/2/199)
+
+#### Data products
+
+- Molecular mass of a group of galaxies.
+
+#### Reference
+
+E. J. Chung, M.-H. Rhee, H. Kim, Min S. Yun, M. Heyer, and J. S. Young, 12CO(J = 1 − 0) ON-THE-FLY MAPPING SURVEY OF THE VIRGO CLUSTER SPIRALS. I. DATA AND ATLAS, _The Astrophysical Journal Supplement Series_, Volume 184, Issue 2, September 2009, Pages 199, doi: 10.1088/0067-0049/184/2/199
+
 ### [Feldmann (2020)](https://doi.org/10.1038/s42005-020-00493-0)
 
 #### Data products
@@ -64,6 +74,17 @@ R. C. Kennicutt, Jr., The Star Formation Law in Galactic Disks, _Astrophysical J
 R. C. Kennicutt, Jr., The Global Schmidt Law in Star-forming Galaxies, _The Astrophysical Journal_, Volume 498, Issue 2, January 1998, Pages 541, doi: [10.1086/305588](https://doi.org/10.1086/305588)
 
 R. C. Kennicutt, Jr., STAR FORMATION IN GALAXIES ALONG THE HUBBLE SEQUENCE, _Annual Review of Astronomy and Astrophysics_, Volume 36, September 1998, Pages 189-231, doi: [10.1146/annurev.astro.36.1.189](https://doi.org/10.1146/annurev.astro.36.1.189)
+
+### [Leroy et al. (2019)](https://doi.org/10.3847/1538-4365/ab3925)
+
+#### Data products
+
+- Global star formation rate.
+- Stellar mass.
+
+#### Reference
+
+A. K. Leroy, K. M. Sandstrom, D. Lang, A. Lewis, S. Salim, E. A. Behrens, J. Chastenet, I-Da Chiang, M. J. Gallagher, S. Kessler and D. Utomo, A z = 0 Multiwavelength Galaxy Synthesis. I. A WISE and GALEX Atlas of Local Galaxies, _The Astrophysical Journal Supplement Series_, Volume 244, Issue 2, September 2019, Pages 24, doi: 10.3847/1538-4365/ab3925
 
 ### [Mannucci et al. (2010)](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
 
@@ -182,6 +203,21 @@ A. R. Tomczak, R. F. Quadri, K.-V. H. Tran, I. Labbé, C. M. Straatman, C. Papov
 #### Reference
 
 C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. White, M. Seibert, E. W. Peng, D. J. Schlegel, A. Uomoto, M. Fukugita and J. Brinkmann, The Origin of the Mass-Metallicity Relation: Insights from 53,000 Star-forming Galaxies in the Sloan Digital Sky Survey, _The Astrophysical Journal_, Volume 613, Issue 2, May 2004, Pages 898–913, doi: 10.1086/423264
+
+### VERTICO
+
+#### Data products
+
+- Molecular mass.
+- Stellar mass.
+
+#### Reference
+
+A. K. Leroy, K. M. Sandstrom, D. Lang, A. Lewis, S. Salim, E. A. Behrens, J. Chastenet, I-Da Chiang, M. J. Gallagher, S. Kessler and D. Utomo, A z = 0 Multiwavelength Galaxy Synthesis. I. A WISE and GALEX Atlas of Local Galaxies, _The Astrophysical Journal Supplement Series_, Volume 244, Issue 2, September 2019, Pages 24, doi: 10.3847/1538-4365/ab3925
+
+T. Brown, C. D. Wilson, N. Zabel, T. A. Davis, A. Boselli, A. Chung, S. L. Ellison, C. D. P. Lagos, A. R. H. Stevens, L. Cortese, Y. M. Bahé, D. Bisaria, A. D. Bolatto, C. R. Cashmore, B. Catinella, R. Chown, B. Diemer, P. J. Elahi, M. H. Hani, M. J. Jiménez-Donaire, B. Lee, K. Leidig, A. Mok, K. Pardos Olsen, L. C. Parker, I. D. Roberts, R. Smith, K. Spekkens, M. Thorp, S. Tonnesen, E. Vienneau, V. Villanueva, S. N. Vogel, J. Wadsley, C. Welker and H. Yoon, VERTICO: The Virgo Environment Traced in CO Survey, _The Astrophysical Journal Supplement Series_, Volume 257, Issue 2, November 2021, Pages 21, doi: 10.3847/1538-4365/ac28f5
+
+N. Zabel, T. Brown, C. D. Wilson, T. A. Davis, L. Cortese, L. C. Parker, A. Boselli, B. Catinella, R. Chown, A. Chung, T. Deb, S. L. Ellison, M. J. Jiménez-Donaire, B. Lee, I. D. Roberts, K. Spekkens, A. R.H. Stevens, M. Thorp, S. Tonnesen and V. Villanueva, VERTICO II: effects of HI-identified environmental mechanisms on molecular gas, _arXiv_, doi: 10.48550/arXiv.2205.05698
 
 ### [Whitaker et al. (2014)](https://doi.org/10.1088/0004-637x/795/2/104)
 

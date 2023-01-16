@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.17
+# v0.19.19
 
 #> [frontmatter]
 
@@ -52,41 +52,45 @@ end
 
 # ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
 let
-	log_mass = Measurements.value.(global_data[!, "log_mass"])
-	log_sfr = Measurements.value.(global_data[!, "log_sfr"])
+	log_mass     = Measurements.value.(global_data[!, "log_mass"])
+	log_sfr      = Measurements.value.(global_data[!, "log_sfr"])
 	log_mass_err = Measurements.uncertainty.(global_data[!, "log_mass"])
-	log_sfr_err = Measurements.uncertainty.(global_data[!, "log_sfr"])
+	log_sfr_err  = Measurements.uncertainty.(global_data[!, "log_sfr"])
+
+	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})", 
-		title = L"\mathrm{SFR \,\, vs. \,\, Mass}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})", 
+		ylabel=L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})", 
+		title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
 	)
 
 	errorbars!(
 		ax, 
-		log_mass, log_sfr, 
+		log_mass, 
+		log_sfr, 
 		log_sfr_err, 
-		whiskerwidth = 8, 
-		color= :blue,
+		whiskerwidth=8, 
+		color=:blue,
 	)
 	errorbars!(
 		ax, 
-		log_mass, log_sfr, 
+		log_mass, 
+		log_sfr, 
 		log_mass_err, 
-		whiskerwidth = 8, 
-		color= :blue, 
-		direction = :x,
+		whiskerwidth=8, 
+		color=:blue, 
+		direction=:x,
 	)
-	scatter!(ax, log_mass, log_sfr, color = :red, markersize = 5)
+	scatter!(ax, log_mass, log_sfr, color=:red, markersize=5)
 
 	f
 end
@@ -114,48 +118,50 @@ begin
 	raw_table_1 = CSV.read("./data/table_1.csv", DataFrame, header=2, comment="%")
 	table_1 = DataFrame(
 		indicator = raw_table_1[:, "Indicator"],
-		a = parse_measurement(raw_table_1[:, "\$a\$"]),
-		b = parse_measurement(raw_table_1[:, "\$b\$"]),
-		p0 = parse_measurement(raw_table_1[:, "\$p_0\$"]),
-		p1 = parse_measurement(raw_table_1[:, "\$p_1\$"]),
-		p2 = parse_measurement(raw_table_1[:, "\$p_2\$"]),
-		p3 = parse_measurement(raw_table_1[:, "\$p_3\$"]),
+		a         = parse_measurement(raw_table_1[:, "\$a\$"]),
+		b         = parse_measurement(raw_table_1[:, "\$b\$"]),
+		p0        = parse_measurement(raw_table_1[:, "\$p_0\$"]),
+		p1        = parse_measurement(raw_table_1[:, "\$p_1\$"]),
+		p2        = parse_measurement(raw_table_1[:, "\$p_2\$"]),
+		p3        = parse_measurement(raw_table_1[:, "\$p_3\$"]),
 	)
 end
 
 # ╔═╡ cf8df0da-1760-464e-9531-42ba2ef2c7aa
 let
-	c = 3.5
+	c          = 3.5
 	indicators = table_1[:, :indicator]
-	a_s = Measurements.value.(table_1[:, :a])
-	b_s = Measurements.value.(table_1[:, :b])
- 	y_s = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+	a_s        = Measurements.value.(table_1[:, :a])
+	b_s        = Measurements.value.(table_1[:, :b])
+ 	y_s        = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+
+	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot}) - 8", 
-		ylabel = L"12 + \log(\mathrm{O / H})", 
-		title = L"\mathrm{MZR  \,\, best  \,\, fit}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
+		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 8", 
+		ylabel=L"12 + \log(\mathrm{O / H})", 
+		title=L"\mathrm{MZR  \,\, best  \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
 	)
 
 	colors = distinguishable_colors(
 		length(indicators), 
 		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed = true,
+		dropseed=true,
 	)
 
 	for (label, y, color) in zip(indicators, y_s, colors)
-		lines!(ax, 0.5:0.05:3, y; color, linewidth = 3, label)
+		lines!(ax, 0.5:0.05:3, y; color, linewidth=3, label)
 	end
 
-	axislegend(ax, position = :rb, nbanks = 3, orientation = :horizontal)
+	axislegend(ax, position=:rb, nbanks=3, orientation=:horizontal)
 
 	f
 end
@@ -163,40 +169,42 @@ end
 # ╔═╡ 5705382a-bad5-4c65-b1fe-12f3ff20d872
 let
 	indicators = table_1[:, :indicator]
-	p0_s = Measurements.value.(table_1[:, :p0])
-	p1_s = Measurements.value.(table_1[:, :p1])
-	p2_s = Measurements.value.(table_1[:, :p2])
-	p3_s = Measurements.value.(table_1[:, :p3])
- 	y_s = [
+	p0_s       = Measurements.value.(table_1[:, :p0])
+	p1_s       = Measurements.value.(table_1[:, :p1])
+	p2_s       = Measurements.value.(table_1[:, :p2])
+	p3_s       = Measurements.value.(table_1[:, :p3])
+ 	y_s        = [
 		x -> p0 + p1 * x + p2 * x^2 + p3 * x^3 for (p0, p1, p2, p3) 
 		in zip(p0_s, p1_s, p2_s, p3_s)
 	]
+
+	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot}) - 8", 
-		ylabel = L"12 + \log(\mathrm{O / H})", 
-		title = L"\mathrm{MZR \,\, polynomial \,\, fit}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
+		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 8", 
+		ylabel=L"12 + \log(\mathrm{O / H})", 
+		title=L"\mathrm{MZR \,\, polynomial \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
 	)
 
 	colors = distinguishable_colors(
 		length(indicators), 
 		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed = true,
+		dropseed=true,
 	)
 
 	for (label, y, color) in zip(indicators, y_s, colors)
-		lines!(ax, 0.5:0.05:3, y; color, linewidth = 3, label)
+		lines!(ax, 0.5:0.05:3, y; color, linewidth=3, label)
 	end
 
-	axislegend(ax, position = :lt, nbanks = 3, orientation = :horizontal)
+	axislegend(ax, position=:lt, nbanks=3, orientation=:horizontal)
 
 	f
 end
@@ -229,48 +237,50 @@ begin
 	raw_table_4 = CSV.read("./data/table_4.csv", DataFrame, header=2, comment="%")
 	table_4 = DataFrame(
 		indicator = raw_table_4[:, "Indicator"],
-		a = parse_measurement(raw_table_4[:, "\$a\$"]),
-		b = parse_measurement(raw_table_4[:, "\$b\$"]),
-		p0 = parse_measurement(raw_table_4[:, "\$p_0\$"]),
-		p1 = parse_measurement(raw_table_4[:, "\$p_1\$"]),
-		p2 = parse_measurement(raw_table_4[:, "\$p_2\$"]),
-		p3 = parse_measurement(raw_table_4[:, "\$p_3\$"]),
+		a         = parse_measurement(raw_table_4[:, "\$a\$"]),
+		b         = parse_measurement(raw_table_4[:, "\$b\$"]),
+		p0        = parse_measurement(raw_table_4[:, "\$p_0\$"]),
+		p1        = parse_measurement(raw_table_4[:, "\$p_1\$"]),
+		p2        = parse_measurement(raw_table_4[:, "\$p_2\$"]),
+		p3        = parse_measurement(raw_table_4[:, "\$p_3\$"]),
 	)
 end
 
 # ╔═╡ 2266aa08-eec0-4b18-92ab-64ebdcbb92f5
 let
-	c = 3.5
+	c          = 3.5
 	indicators = table_4[:, :indicator]
-	a_s = Measurements.value.(table_4[:, :a])
-	b_s = Measurements.value.(table_4[:, :b])
- 	y_s = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+	a_s        = Measurements.value.(table_4[:, :a])
+	b_s        = Measurements.value.(table_4[:, :b])
+ 	y_s        = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+
+	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\mu - 8", 
-		ylabel = L"12 + \log(\mathrm{O / H})", 
-		title = L"\mathrm{FMR  \,\, best  \,\, fit}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
+		xlabel=L"\mu - 8", 
+		ylabel=L"12 + \log(\mathrm{O / H})", 
+		title=L"\mathrm{FMR  \,\, best  \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
 	)
 
 	colors = distinguishable_colors(
 		length(indicators), 
 		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed = true,
+		dropseed=true,
 	)
 
 	for (label, y, color) in zip(indicators, y_s, colors)
-		lines!(ax, 1:0.05:3, y; color, linewidth = 3, label)
+		lines!(ax, 1:0.05:3, y; color, linewidth=3, label)
 	end
 
-	axislegend(ax, position = :rb, nbanks = 3, orientation = :horizontal)
+	axislegend(ax, position=:rb, nbanks=3, orientation=:horizontal)
 
 	f
 end
@@ -278,40 +288,42 @@ end
 # ╔═╡ ab335c39-0907-4bad-b659-724f7122303c
 let
 	indicators = table_4[:, :indicator]
-	p0_s = Measurements.value.(table_4[:, :p0])
-	p1_s = Measurements.value.(table_4[:, :p1])
-	p2_s = Measurements.value.(table_4[:, :p2])
-	p3_s = Measurements.value.(table_4[:, :p3])
- 	y_s = [
+	p0_s       = Measurements.value.(table_4[:, :p0])
+	p1_s       = Measurements.value.(table_4[:, :p1])
+	p2_s       = Measurements.value.(table_4[:, :p2])
+	p3_s       = Measurements.value.(table_4[:, :p3])
+ 	y_s        = [
 		x -> p0 + p1 * x + p2 * x^2 + p3 * x^3 for (p0, p1, p2, p3) 
 		in zip(p0_s, p1_s, p2_s, p3_s)
 	]
+
+	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel = L"\log(\mathrm{M_\star / M_\odot}) - 8", 
-		ylabel = L"12 + \log(\mathrm{O / H})", 
-		title = L"\mathrm{FMR  \,\, polynomial  \,\, fit}",
-		titlesize = 28,
-		xlabelsize = 24,
-		ylabelsize = 24,
-		xticklabelsize = 18,
-		yticklabelsize = 18,
+		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 8", 
+		ylabel=L"12 + \log(\mathrm{O / H})", 
+		title=L"\mathrm{FMR  \,\, polynomial  \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
 	)
 
 	colors = distinguishable_colors(
 		length(indicators), 
 		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed = true,
+		dropseed=true,
 	)
 
 	for (label, y, color) in zip(indicators, y_s, colors)
-		lines!(ax, 1:0.05:3, y; color, linewidth = 3, label)
+		lines!(ax, 1:0.05:3, y; color, linewidth=3, label)
 	end
 
-	axislegend(ax, position = :lt, nbanks = 3, orientation = :horizontal)
+	axislegend(ax, position=:lt, nbanks=3, orientation=:horizontal)
 
 	f
 end
@@ -357,37 +369,42 @@ let
 	# y = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})"
 	# z = L"12 + \log(\mathrm{O / H})"
 	
-	c = 3.5
+	c          = 3.5
 	indicators = table_5[:, :indicator]
-	a_s = Measurements.value.(table_5[:, :a])
-	b_s = Measurements.value.(table_5[:, :b])
-	d_s = Measurements.value.(table_5[:, :d])
- 	z_s = [
+	a_s        = Measurements.value.(table_5[:, :a])
+	b_s        = Measurements.value.(table_5[:, :b])
+	d_s        = Measurements.value.(table_5[:, :d])
+ 	z_s        = [
 		(x, y) -> a + b * (x + d * y - c) * exp(-(x + d * y - c)) for 
 		(a, b, d) in zip(a_s, b_s, d_s)
 	]
+
+	set_theme!(theme_black())
 	
-	f = Figure(resolution = (1200, 800))
+	f = Figure(resolution=(1200, 800))
 
 	colors = distinguishable_colors(
 		length(indicators), 
 		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed = true,
+		dropseed=true,
 	)
 
 	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
 		ax = Axis3(
 			f[mod1(i, 3), mod1(i, 4)], 
-			xlabel = L"x", 
-			ylabel = L"y", 
-			zlabel = L"z", 
-			xticklabelsize = 15,
-			yticklabelsize = 15,
-			zticklabelsize = 15;
-			title,
-			titlesize = 20,
+			xlabel=L"x", 
+			ylabel=L"y", 
+			zlabel=L"z", 
+			title=L"\mathrm{%$title}",
+			titlesize=30,
+			xlabelsize=22,
+			ylabelsize=22,
+			zlabelsize=22,
+			xticklabelsize=16,
+			yticklabelsize=16,
+			zticklabelsize=16,
 		)
-		surface!(ax, 1:0.05:3, -1.5:0.01:-1, z; color, linewidth = 3)
+		surface!(ax, 1:0.05:3, -1.5:0.01:-1, z; color, linewidth=3)
 	end
 	
 	f
@@ -428,14 +445,16 @@ let
 	# z = L"\log(M_\star / M_\odot)"
 
 	indicators = table_7[:, :indicator]
-	α_s = Measurements.value.(table_7[:, :α])
-	β_s = Measurements.value.(table_7[:, :β])
-	γ_s = Measurements.value.(table_7[:, :γ])
- 	z_s = [
+	α_s        = Measurements.value.(table_7[:, :α])
+	β_s        = Measurements.value.(table_7[:, :β])
+	γ_s        = Measurements.value.(table_7[:, :γ])
+ 	z_s        = [
 		(x, y) -> α * y + β * x + γ for (α, β, γ) in zip(α_s, β_s, γ_s)
 	]
+
+	set_theme!(theme_black())
 	
-	f = Figure(resolution = (1200, 800))
+	f = Figure(resolution=(1200, 800))
 
 	colors = distinguishable_colors(
 		length(indicators), 
@@ -446,16 +465,19 @@ let
 	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
 		ax = Axis3(
 			f[mod1(i, 3), mod1(i, 4)], 
-			xlabel = L"x", 
-			ylabel = L"y", 
-			zlabel = L"z", 
-			xticklabelsize = 15,
-			yticklabelsize = 15,
-			zticklabelsize = 15;
-			title,
-			titlesize = 20,
+			xlabel=L"x", 
+			ylabel=L"y", 
+			zlabel=L"z", 
+			title=L"\mathrm{%$title}",
+			titlesize=30,
+			xlabelsize=22,
+			ylabelsize=22,
+			zlabelsize=22,
+			xticklabelsize=16,
+			yticklabelsize=16,
+			zticklabelsize=16,
 		)
-		surface!(ax, 8:0.01:9, -1.5:0.01:-1, z; color, linewidth = 3)
+		surface!(ax, 8:0.01:9, -1.5:0.01:-1, z; color, linewidth=3)
 	end
 	
 	f
@@ -486,9 +508,9 @@ Measurements = "~2.8.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.3"
+julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "e265865efaba4f331231893b67762b891968fe8b"
+project_hash = "0a9c56442d8a44aff4afed8673f8e64e5a46516f"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -564,11 +586,14 @@ git-tree-sha1 = "9c91a9358de42043c3101e3a29e60883345b0b39"
 uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
 version = "4.0.0+0"
 
+[[deps.CRC32c]]
+uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
+
 [[deps.CSV]]
 deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "SnoopPrecompile", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "8c73e96bd6817c2597cfd5615b91fca5deccf1af"
+git-tree-sha1 = "c700cce799b51c9045473de751e9319bdd1c6e94"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.8"
+version = "0.10.9"
 
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
@@ -578,12 +603,12 @@ version = "1.0.5"
 
 [[deps.CairoMakie]]
 deps = ["Base64", "Cairo", "Colors", "FFTW", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "SHA", "SnoopPrecompile"]
-git-tree-sha1 = "a1889ac0cfd046d62404ac3e0a1cb718575ee017"
+git-tree-sha1 = "439517f69683932a078b2976ca040e21dd18598c"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.10.0"
+version = "0.10.1"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -632,15 +657,15 @@ version = "0.11.4"
 
 [[deps.ColorVectorSpace]]
 deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
-git-tree-sha1 = "d08c20eef1f2cbc6e60fd3612ac4340b89fea322"
+git-tree-sha1 = "600cc5508d66b78aae350f7accdb58763ac18589"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.9.9"
+version = "0.9.10"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
-git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
+git-tree-sha1 = "fc08e5930ee9a4e03f84bfb5211cb54e7769758a"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.8"
+version = "0.12.10"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
@@ -651,7 +676,7 @@ version = "4.5.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "0.5.2+0"
+version = "1.0.1+0"
 
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -670,9 +695,9 @@ uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 version = "4.1.1"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "e08915633fcb3ea83bf9d6126292e5bc5c739922"
+git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.13.0"
+version = "1.14.0"
 
 [[deps.DataFrames]]
 deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
@@ -707,9 +732,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "a7756d098cbabec6b3ac44f369f74915e8cfd70a"
+git-tree-sha1 = "74911ad88921455c6afcad1eefa12bd7b1724631"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.79"
+version = "0.25.80"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -842,6 +867,12 @@ version = "1.0.10+0"
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
+[[deps.GPUArraysCore]]
+deps = ["Adapt"]
+git-tree-sha1 = "6872f5ec8fd1a38880f027a26739d42dcda6691f"
+uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
+version = "0.1.2"
+
 [[deps.GeoInterface]]
 deps = ["Extents"]
 git-tree-sha1 = "fb28b5dc239d0174d7297310ef7b84a11804dfab"
@@ -862,9 +893,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "fb83fbe02fe57f2c068013aa94bcdf6760d3a7a7"
+git-tree-sha1 = "d3b3624125c1474292d0d8ed0f65554ac37ddb23"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.74.0+1"
+version = "2.74.0+2"
 
 [[deps.Graphics]]
 deps = ["Colors", "LinearAlgebra", "NaNMath"]
@@ -965,9 +996,9 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.Interpolations]]
 deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "842dd89a6cb75e02e85fdd75c760cdc43f5d6863"
+git-tree-sha1 = "721ec2cf720536ad005cb38f50dbba7b02419a15"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.14.6"
+version = "0.14.7"
 
 [[deps.IntervalSets]]
 deps = ["Dates", "Random", "Statistics"]
@@ -1105,9 +1136,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1147,16 +1178,16 @@ uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 version = "0.5.10"
 
 [[deps.Makie]]
-deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "InteractiveUtils", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "MiniQhull", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Serialization", "Setfield", "Showoff", "SignedDistanceFields", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun"]
-git-tree-sha1 = "7154536d78dcde1c4321b50e0e8dda90995f1f6f"
+deps = ["Animations", "Base64", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "Downloads", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "InteractiveUtils", "IntervalSets", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MakieCore", "Markdown", "Match", "MathTeXEngine", "MiniQhull", "Observables", "OffsetArrays", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "RelocatableFolders", "Setfield", "Showoff", "SignedDistanceFields", "SnoopPrecompile", "SparseArrays", "StableHashTraits", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun"]
+git-tree-sha1 = "20f42c8f4d70a795cb7927d7312b98a255209155"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.19.0"
+version = "0.19.1"
 
 [[deps.MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "5357b0696f7c245941389995e193c127190d45f8"
+git-tree-sha1 = "c5b3ce048ee73a08bbca1b9f4a776e64257611d5"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
-version = "0.6.0"
+version = "0.6.1"
 
 [[deps.MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -1197,9 +1228,9 @@ version = "0.4.0"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
-git-tree-sha1 = "bf210ce90b6c9eed32d25dbcae1ebc565df2687f"
+git-tree-sha1 = "f66bdc5de519e8f8ae43bdc598782d35a25b1272"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
-version = "1.0.2"
+version = "1.1.0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
@@ -1311,9 +1342,9 @@ version = "0.3.17"
 
 [[deps.Packing]]
 deps = ["GeometryBasics"]
-git-tree-sha1 = "1155f6f937fa2b94104162f01fa400e192e4272f"
+git-tree-sha1 = "ec3edfe723df33528e085e632414499f26650501"
 uuid = "19eb6ba3-879d-56ad-ad62-d5c202156566"
-version = "0.4.2"
+version = "0.5.0"
 
 [[deps.PaddedViews]]
 deps = ["OffsetArrays"]
@@ -1329,9 +1360,9 @@ version = "1.50.9+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "b64719e8b4504983c7fca6cc9db3ebc8acc2a4d6"
+git-tree-sha1 = "8175fc2b118a3755113c8e68084dc1a9e63c61ee"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.1"
+version = "2.5.3"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1434,9 +1465,9 @@ version = "0.4.3"
 
 [[deps.RecipesBase]]
 deps = ["SnoopPrecompile"]
-git-tree-sha1 = "18c35ed630d7229c5584b945641a73ca83fb5213"
+git-tree-sha1 = "261dddd3b862bd2c940cf6ca4d1c8fe593e457c8"
 uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.3.2"
+version = "1.3.3"
 
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
@@ -1472,9 +1503,10 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
 
 [[deps.SIMD]]
-git-tree-sha1 = "bc12e315740f3a36a6db85fa2c0212a848bd239e"
+deps = ["SnoopPrecompile"]
+git-tree-sha1 = "34edfe91375e5883875987e740c554b92c48fc41"
 uuid = "fdea26ae-647d-5447-a871-4b548cad5224"
-version = "3.4.2"
+version = "3.4.3"
 
 [[deps.ScanByte]]
 deps = ["Libdl", "SIMD"]
@@ -1532,9 +1564,10 @@ uuid = "45858cf5-a6b0-47a3-bbea-62219f50df47"
 version = "0.1.2"
 
 [[deps.SnoopPrecompile]]
-git-tree-sha1 = "f604441450a3c0569830946e5b33b78c928e1a85"
+deps = ["Preferences"]
+git-tree-sha1 = "e760a70afdcd461cf01a575947738d359234665c"
 uuid = "66db9d55-30c0-4569-8b51-7e840670fc0c"
-version = "1.0.1"
+version = "1.0.3"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -1555,6 +1588,12 @@ git-tree-sha1 = "d75bda01f8c31ebb72df80a46c88b25d1c79c56d"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.7"
 
+[[deps.StableHashTraits]]
+deps = ["CRC32c", "Compat", "Dates", "SHA", "Tables", "TupleTools", "UUIDs"]
+git-tree-sha1 = "0b8b801b8f03a329a4e86b44c5e8a7d7f4fe10a3"
+uuid = "c5dd0088-6c3f-4803-b00e-f31a60c170fa"
+version = "0.3.1"
+
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
 git-tree-sha1 = "46e589465204cd0c08b4bd97385e4fa79a0c770c"
@@ -1563,9 +1602,9 @@ version = "0.1.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "ffc098086f35909741f71ce21d03dadf0d2bfa76"
+git-tree-sha1 = "6954a456979f23d05085727adb17c4551c19ecd1"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.11"
+version = "1.5.12"
 
 [[deps.StaticArraysCore]]
 git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
@@ -1600,10 +1639,10 @@ uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
 version = "0.3.0"
 
 [[deps.StructArrays]]
-deps = ["Adapt", "DataAPI", "StaticArraysCore", "Tables"]
-git-tree-sha1 = "13237798b407150a6d2e2bce5d793d7d9576e99e"
+deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
+git-tree-sha1 = "b03a3b745aa49b566f128977a7dd1be8711c5e71"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.13"
+version = "0.6.14"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1643,20 +1682,25 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TiffImages]]
 deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "ProgressMeter", "UUIDs"]
-git-tree-sha1 = "f8cd5b95aae14d3d88da725414bdde342457366f"
+git-tree-sha1 = "7e6b0e3e571be0b4dd4d2a9a3a83b65c04351ccc"
 uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
-version = "0.6.2"
+version = "0.6.3"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
-git-tree-sha1 = "e4bdc63f5c6d62e80eb1c0043fcc0360d5950ff7"
+git-tree-sha1 = "94f38103c984f89cf77c402f2a68dbd870f8165f"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.9.10"
+version = "0.9.11"
 
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
 version = "0.1.0"
+
+[[deps.TupleTools]]
+git-tree-sha1 = "3c712976c47707ff893cf6ba4354aa14db1d8938"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.3.0"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1684,15 +1728,15 @@ uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "0.5.5"
 
 [[deps.WorkerUtilities]]
-git-tree-sha1 = "5ef49b0d5cdda47c93a8eb1d5632501f2d422781"
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
 uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
-version = "1.6.0"
+version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "58443b63fb7e465a8a7210828c91c08b92132dff"
+git-tree-sha1 = "93c41695bc1c08c46c5899f4fe06d6ead504bb73"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.9.14+0"
+version = "2.10.3+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "Pkg", "XML2_jll", "Zlib_jll"]
@@ -1841,7 +1885,7 @@ version = "3.5.0+0"
 # ╟─ab335c39-0907-4bad-b659-724f7122303c
 # ╟─96a8cf9f-be9e-499e-ab48-0d72f02318f7
 # ╟─eb67f33e-c523-43d4-b752-2207aeebdbd0
-# ╠═b5ba7173-2217-4483-af30-cce18381b69f
+# ╟─b5ba7173-2217-4483-af30-cce18381b69f
 # ╟─255fc776-c31a-4f88-bb98-dd069f3485e8
 # ╟─5d3cc3ad-0f29-43b1-a176-417d520586e5
 # ╟─183fca81-6140-4b94-8ce3-9ed8040f7f30

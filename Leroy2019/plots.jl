@@ -1,93 +1,69 @@
 ### A Pluto.jl notebook ###
 # v0.19.19
 
+#> [frontmatter]
+
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements, Colors
-
-# ╔═╡ 6b70529a-5941-4c64-92ee-2add064119a4
-md"""
-# Zahid et al. (2014)
-
-[Table 2](https://iopscience.iop.org/0004-637X/791/2/130/suppdata/apj498704t2_ascii.txt?doi=10.1088/0004-637X/791/2/130)
-"""
+using  CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# Fits
+# [Leroy2019](https://doi.org/10.3847/1538-4365/ab3925)
 
-## M-Z relation: 
-
-``12 + \log(O / H) = Z_0 + \log\!\left[1 - \exp\!\left(-\left[\dfrac{M_\star}{M_0}\right]^{\!\gamma}\right)\right]``
-
-In this model, ``Z_0`` is the saturation metallicity. It quantifies the asymptotic upper metallicity limit. ``M_0`` is the characteristic turnover mass above which the metallicity asymptotically approaches the upper metallicity limit, ``Z_0``. At stellar masses ``< M_0``, the M-Z relation reduces to a power law with an index ``\gamma``.
-
-## M-redshift relation: 
-
-``\log(M_0 / M_⊙) = a + b \, \log(1 + z)``
+## [Dowloads](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/ApJS/244/24)
 """
 
-# ╔═╡ 32ffc13b-75dd-4986-beba-8766e7c6719b
-fit = DataFrame(
-	Relation = "M-redshift",
-	a = 9.138 ± 0.003, 
-	b = 2.64 ± 0.05, 
-)
-
-# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
-md"## Raw data for M-Z fit"
-
-# ╔═╡ e5710a64-1b6f-46a4-9ee3-ac22529caef2
-function parse_error(s::String)::Measurement{Float64}
-	number = parse(Float64, match(r"^.*(?=(\+or-))", s).match)
-	error  = parse(Float64, match(r"(?<=\+or-).*", s).match)
-	return number ± error
-end;
-
-# ╔═╡ 34ce6570-6566-4981-908a-81eabcbca7bf
+# ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5
 begin
-	raw_data_full_fit       = readdlm("./data/clean_table_02_full_fit.txt")
-	raw_data_Z0_gamma_fixed = readdlm("./data/clean_table_02_Z0_gamma_fixed.txt")
+	table_lines = readlines("./data/table4.dat")
+	col_range = [
+		1:7, 
+		8:15, 
+		16:26, 
+		27:35, 
+		36:42, 
+		43:47, 
+		48:53, 
+		54:58, 
+		59:63, 
+		64:72, 
+		73:78,
+		79:83,
+		84:93,
+		94:99,
+		100:105,
+	]
+	data  = Matrix{String}(undef, length(table_lines), 15)
+	for (i_row, line) in enumerate(table_lines)
+		ll  = length(line)
+		row = line * " "^(105 - ll)
+		for (i_col, crange) in enumerate(col_range)
+			data[i_row, i_col] = strip(string(row[crange]))
+		end
+	end
+	logMs   = parse.(Float64, replace(data[:, 7], "" => "nan"))
+	Ms      = exp10.(logMs)
+	e_logMs = parse.(Float64, replace(data[:, 8], "" => "nan"))
 
-	df_full_fit = identity.(DataFrame(
-		raw_data_full_fit[2:end, [1,2,6]], 
-		raw_data_full_fit[1, [1,2,6]],
-	))
-	df_full_fit[!, raw_data_full_fit[1, 3]] = parse_error.(
-		string.(raw_data_full_fit[2:end, 3])
-	)
-	df_full_fit[!, raw_data_full_fit[1, 4]] = parse_error.(
-		string.(raw_data_full_fit[2:end, 4])
-	)
-	df_full_fit[!, raw_data_full_fit[1, 5]] = parse_error.(
-		string.(raw_data_full_fit[2:end, 5])
-	)
-	df_Z0_gamma_fixed = identity.(DataFrame(
-		raw_data_Z0_gamma_fixed[2:end, [1,2,3,5,6]], 
-		raw_data_Z0_gamma_fixed[1, [1,2,3,5,6]],
-	))
-	df_Z0_gamma_fixed[!, raw_data_Z0_gamma_fixed[1, 4]] = parse_error.(
-		string.(raw_data_Z0_gamma_fixed[2:end, 4])
-	)
+	logSFR   = parse.(Float64, replace(data[:, 11], "" => "nan"))
+	SFR      = exp10.(logSFR)
+	e_logSFR = parse.(Float64, replace(data[:, 12], "" => "nan"))
 end;
 
-# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
+# ╔═╡ cf76d5ea-f8a9-421f-a795-7d58bb858bae
 let
-	val(x) = Measurements.value(x)
-	params(row) = (val(row["Z_o"]), val(row["log(M_o/M_sun)"]), val(row["gamma"]))
-	MZ = (x, param) -> param[1] + log10(1 - exp(-10^((x - param[2]) * param[3])))
-
 	set_theme!(theme_black())
-	
+
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel=L"12 + \log(\mathrm{O / H})", 
-		title=L"\mathrm{Full \,\, fit}",
+		xlabel=L"\log_{10}(\mathrm{M_\star / M_\odot})", 
+		ylabel=L"\log_{10}(\mathrm{SFR / M_\odot \, yr^{-1}})", 
+		title=L"\mathrm{SFR \,\, vs. \,\, Stellar \,\, mass}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -95,112 +71,7 @@ let
 		yticklabelsize=20,
 	)
 
-	colors = distinguishable_colors(
-		size(df_full_fit, 1), 
-		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed=true,
-	)
-
-	for (row, color) in zip(eachrow(df_full_fit), colors)
-		lines!(
-			ax, 
-			9..11, m -> MZ(m, params(row)); 
-			color, 
-			label=row["Sample"],
-		)
-	end
-
-	axislegend(ax, position=:rb, labelsize=25)
-
-	f
-end
-
-# ╔═╡ 3ec7c8d3-e5d3-4c7a-ba3c-e0a267131469
-let
-	val(x) = Measurements.value(x)
-	params(row) = (row["Z_o"], val(row["log(M_o/M_sun)"]), row["gamma"])
-	MZ = (x, param) -> param[1] + log10(1 - exp(-10^((x - param[2]) * param[3])))
-
-	set_theme!(theme_black())
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel=L"12 + \log(\mathrm{O / H})", 
-		title=L"\mathrm{Z0 \,\, and \,\, \gamma \,\, fixed}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	colors = distinguishable_colors(
-		size(df_Z0_gamma_fixed, 1), 
-		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed=true,
-	)
-
-	for (row, color) in zip(eachrow(df_Z0_gamma_fixed), colors)
-		lines!(
-			ax, 
-			9..11, m -> MZ(m, params(row)); 
-			color, 
-			label=row["Sample"],
-		)
-	end
-
-	axislegend(ax, position=:rb, labelsize=25)
-
-	f
-end
-
-# ╔═╡ fb901ecb-aed9-4a21-818f-b2be8d76e674
-let
-	Mz = Measurements.value.(df_Z0_gamma_fixed[!, "log(M_o/M_sun)"])
-	Mz_error = Measurements.uncertainty.(df_Z0_gamma_fixed[!, "log(M_o/M_sun)"])
-	z = log10.(1 .+ df_Z0_gamma_fixed[!, "Redshift"])
-
-	Mz_fit = z -> Measurements.value(fit[1, "a"]) + Measurements.value(fit[1, "b"]) * z
-
-	set_theme!(theme_black())
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(1 + z)", 
-		ylabel=L"\log(\mathrm{M_0 / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	colors = distinguishable_colors(
-		size(df_Z0_gamma_fixed, 1), 
-		[RGB(1,1,1), RGB(0,0,0)], 
-		dropseed=true,
-	)
-
-	for (i, color) in pairs(colors)
-		scatter!(
-			ax, 
-			[z[i],], 
-			[Mz[i],], 
-			label=df_Z0_gamma_fixed[i, "Sample"];
-			color,
-		)
-		errorbars!(ax, [z[i],], [Mz[i],], Mz_error[i]; color, whiskerwidth=10)
-	end
-
-	lines!(ax, z, Mz_fit, color=:white, label="Fit")
-
-	axislegend(ax, position=:rb, labelsize=25)
+	scatter!(ax, logMs, logSFR, markersize=2) 
 
 	f
 end
@@ -209,16 +80,12 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.10.0"
-Colors = "~0.12.8"
-DataFrames = "~1.4.4"
 LaTeXStrings = "~1.3.0"
 Measurements = "~2.8.0"
 """
@@ -229,7 +96,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "556c5d12427e4b905aeb46504369b68407479779"
+project_hash = "9419d846c551483af2219928a7658d06bbd25a38"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -384,21 +251,10 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.14.0"
-
-[[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "d4f69885afa5e6149d0cab3818491565cf41446d"
-uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.4.4"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -692,11 +548,6 @@ deps = ["Test"]
 git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
-
-[[deps.InvertedIndices]]
-git-tree-sha1 = "82aec7a3dd64f4d9584659dc0b62ef7db2ef3e19"
-uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.2.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -1073,23 +924,11 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
-[[deps.PooledArrays]]
-deps = ["DataAPI", "Future"]
-git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
-uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.2"
-
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
-
-[[deps.PrettyTables]]
-deps = ["Crayons", "Formatting", "LaTeXStrings", "Markdown", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "96f6db03ab535bdb901300f88335257b0018689d"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.2.2"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1307,11 +1146,6 @@ deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "Irrati
 git-tree-sha1 = "ab6083f09b3e617e34a956b43e9d51b824206932"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.1.1"
-
-[[deps.StringManipulation]]
-git-tree-sha1 = "46da2434b41f41ac3594ee9816ce5541c6096123"
-uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.0"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
@@ -1533,14 +1367,8 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─6b70529a-5941-4c64-92ee-2add064119a4
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╟─32ffc13b-75dd-4986-beba-8766e7c6719b
-# ╟─072bddde-dece-4d9f-990b-e374038ba7e6
-# ╠═e5710a64-1b6f-46a4-9ee3-ac22529caef2
-# ╠═34ce6570-6566-4981-908a-81eabcbca7bf
-# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
-# ╟─3ec7c8d3-e5d3-4c7a-ba3c-e0a267131469
-# ╟─fb901ecb-aed9-4a21-818f-b2be8d76e674
+# ╠═75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+# ╟─cf76d5ea-f8a9-421f-a795-7d58bb858bae
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
