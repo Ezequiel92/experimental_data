@@ -2,7 +2,7 @@
     <h1>🔭 Experimental data</h1>
 </div>
 
-Experimental measurements and fits made computationally available in [Pluto](https://github.com/fonsp/Pluto.jl) notebooks.
+Experimental measurements and results made computationally available in [Pluto](https://github.com/fonsp/Pluto.jl) notebooks.
 
 A web version of each notebook can be seen [here](ezequiel92.github.io/experimental_data/).
 
@@ -273,14 +273,14 @@ C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. Wh
 
 #### Reference
 
-A. K. Leroy, K. M. Sandstrom, D. Lang, A. Lewis, S. Salim, E. A. Behrens, J. Chastenet, I-Da Chiang, M. J. Gallagher, S. Kessler and D. Utomo, A z = 0 Multiwavelength Galaxy Synthesis. I. A WISE and GALEX Atlas of Local Galaxies, _The Astrophysical Journal Supplement Series_, Volume 244, Issue 2, September 2019, Pages 24, doi: 10.3847/1538-4365/ab3925
+A. K. Leroy, K. M. Sandstrom, D. Lang, A. Lewis, S. Salim, E. A. Behrens, J. Chastenet, I-Da Chiang, M. J. Gallagher, S. Kessler and D. Utomo, A z = 0 Multiwavelength Galaxy Synthesis. I. A WISE and GALEX Atlas of Local Galaxies, _The Astrophysical Journal Supplement Series_, Volume 244, Issue 2, September 2019, Pages 24, doi: [10.3847/1538-4365/ab3925](https://doi.org/10.3847/1538-4365/ab3925)
 
-T. Brown, C. D. Wilson, N. Zabel, T. A. Davis, A. Boselli, A. Chung, S. L. Ellison, C. D. P. Lagos, A. R. H. Stevens, L. Cortese, Y. M. Bahé, D. Bisaria, A. D. Bolatto, C. R. Cashmore, B. Catinella, R. Chown, B. Diemer, P. J. Elahi, M. H. Hani, M. J. Jiménez-Donaire, B. Lee, K. Leidig, A. Mok, K. Pardos Olsen, L. C. Parker, I. D. Roberts, R. Smith, K. Spekkens, M. Thorp, S. Tonnesen, E. Vienneau, V. Villanueva, S. N. Vogel, J. Wadsley, C. Welker and H. Yoon, VERTICO: The Virgo Environment Traced in CO Survey, _The Astrophysical Journal Supplement Series_, Volume 257, Issue 2, November 2021, Pages 21, doi: 10.3847/1538-4365/ac28f5
+T. Brown, C. D. Wilson, N. Zabel, T. A. Davis, A. Boselli, A. Chung, S. L. Ellison, C. D. P. Lagos, A. R. H. Stevens, L. Cortese, Y. M. Bahé, D. Bisaria, A. D. Bolatto, C. R. Cashmore, B. Catinella, R. Chown, B. Diemer, P. J. Elahi, M. H. Hani, M. J. Jiménez-Donaire, B. Lee, K. Leidig, A. Mok, K. Pardos Olsen, L. C. Parker, I. D. Roberts, R. Smith, K. Spekkens, M. Thorp, S. Tonnesen, E. Vienneau, V. Villanueva, S. N. Vogel, J. Wadsley, C. Welker and H. Yoon, VERTICO: The Virgo Environment Traced in CO Survey, _The Astrophysical Journal Supplement Series_, Volume 257, Issue 2, November 2021, Pages 21, doi: [10.3847/1538-4365/ac28f5](https://doi.org/10.3847/1538-4365/ac28f5)
 
-N. Zabel, T. Brown, C. D. Wilson, T. A. Davis, L. Cortese, L. C. Parker, A. Boselli, B. Catinella, R. Chown, A. Chung, T. Deb, S. L. Ellison, M. J. Jiménez-Donaire, B. Lee, I. D. Roberts, K. Spekkens, A. R.H. Stevens, M. Thorp, S. Tonnesen and V. Villanueva, VERTICO II: effects of HI-identified environmental mechanisms on molecular gas, _arXiv_, doi: 10.48550/arXiv.2205.05698
+N. Zabel, T. Brown, C. D. Wilson, T. A. Davis, L. Cortese, L. C. Parker, A. Boselli, B. Catinella, R. Chown, A. Chung, T. Deb, S. L. Ellison, M. J. Jiménez-Donaire, B. Lee, I. D. Roberts, K. Spekkens, A. R.H. Stevens, M. Thorp, S. Tonnesen and V. Villanueva, VERTICO II: effects of HI-identified environmental mechanisms on molecular gas, _arXiv_, doi: [10.48550/arXiv.2205.05698](https://doi.org/10.48550/arXiv.2205.05698)
 
 M. J. Jiménez-Donaire, T. Brown, C. D. Wilson, I. D. Roberts, N. Zabel, S. L. Ellison, M. Thorp, V. Villanueva, R. Chown, D. Bisaria, A. D. Bolatto, A. Boselli, B. Catinella, A. Chung, L. Cortese, T. A. Davis, C. D. P. Lagos, B.
-Lee, L. C. Parker, K. Spekkens, A. R. H. Stevens and J. Sun, VERTICO III: The Kennicutt-Schmidt relation in Virgo cluster galaxies, _arXiv_, doi: 10.48550/arXiv.2211.16521
+Lee, L. C. Parker, K. Spekkens, A. R. H. Stevens and J. Sun, VERTICO III: The Kennicutt-Schmidt relation in Virgo cluster galaxies, _arXiv_, doi: [10.48550/arXiv.2211.16521](https://doi.org/10.48550/arXiv.2211.16521)
 
 ### [Whitaker et al. (2014)](https://doi.org/10.1088/0004-637x/795/2/104)
 
