@@ -83,38 +83,44 @@ md"""
 """
 
 # ╔═╡ 9007db12-d49a-479c-97f5-d87bafbe0a91
-eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2];
+if isfile("./data/sdss_eboss_firefly-dr16.fits")
+	eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2]
+end;
 
 # ╔═╡ 2864f808-f423-492a-8f2f-796fcb99e713
 let
-	IMF     = "Chabrier" # Options: Chabrier
-	LIBRARY = "MILES"    # Options: MILES or ELODIE
-
-	masses = read(eBOSS_data, "$(IMF)_$(LIBRARY)_total_mass")
-	ages   = read(eBOSS_data, "$(IMF)_$(LIBRARY)_age_lightW")
-
-	set_theme!(theme_black())
-
-	f = Figure()
+	if isfile("./data/sdss_eboss_firefly-dr16.fits")
+		IMF     = "Chabrier" # Options: Chabrier
+		LIBRARY = "MILES"    # Options: MILES or ELODIE
 	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\mathrm{M_\star / M_\odot}", 
-		ylabel=L"\mathrm{age / yr}", 
-		title=L"\mathrm{Light \,\, weighted \,\, age \,\, vs. \,\, Total \,\, mass}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-		xscale=log10,
-	)
-
-	x, y = filter_negatives(masses, ages)
-
-	scatter!(ax, x, y, markersize=2) 
-
-	f
+		masses = read(eBOSS_data, "$(IMF)_$(LIBRARY)_total_mass")
+		ages   = read(eBOSS_data, "$(IMF)_$(LIBRARY)_age_lightW")
+	
+		set_theme!(theme_black())
+	
+		f = Figure()
+		
+		ax = Axis(
+			f[1,1], 
+			xlabel=L"\mathrm{M_\star / M_\odot}", 
+			ylabel=L"\mathrm{age / yr}", 
+			title=L"\mathrm{Light \,\, weighted \,\, age \,\, vs. \,\, Total \,\, mass}",
+			titlesize=30,
+			xlabelsize=28,
+			ylabelsize=28,
+			xticklabelsize=20,
+			yticklabelsize=20,
+			xscale=log10,
+		)
+	
+		x, y = filter_negatives(masses, ages)
+	
+		scatter!(ax, x, y, markersize=2) 
+	
+		f
+	else
+		println("sdss_eboss_firefly-dr16.fits is not included in the repository because is too heavy. See the README for a link to download it.")
+	end
 end
 
 # ╔═╡ e969d495-005e-44fb-8d17-f438038840c9
