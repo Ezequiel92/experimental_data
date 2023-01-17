@@ -5,7 +5,17 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-using CairoMakie,  DelimitedFiles, LaTeXStrings, FITSIO, Measurements, PlutoLinks
+using CairoMakie, CSV, DataFrames, DelimitedFiles, LaTeXStrings, FITSIO, Measurements, PlutoLinks
+
+# ╔═╡ 47fc2dfe-a69e-4604-b0cd-c6eff55fd4bf
+function parse_measurement(data::Vector)::Vector{Measurement{Float64}}
+	return [
+		measurement(
+			parse(Float64, match(r".*(?=\\pm)", val).match),
+			parse(Float64, match(r"(?<=\\pm).*", val).match),
+		) for val in data
+	]
+end;
 
 # ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
 md"""
@@ -13,6 +23,7 @@ md"""
 
 ### [Leroy2019](https://doi.org/10.3847/1538-4365/ab3925)
 ### [Brown2021](https://doi.org/10.3847/1538-4365/ac28f5)
+### [Jiménez-Donaire2022](https://doi.org/10.48550/arXiv.2211.16521)
 ### [Zabel2023](https://doi.org/10.48550/arXiv.2205.05698)
 """
 
@@ -85,10 +96,61 @@ let
 	f
 end
 
+# ╔═╡ 97171b52-618c-4276-8a8f-31c07b9e573a
+begin
+	ks_data = CSV.read(
+		"./data/table2.csv", 
+		DataFrame, 
+		header=0, 
+		select=[1,2], 
+		silencewarnings=true,
+	)
+
+	names = replace.(ks_data[!, 1], "\\citet{" => "", "}" => "", "\\cite{" => "")
+	N     = parse_measurement(replace.(ks_data[!, 2], "\$" => "", "^a" => ""))
+end;
+
+# ╔═╡ 056fb5fe-169e-4c7a-9107-31e07aaa004d
+let
+	set_theme!(theme_black())
+
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1],
+		ylabel=L"\mathrm{KS \,\, relation \,\, slope \,\, (N)}", 
+		xticks=(1:length(names), names),
+		xticklabelrotation = π / 3,
+		xticklabelalign = (:right, :center),
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	scatter!(
+		ax, 
+		1:length(N), 
+		Measurements.value.(N), 
+		color=:red,
+		markersize=10,
+	) 
+	errorbars!(
+		1:length(N), 
+		Measurements.value.(N), 
+		Measurements.uncertainty.(N),
+		color=:red,
+	)
+
+	f
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
@@ -96,7 +158,9 @@ Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 PlutoLinks = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 
 [compat]
+CSV = "~0.10.9"
 CairoMakie = "~0.10.0"
+DataFrames = "~1.4.4"
 FITSIO = "~0.17.0"
 LaTeXStrings = "~1.3.0"
 Measurements = "~2.8.0"
@@ -109,7 +173,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "f811861b5e00b59f0b28d3118d29dc615798d175"
+project_hash = "7c26820e0df5d3f3a2421fc169b3ffd1977e442c"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -188,6 +252,12 @@ version = "4.0.0+0"
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "SnoopPrecompile", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
+git-tree-sha1 = "c700cce799b51c9045473de751e9319bdd1c6e94"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.9"
+
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
 git-tree-sha1 = "d0b3f8b4ad16cb0a2988c6788646a5e6a17b6b1b"
@@ -229,6 +299,12 @@ deps = ["InteractiveUtils", "UUIDs"]
 git-tree-sha1 = "0e5c14c3bb8a61b3d53b2c0620570c332c8d0663"
 uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
 version = "1.2.0"
+
+[[deps.CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.0"
 
 [[deps.ColorBrewer]]
 deps = ["Colors", "JSON", "Test"]
@@ -282,10 +358,21 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.14.0"
+
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "d4f69885afa5e6149d0cab3818491565cf41446d"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.4.4"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -391,6 +478,12 @@ deps = ["Pkg", "Requires", "UUIDs"]
 git-tree-sha1 = "7be5f99f7d15578798f338f5433b6c432ea8037b"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.16.0"
+
+[[deps.FilePathsBase]]
+deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
+git-tree-sha1 = "e27c4ebe80e8699540f2d6c805cc12203b614f12"
+uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
+version = "0.9.20"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
@@ -558,6 +651,12 @@ git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.3"
 
+[[deps.InlineStrings]]
+deps = ["Parsers"]
+git-tree-sha1 = "0cf92ec945125946352f3d46c96976ab972bde6f"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.3.2"
+
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "d979e54b71da82f3a65b62553da4fc3d18c9004c"
@@ -585,6 +684,11 @@ deps = ["Test"]
 git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
+
+[[deps.InvertedIndices]]
+git-tree-sha1 = "82aec7a3dd64f4d9584659dc0b62ef7db2ef3e19"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.2.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -985,11 +1089,23 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.2"
+
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "Formatting", "LaTeXStrings", "Markdown", "Reexport", "StringManipulation", "Tables"]
+git-tree-sha1 = "96f6db03ab535bdb901300f88335257b0018689d"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "2.2.2"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1107,6 +1223,12 @@ git-tree-sha1 = "f94f779c94e58bf9ea243e77a37e16d9de9126bd"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.1.1"
 
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "c02bd3c9c3fc8463d3591a62a378f90d2d8ab0f3"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.3.17"
+
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
@@ -1214,6 +1336,11 @@ git-tree-sha1 = "ab6083f09b3e617e34a956b43e9d51b824206932"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.1.1"
 
+[[deps.StringManipulation]]
+git-tree-sha1 = "46da2434b41f41ac3594ee9816ce5541c6096123"
+uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
+version = "0.3.0"
+
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
 git-tree-sha1 = "b03a3b745aa49b566f128977a7dd1be8711c5e71"
@@ -1291,11 +1418,22 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "de67fa59e33ad156a590055375a30b23c40299d3"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "0.5.5"
+
+[[deps.WorkerUtilities]]
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
+uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
+version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
@@ -1434,9 +1572,12 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
+# ╟─47fc2dfe-a69e-4604-b0cd-c6eff55fd4bf
 # ╟─0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
 # ╠═d300ff7e-e361-4c22-934f-786c20144f9a
 # ╠═dd1d439d-47ee-4232-8524-c41115639c39
 # ╟─64caea9e-8e85-456c-adf2-5842ca222593
+# ╠═97171b52-618c-4276-8a8f-31c07b9e573a
+# ╟─056fb5fe-169e-4c7a-9107-31e07aaa004d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

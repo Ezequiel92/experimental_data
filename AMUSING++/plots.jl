@@ -1,59 +1,40 @@
 ### A Pluto.jl notebook ###
 # v0.19.19
 
-#> [frontmatter]
-
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using  CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
+# ╔═╡ dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
+using CairoMakie, ColorSchemes, DelimitedFiles, LaTeXStrings
 
-# ╔═╡ dfeea049-a273-45b2-9245-7a6fa9a1c820
-function parse_measurement(data::Vector)::Vector{Measurement{Float64}}
-	return [
-		measurement(
-			parse(Float64, match(r".*(?=\+or\-)", val).match),
-			parse(Float64, match(r"(?<=\+or\-).*", val).match),
-		) for val in data
-	]
-end;
-
-# ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
+# ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
 md"""
-# [Chung et al. (2009)](https://doi.org/10.1088/0067-0049/184/2/199)
+# AMUSING++
 
-[Table 3](https://iopscience.iop.org/0067-0049/184/2/199/suppdata/apjs300659t3_ascii.txt?doi=10.1088/0067-0049/184/2/199)
+### [López-Cobá2020](https://doi.org/10.3847/1538-3881/ab7848)
 """
 
-# ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+# ╔═╡ dd1d439d-47ee-4232-8524-c41115639c39
 begin
-	raw_data_g1 = readdlm("./data/table3_g1.txt")
-	raw_data_g2 = readdlm("./data/table3_g2.txt")
-	
-	raw_mass_g1 = raw_data_g1[:, 7]
-	raw_mass_g2 = raw_data_g2[:, 7]
 
-	galaxy_names_g1 = raw_data_g1[:, 1]
-	galaxy_names_g2 = raw_data_g2[:, 1]
-	
-	mass_g1 = parse_measurement(raw_mass_g1)
-	mass_g2 = parse_measurement(raw_mass_g2)
+	data = readdlm("./data/ajab7848t3_mrt.txt", skipstart=40)
+
+	redshifts = Float64[data[:, 10]...]
+	logSFR    = Float64[data[:, 13]...]
+	logM      = Float64[data[:, 14]...]
 end;
 
-# ╔═╡ cf76d5ea-f8a9-421f-a795-7d58bb858bae
+# ╔═╡ 64caea9e-8e85-456c-adf2-5842ca222593
 let
 	set_theme!(theme_black())
 
 	f = Figure()
 	
 	ax = Axis(
-		f[1,1],
-		ylabel=L"\mathrm{M_{H_2} \, / \, 10^8 \, M_\odot}", 
-		title=L"\mathrm{Molecular \,\, mass - Group \,\, I}",
-		xticks=(1:length(mass_g1), galaxy_names_g1),
-		xticklabelrotation = π / 3,
-		xticklabelalign = (:right, :center),
+		f[1,1], 
+		xlabel=L"\log_{10}(\mathrm{M_\star / M_\odot})", 
+		ylabel=L"\log_{10}(\mathrm{SFR / M_\odot \, yr^{-1}})", 
+		title=L"\mathrm{SFR \,\, vs. \,\, Stellar \,\, mass}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -61,56 +42,7 @@ let
 		yticklabelsize=20,
 	)
 
-	scatter!(
-		ax, 
-		1:length(mass_g1), 
-		Measurements.value.(mass_g1), 
-		color=:red,
-		markersize=15,
-	) 
-	errorbars!(
-		1:length(mass_g1), 
-		Measurements.value.(mass_g1), 
-		Measurements.uncertainty.(mass_g1),
-		color=:red,
-	)
-
-	f
-end
-
-# ╔═╡ f9105066-4f40-490c-ab9f-486709112875
-let
-	set_theme!(theme_black())
-
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1],
-		ylabel=L"\mathrm{M_{H_2} \, / \, 10^8 \, M_\odot}", 
-		title=L"\mathrm{Molecular \,\, mass - Group \,\, II}",
-		xticks=(1:length(mass_g2), galaxy_names_g2),
-		xticklabelrotation = π / 3,
-		xticklabelalign = (:right, :center),
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	scatter!(
-		ax, 
-		1:length(mass_g2), 
-		Measurements.value.(mass_g2), 
-		color=:red,
-		markersize=15,
-	) 
-	errorbars!(
-		1:length(mass_g2), 
-		Measurements.value.(mass_g2), 
-		Measurements.uncertainty.(mass_g2),
-		color=:red,
-	)
+	scatter!(ax, logM, logSFR, markersize=8; color=redshifts, colormap=:rainbow1) 
 
 	f
 end
@@ -119,14 +51,14 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.10.0"
+ColorSchemes = "~3.20.0"
 LaTeXStrings = "~1.3.0"
-Measurements = "~2.8.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -135,7 +67,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "9419d846c551483af2219928a7658d06bbd25a38"
+project_hash = "253021d28b9b658a626694cebded3b6c3001a3d6"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -144,9 +76,9 @@ uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.2.1"
 
 [[deps.AbstractTrees]]
-git-tree-sha1 = "52b3b436f8f73133d7bc3a6c71ee7ed6ab2ab754"
+git-tree-sha1 = "faa260e4cb5aba097a73fab382dd4b5819d8ec8c"
 uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
-version = "0.4.3"
+version = "0.4.4"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -785,12 +717,6 @@ deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.0+0"
 
-[[deps.Measurements]]
-deps = ["Calculus", "LinearAlgebra", "Printf", "RecipesBase", "Requires"]
-git-tree-sha1 = "12950d646ce04fb2e89ba5bd890205882c3592d7"
-uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
-version = "2.8.0"
-
 [[deps.MiniQhull]]
 deps = ["QhullMiniWrapper_jll"]
 git-tree-sha1 = "9dc837d180ee49eeb7c8b77bb1c860452634b0d1"
@@ -1021,12 +947,6 @@ deps = ["Requires"]
 git-tree-sha1 = "dc84268fe0e3335a62e315a3a7cf2afa7178a734"
 uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
 version = "0.4.3"
-
-[[deps.RecipesBase]]
-deps = ["SnoopPrecompile"]
-git-tree-sha1 = "261dddd3b862bd2c940cf6ca4d1c8fe593e457c8"
-uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.3.3"
 
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
@@ -1405,11 +1325,9 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╠═dfeea049-a273-45b2-9245-7a6fa9a1c820
-# ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╠═75732f0c-4d1f-4b8f-af27-0acde5bc02f5
-# ╟─cf76d5ea-f8a9-421f-a795-7d58bb858bae
-# ╟─f9105066-4f40-490c-ab9f-486709112875
+# ╠═dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
+# ╟─0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
+# ╠═dd1d439d-47ee-4232-8524-c41115639c39
+# ╟─64caea9e-8e85-456c-adf2-5842ca222593
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -27,6 +27,18 @@ A web version of each notebook can be seen [here](ezequiel92.github.io/experimen
 
 A. Durbala, R. A. Finn, M. C. Odekon, M. P. Haynes, R. A. Koopmann and A. A. O'Donoghue, The ALFALFA-SDSS Galaxy Catalog, _The Astronomical Journal_, Volume 160, Issue 6, November 2020, Pages 271, doi: 10.3847/1538-3881/abc018
 
+### [AMUSING++](https://doi.org/10.3847/1538-3881/ab7848)
+
+#### Data products
+
+- Global star formation rate.
+- Stellar mass.
+- Redshifts.
+
+#### Reference
+
+C. López-Cobá, S. F. Sánchez, J. P. Anderson, I. Cruz-González, L. Galbany, T. Ruiz-Lara, J. K. Barrera-Ballesteros, J. L. Prieto and H. Kuncarayakti, The AMUSING++ Nearby Galaxy Compilation. I. Full Sample Characterization and Galactic-scale Outflow Selection, _The Astronomical Journal_, Volume 159, Issue 4, March 2020, Pages 167, doi: 10.3847/1538-3881/ab7848
+
 ### [Baldry et al. (2012)](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
 
 #### Data products
@@ -86,6 +98,17 @@ R. C. Kennicutt, Jr., The Star Formation Law in Galactic Disks, _Astrophysical J
 R. C. Kennicutt, Jr., The Global Schmidt Law in Star-forming Galaxies, _The Astrophysical Journal_, Volume 498, Issue 2, January 1998, Pages 541, doi: [10.1086/305588](https://doi.org/10.1086/305588)
 
 R. C. Kennicutt, Jr., STAR FORMATION IN GALAXIES ALONG THE HUBBLE SEQUENCE, _Annual Review of Astronomy and Astrophysics_, Volume 36, September 1998, Pages 189-231, doi: [10.1146/annurev.astro.36.1.189](https://doi.org/10.1146/annurev.astro.36.1.189)
+
+### [Langeroodi et al. (2022)](https://arxiv.org/abs/2212.02491)
+
+#### Data products
+
+- Global star formation rate.
+- Metallicity.
+
+#### Reference
+
+D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarlata, A. Zitrin, T. Broadhurst, J. M. Diego, X. Huang, A. V. Filippenko, R. J. Foley, S. Jha, A. M. Koekemoer, M. Oguri, I. Perez-Fournon, J. Pierel, F. Poidevin and L. Strolger, Evolution of the Mass-Metallicity Relation from Redshift z≈8 to the Local Universe, _arXiv_, doi: 10.48550/arXiv.2212.02491
 
 ### [Leroy et al. (2019)](https://doi.org/10.3847/1538-4365/ab3925)
 
@@ -163,6 +186,16 @@ S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher,
 
 S. F. Sánchez, J. K. Barrera-Ballesteros, C. López-Cobá, S. Brough, J. J. Bryant, J. Bland-Hawthorn, S. M. Croom, J. van de Sande, L. Cortese, M. Goodwin, J. S. Lawrence, A. R. López-Sánchez, S. M. Sweet, M. S. Owers, S. N. Richards, C. J. Walcher and SAMI Team, The SAMI galaxy survey: exploring the gas-phase mass–metallicity relation, _Monthly Notices of the Royal Astronomical Society_, Volume 484, Issue 3, April 2019, Pages 3042–3070, doi: 10.1093/mnras/stz019
 
+### [Sánchez et al. (2022)](https://doi.org/10.48550/arXiv.2212.03738)
+
+#### Data products
+
+- Fits for the SFR, stellar mass and gas mass relations.
+
+#### Reference
+
+S. F. Sánchez, D. C. Gómez Medina, J.K. Barrera-Ballesteros, L. Galbany, A. Bolatto, T. Wong, The local and global relations between Σ⋆ , ΣSFR and Σmol that regulate star-formation, _arXiv_, doi: 10.48550/arXiv.2212.03738
+
 ### [Schreiber et al. (2015)](https://doi.org/10.1051/0004-6361/201425017)
 
 #### Data products
@@ -235,6 +268,8 @@ C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. Wh
 
 - Molecular mass.
 - Stellar mass.
+- Global star formation arte.
+- Fits for the Kennicutt–Schmidt law.
 
 #### Reference
 
@@ -243,6 +278,9 @@ A. K. Leroy, K. M. Sandstrom, D. Lang, A. Lewis, S. Salim, E. A. Behrens, J. Cha
 T. Brown, C. D. Wilson, N. Zabel, T. A. Davis, A. Boselli, A. Chung, S. L. Ellison, C. D. P. Lagos, A. R. H. Stevens, L. Cortese, Y. M. Bahé, D. Bisaria, A. D. Bolatto, C. R. Cashmore, B. Catinella, R. Chown, B. Diemer, P. J. Elahi, M. H. Hani, M. J. Jiménez-Donaire, B. Lee, K. Leidig, A. Mok, K. Pardos Olsen, L. C. Parker, I. D. Roberts, R. Smith, K. Spekkens, M. Thorp, S. Tonnesen, E. Vienneau, V. Villanueva, S. N. Vogel, J. Wadsley, C. Welker and H. Yoon, VERTICO: The Virgo Environment Traced in CO Survey, _The Astrophysical Journal Supplement Series_, Volume 257, Issue 2, November 2021, Pages 21, doi: 10.3847/1538-4365/ac28f5
 
 N. Zabel, T. Brown, C. D. Wilson, T. A. Davis, L. Cortese, L. C. Parker, A. Boselli, B. Catinella, R. Chown, A. Chung, T. Deb, S. L. Ellison, M. J. Jiménez-Donaire, B. Lee, I. D. Roberts, K. Spekkens, A. R.H. Stevens, M. Thorp, S. Tonnesen and V. Villanueva, VERTICO II: effects of HI-identified environmental mechanisms on molecular gas, _arXiv_, doi: 10.48550/arXiv.2205.05698
+
+M. J. Jiménez-Donaire, T. Brown, C. D. Wilson, I. D. Roberts, N. Zabel, S. L. Ellison, M. Thorp, V. Villanueva, R. Chown, D. Bisaria, A. D. Bolatto, A. Boselli, B. Catinella, A. Chung, L. Cortese, T. A. Davis, C. D. P. Lagos, B.
+Lee, L. C. Parker, K. Spekkens, A. R. H. Stevens and J. Sun, VERTICO III: The Kennicutt-Schmidt relation in Virgo cluster galaxies, _arXiv_, doi: 10.48550/arXiv.2211.16521
 
 ### [Whitaker et al. (2014)](https://doi.org/10.1088/0004-637x/795/2/104)
 
@@ -310,11 +348,5 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, doi: 10.1088/0004-637x/791/2/130
 
 ### To-do
-
-[Jiménez-Donaire2022](https://arxiv.org/abs/2211.16521)
-
-[Langeroodi2022](https://arxiv.org/abs/2212.02491)
-
-[Sánchez2022](https://arxiv.org/abs/2212.03738)
 
 [Pesaa2022](https://arxiv.org/abs/2203.11971)
