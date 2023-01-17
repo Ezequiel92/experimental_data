@@ -1,59 +1,66 @@
 ### A Pluto.jl notebook ###
 # v0.19.19
 
-#> [frontmatter]
-
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using  CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
+using  CairoMakie, DataFrames, Measurements, LaTeXStrings
 
-# ╔═╡ dfeea049-a273-45b2-9245-7a6fa9a1c820
-function parse_measurement(data::Vector)::Vector{Measurement{Float64}}
-	return [
-		measurement(
-			parse(Float64, match(r".*(?=\+or\-)", val).match),
-			parse(Float64, match(r"(?<=\+or\-).*", val).match),
-		) for val in data
-	]
-end;
+# ╔═╡ e5c8a798-83a0-4be6-8606-cdbbc47141b2
+md"""
+# [Sánchez et al. (2022)](https://doi.org/10.48550/arXiv.2212.03738)
+"""
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# [Chung et al. (2009)](https://doi.org/10.1088/0067-0049/184/2/199)
+# Fits 
 
-[Table 3](https://iopscience.iop.org/0067-0049/184/2/199/suppdata/apjs300659t3_ascii.txt?doi=10.1088/0067-0049/184/2/199)
+## SFMS relation: 
+
+``\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}}) = a \, \log(\mathrm{M_\star \, / \, M_\odot})  + b``
+
+``\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}}) = c \, \log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})  + d``
+
+## MGMS relation:
+
+``\log(\mathrm{M_\star \, / \, M_\odot}) = a \, \log(\mathrm{M_{gas} \, / \, M_\odot})  + b``
+
+``\log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}}) = c \, \log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})  + d``
+
+## SK relation:
+
+``\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}}) = a \, \log(\mathrm{M_{gas} \, / \, M_\odot})  + b``
+
+``\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}}) = c \, \log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}})  + d``
 """
 
-# ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5
-begin
-	raw_data_g1 = readdlm("./data/table3_g1.txt")
-	raw_data_g2 = readdlm("./data/table3_g2.txt")
-	
-	raw_mass_g1 = raw_data_g1[:, 7]
-	raw_mass_g2 = raw_data_g2[:, 7]
+# ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
+fit = DataFrame(
+	Relation = ["SFMS", "MGMS", "SK"], 
+	a = [0.83 ± 0.22, 1.18 ± 0.21, 0.63 ± 0.19], 
+	b = [−8.43 ± 0.93, -2.52 ± 0.83, -5.97 ± 0.67], 
+	c = [0.94 ± 0.22, 1.15 ± 0.19, 0.80 ± 0.18], 
+	d = [-10.08 ± 0.35, -0.92 ± 0.30, -9.34 ± 0.22], 
+)
 
-	galaxy_names_g1 = raw_data_g1[:, 1]
-	galaxy_names_g2 = raw_data_g2[:, 1]
-	
-	mass_g1 = parse_measurement(raw_mass_g1)
-	mass_g2 = parse_measurement(raw_mass_g2)
-end;
-
-# ╔═╡ cf76d5ea-f8a9-421f-a795-7d58bb858bae
+# ╔═╡ e1980dd7-549d-4770-8205-afe2a2120d9a
 let
-	set_theme!(theme_black())
+	SFMS = [fit[1, :a] * x + fit[1, :b] for x in 8.5:0.01:11.5]
 
+	values = Measurements.value.(SFMS)
+	uncertainties = Measurements.uncertainty.(SFMS)
+
+	set_theme!(theme_black())
+	
 	f = Figure()
 	
 	ax = Axis(
-		f[1,1],
-		ylabel=L"\mathrm{M_{H_2} \, / \, 10^8 \, M_\odot}", 
-		title=L"\mathrm{Molecular \,\, mass - Group \,\, I}",
-		xticks=(1:length(mass_g1), galaxy_names_g1),
-		xticklabelrotation = π / 3,
-		xticklabelalign = (:right, :center),
+		f[1,1], 
+		xlabel=L"\log(\mathrm{M_\star \, / \, M_\odot})", 
+		ylabel=L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
+		title=L"\mathrm{SFMS \,\, relation}",
+		limits=(8, 12, -4, 4),
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -61,36 +68,31 @@ let
 		yticklabelsize=20,
 	)
 
-	scatter!(
-		ax, 
-		1:length(mass_g1), 
-		Measurements.value.(mass_g1), 
-		color=:red,
-		markersize=15,
-	) 
-	errorbars!(
-		1:length(mass_g1), 
-		Measurements.value.(mass_g1), 
-		Measurements.uncertainty.(mass_g1),
-		color=:red,
-	)
+	band!(ax, 8.5:0.01:11.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, 8.5:0.01:11.5, values, color=:white, label=L"\mathrm{Best Fit}")
+
+	axislegend(ax, position=:rb, labelsize=24)
 
 	f
 end
 
-# ╔═╡ f9105066-4f40-490c-ab9f-486709112875
+# ╔═╡ 83277d24-acf5-4155-82c1-4dd77bf0a594
 let
-	set_theme!(theme_black())
+	SFMS = [fit[1, :c] * x + fit[1, :d] for x in 0.0:0.01:3.5]
 
+	values = Measurements.value.(SFMS)
+	uncertainties = Measurements.uncertainty.(SFMS)
+
+	set_theme!(theme_black())
+	
 	f = Figure()
 	
 	ax = Axis(
-		f[1,1],
-		ylabel=L"\mathrm{M_{H_2} \, / \, 10^8 \, M_\odot}", 
-		title=L"\mathrm{Molecular \,\, mass - Group \,\, II}",
-		xticks=(1:length(mass_g2), galaxy_names_g2),
-		xticklabelrotation = π / 3,
-		xticklabelalign = (:right, :center),
+		f[1,1], 
+		xlabel=L"\log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})", 
+		ylabel=L"\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}})", 
+		title=L"\mathrm{SFMS \,\, relation}",
+		limits=(-0.5, 4, -11, -5.5),
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -98,19 +100,138 @@ let
 		yticklabelsize=20,
 	)
 
-	scatter!(
-		ax, 
-		1:length(mass_g2), 
-		Measurements.value.(mass_g2), 
-		color=:red,
-		markersize=15,
-	) 
-	errorbars!(
-		1:length(mass_g2), 
-		Measurements.value.(mass_g2), 
-		Measurements.uncertainty.(mass_g2),
-		color=:red,
+	band!(ax, 0.0:0.01:3.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, 0.0:0.01:3.5, values, color=:white, label=L"\mathrm{Best Fit}")
+
+	axislegend(ax, position=:rb, labelsize=24)
+
+	f
+end
+
+# ╔═╡ 2cbf8b90-81e3-4bac-bd13-12be04e65d6e
+let
+	MGMS = [fit[2, :a] * x + fit[2, :b] for x in 7.5:0.01:11]
+
+	values = Measurements.value.(MGMS)
+	uncertainties = Measurements.uncertainty.(MGMS)
+
+	set_theme!(theme_black())
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log(\mathrm{M_{gas} \, / \, M_\odot})", 
+		ylabel=L"\log(\mathrm{M_\star \, / \, M_\odot})", 
+		title=L"\mathrm{MGMS \,\, relation}",
+		limits=(7, 11.5, 4, 13.5),
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
 	)
+
+	band!(ax, 7.5:0.01:11, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, 7.5:0.01:11, values, color=:white, label=L"\mathrm{Best Fit}")
+
+	axislegend(ax, position=:rb, labelsize=24)
+
+	f
+end
+
+# ╔═╡ 3ca4566d-a865-451c-a17e-c48fc04f526e
+let
+	MGMS = [fit[2, :c] * x + fit[2, :d] for x in 0.0:0.01:4]
+
+	values = Measurements.value.(MGMS)
+	uncertainties = Measurements.uncertainty.(MGMS)
+
+	set_theme!(theme_black())
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})", 
+		ylabel=L"\log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}})", 
+		title=L"\mathrm{MGMS \,\, relation}",
+		limits=(-0.5, 4.5, -2, 5.0),
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	band!(ax, 0.0:0.01:4, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, 0.0:0.01:4, values, color=:white, label=L"\mathrm{Best Fit}")
+
+	axislegend(ax, position=:rb, labelsize=24)
+
+	f
+end
+
+# ╔═╡ 8b4f7381-4d87-46f6-b32d-9a19a45fcbb7
+let
+	SK = [fit[3, :a] * x + fit[3, :b] for x in 7:0.01:12]
+
+	values = Measurements.value.(SK)
+	uncertainties = Measurements.uncertainty.(SK)
+
+	set_theme!(theme_black())
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log(\mathrm{M_{gas} \, / \, M_\odot})", 
+		ylabel=L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
+		title=L"\mathrm{SK \,\, relation}",
+		limits=(6.5, 12.5, -4, 4.5),
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	band!(ax, 7:0.01:12, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, 7:0.01:12, values, color=:white, label=L"\mathrm{Best Fit}")
+
+	axislegend(ax, position=:rb, labelsize=24)
+
+	f
+end
+
+# ╔═╡ 8f1123c7-e513-4341-9342-d0560c68a901
+let
+	SK = [fit[3, :c] * x + fit[3, :d] for x in -2:0.01:2.5]
+
+	values = Measurements.value.(SK)
+	uncertainties = Measurements.uncertainty.(SK)
+
+	set_theme!(theme_black())
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}})", 
+		ylabel=L"\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}})", 
+		title=L"\mathrm{SK \,\, relation}",
+		limits=(-2.5, 3, -12, -6),
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	band!(ax, -2:0.01:2.5, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, -2:0.01:2.5, values, color=:white, label=L"\mathrm{Best Fit}")
+
+	axislegend(ax, position=:rb, labelsize=24)
 
 	f
 end
@@ -119,12 +240,13 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.10.0"
+DataFrames = "~1.4.4"
 LaTeXStrings = "~1.3.0"
 Measurements = "~2.8.0"
 """
@@ -135,7 +257,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "9419d846c551483af2219928a7658d06bbd25a38"
+project_hash = "6fea917b76ebf96577072a1fe71c45a8dec2b224"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -290,10 +412,21 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.14.0"
+
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "d4f69885afa5e6149d0cab3818491565cf41446d"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.4.4"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -309,10 +442,6 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
-
-[[deps.DelimitedFiles]]
-deps = ["Mmap"]
-uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[deps.DensityInterface]]
 deps = ["InverseFunctions", "Test"]
@@ -457,9 +586,9 @@ version = "0.1.2"
 
 [[deps.GeoInterface]]
 deps = ["Extents"]
-git-tree-sha1 = "e315c4f9d43575cf6b4e511259433803c15ebaa2"
+git-tree-sha1 = "fb28b5dc239d0174d7297310ef7b84a11804dfab"
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
-version = "1.1.0"
+version = "1.0.1"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "GeoInterface", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
@@ -587,6 +716,11 @@ deps = ["Test"]
 git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
+
+[[deps.InvertedIndices]]
+git-tree-sha1 = "82aec7a3dd64f4d9584659dc0b62ef7db2ef3e19"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.2.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -963,11 +1097,23 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.2"
+
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "Formatting", "LaTeXStrings", "Markdown", "Reexport", "StringManipulation", "Tables"]
+git-tree-sha1 = "96f6db03ab535bdb901300f88335257b0018689d"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "2.2.2"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1063,9 +1209,9 @@ version = "0.7.0"
 
 [[deps.SIMD]]
 deps = ["SnoopPrecompile"]
-git-tree-sha1 = "8b20084a97b004588125caebf418d8cab9e393d1"
+git-tree-sha1 = "34edfe91375e5883875987e740c554b92c48fc41"
 uuid = "fdea26ae-647d-5447-a871-4b548cad5224"
-version = "3.4.4"
+version = "3.4.3"
 
 [[deps.ScanByte]]
 deps = ["Libdl", "SIMD"]
@@ -1185,6 +1331,11 @@ deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "Irrati
 git-tree-sha1 = "ab6083f09b3e617e34a956b43e9d51b824206932"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.1.1"
+
+[[deps.StringManipulation]]
+git-tree-sha1 = "46da2434b41f41ac3594ee9816ce5541c6096123"
+uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
+version = "0.3.0"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
@@ -1406,10 +1557,14 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╠═dfeea049-a273-45b2-9245-7a6fa9a1c820
+# ╟─e5c8a798-83a0-4be6-8606-cdbbc47141b2
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╠═75732f0c-4d1f-4b8f-af27-0acde5bc02f5
-# ╟─cf76d5ea-f8a9-421f-a795-7d58bb858bae
-# ╟─f9105066-4f40-490c-ab9f-486709112875
+# ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
+# ╟─e1980dd7-549d-4770-8205-afe2a2120d9a
+# ╟─83277d24-acf5-4155-82c1-4dd77bf0a594
+# ╟─2cbf8b90-81e3-4bac-bd13-12be04e65d6e
+# ╟─3ca4566d-a865-451c-a17e-c48fc04f526e
+# ╟─8b4f7381-4d87-46f6-b32d-9a19a45fcbb7
+# ╟─8f1123c7-e513-4341-9342-d0560c68a901
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
