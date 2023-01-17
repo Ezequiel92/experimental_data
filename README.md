@@ -15,6 +15,10 @@ A web version of each notebook can be seen [here](ezequiel92.github.io/experimen
 - Global star formation rate.
 - Stellar mass.
 
+#### Reference
+
+G. B. Brammer, R. Sánchez-Janssen, I. Labbé, E. da Cunha, D. K. Erb, M. Franx, M. Fumagalli, B. Lundgren, D. Marchesini, I. Momcheva, E. Nelson, S. Patel, R. Quadri, H.-W. Rix, R. E. Skelton, K. B. Schmidt, A. van der Wel, P. G. van Dokkum, D. A. Wake and K. E. Whitaker, 3D-HST GRISM SPECTROSCOPY OF A GRAVITATIONALLY LENSED, LOW-METALLICITY STARBURST GALAXY AT z = 1.847*, _The Astrophysical Journal Letters_, Volume 758, Issue 1, Pages L17, doi: [10.1088/2041-8205/758/1/L17](https://doi.org/10.1088/2041-8205/758/1/L17)
+
 ### [ALFALFA](https://doi.org/10.3847/1538-3881/abc018)
 
 #### Data products
@@ -319,6 +323,7 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 #### Reference
 
 [xCOLD GASS publications](http://www.star.ucl.ac.uk/xCOLDGASS/publications.html)
+
 [Catalog description](http://www.star.ucl.ac.uk/xCOLDGASS/xCOLDGASS_README.rtf)
 
 ### [xGASS](https://xgass.icrar.org/)
@@ -335,6 +340,7 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 #### Reference
 
 [xGASS publications](https://xgass.icrar.org/publications.html)
+
 [Catalog description](https://xgass.icrar.org/assets/data/xGASS_representative_sample.readme)
 
 ### [Zahid et al. (2014)](https://doi.org/10.1088/0004-637x/791/2/130)
