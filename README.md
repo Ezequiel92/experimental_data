@@ -15,6 +15,18 @@ A web version of each notebook can be seen [here](ezequiel92.github.io/experimen
 - Global star formation rate.
 - Stellar mass.
 
+### [ALFALFA](https://doi.org/10.3847/1538-3881/abc018)
+
+#### Data products
+
+- Global star formation rate.
+- Stellar mass.
+- Atomic mass.
+
+#### Reference
+
+A. Durbala, R. A. Finn, M. C. Odekon, M. P. Haynes, R. A. Koopmann and A. A. O'Donoghue, The ALFALFA-SDSS Galaxy Catalog, _The Astronomical Journal_, Volume 160, Issue 6, November 2020, Pages 271, doi: 10.3847/1538-3881/abc018
+
 ### [Baldry et al. (2012)](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
 
 #### Data products
@@ -113,6 +125,19 @@ F. Mannucci, G. Cresci, R. Maiolino, A. Marconi, A. Gnerucci, A fundamental rela
 
 M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolution: stellar yields and the initial mass function, _Monthly Notices of the Royal Astronomical Society_, Volume 451, Issue 4, 21 August 2015, Pages 3693–3708, doi: 10.1093/mnras/stv1102
 
+### [Puertas et al. 2022](https://doi.org/10.1051/0004-6361/202141571)
+
+#### Data products
+
+- Global star formation rate.
+- Global stellar mass.
+- Metallicity.
+- Nitrogen abundance.
+
+#### Reference
+
+S. D. Puertas, J. M. Vilchez, J. Iglesias-Páramo, M. Mollá, E. Pérez-Montero, C. Kehrig, L. S. Pilyugin and I. A. Zinchenko, Mass–metallicity and star formation rate in galaxies: A complex relation tuned to stellar age, _Astronomy & Astrophysics_, Volume 666, October 2022, Issue A186, doi: 10.1051/0004-6361/202141571
+
 ### [Sánchez et al. (2017)](https://doi.org/10.1093/mnras/stx808)
 
 #### Data products
@@ -146,7 +171,7 @@ S. F. Sánchez, J. K. Barrera-Ballesteros, C. López-Cobá, S. Brough, J. J. Bry
 
 #### Reference
 
-C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. Magnelli, T. Wang, H. Aussel, E. Daddi, S. Juneau, X. Shu, M. T. Sargent, V. Buat, S. M. Faber, H. C. Ferguson, M. Giavalisco, A. M. Koekemoer, G. Magdis, G. E. Morrison, C. Papovich, P. Santini and D. Scott, The Herschel view of the dominant mode of galaxy growth from z = 4 to the present day, _Astronomy & Astrophysics_, Volume 575, March 2015, Pages A74, doi: 10.1051/0004-6361/201425017
+C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. Magnelli, T. Wang, H. Aussel, E. Daddi, S. Juneau, X. Shu, M. T. Sargent, V. Buat, S. M. Faber, H. C. Ferguson, M. Giavalisco, A. M. Koekemoer, G. Magdis, G. E. Morrison, C. Papovich, P. Santini and D. Scott, The Herschel view of the dominant mode of galaxy growth from z = 4 to the present day, _Astronomy & Astrophysics_, Volume 575, March 2015, Issue A74, doi: 10.1051/0004-6361/201425017
 
 ### [SDSS value-added catalogs](https://www.sdss.org/)
 
@@ -204,7 +229,7 @@ A. R. Tomczak, R. F. Quadri, K.-V. H. Tran, I. Labbé, C. M. Straatman, C. Papov
 
 C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. White, M. Seibert, E. W. Peng, D. J. Schlegel, A. Uomoto, M. Fukugita and J. Brinkmann, The Origin of the Mass-Metallicity Relation: Insights from 53,000 Star-forming Galaxies in the Sloan Digital Sky Survey, _The Astrophysical Journal_, Volume 613, Issue 2, May 2004, Pages 898–913, doi: 10.1086/423264
 
-### VERTICO
+### [VERTICO](https://www.verticosurvey.com/)
 
 #### Data products
 
@@ -285,14 +310,6 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, doi: 10.1088/0004-637x/791/2/130
 
 ### To-do
-
-[Puertas2022](https://arxiv.org/abs/2205.01203) (Table 1)
-
-[DEVILS survey](https://docs.datacentral.org.au/devils/)
-
-[Alfalfa](http://egg.astro.cornell.edu/alfalfa/data/index.php)
-
-[Luck2011](http://dx.doi.org/10.1088/0004-6256/142/4/136)
 
 [Jiménez-Donaire2022](https://arxiv.org/abs/2211.16521)
 
