@@ -4,7 +4,7 @@
 
 Experimental measurements and results made computationally available in [Pluto](https://github.com/fonsp/Pluto.jl) notebooks.
 
-A web version of each notebook can be seen [here](ezequiel92.github.io/experimental_data/).
+A web version of each notebook can be seen [here](https://ezequiel92.github.io/experimental_data/).
 
 ## Sources
 
