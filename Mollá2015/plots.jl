@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.20
 
 using Markdown
 using InteractiveUtils
@@ -57,7 +57,7 @@ let
 	ax3 = Axis(
 		f[2,1], 
 		xlabel=L"\mathrm{R \, / \, kpc}", 
-		ylabel=L"\mathrm{log}\left(\Sigma_* \, / \, \mathrm{M_\odot \, pc^{-2} \, Gyr^{-1}}\right)", 
+		ylabel=L"\mathrm{log}\left(\Sigma_\star \, / \, \mathrm{M_\odot \, pc^{-2}} \right)", 
 		xlabelsize=24,
 		ylabelsize=24,
 		xticklabelsize=20,
