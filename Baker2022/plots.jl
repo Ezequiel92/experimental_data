@@ -4,73 +4,78 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 0eb72a20-8b67-11ec-2556-57ab54e8e928
-using FITSIO, DataFrames, CairoMakie
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using CairoMakie, LaTeXStrings, Measurements
 
-# ╔═╡ 08b90676-1872-4f4e-84d7-8caa9d523a3b
+# ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Wu et al. (2021)
-
-[Stellar masses](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/Data/stellarmass.html)
-
-[Star formation rates](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/sfrs.html)
-
-[Gas phase metallicities](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/oh.html)
+# Baker et al. (2022)
 """
 
-# ╔═╡ c9af5533-1b90-4191-9d3f-e48ecc795e98
-begin
-	mass   = FITS("./data/mass.fits")
-	sfr    = FITS("./data/sfr.fits")
-	oxygen = FITS("./data/oxygen.fits")
-	
-	df = identity.(DataFrame(
-		logM=read(mass[2], "AVG"),    # log10(M / M⊙)
-		logSFR=read(sfr[2], "AVG"),   # log10(SFR / M⊙ yr^-1)
-		logOH=read(oxygen[2], "AVG"), # 12 + log10(O / H)
-		flag=read(sfr[2], "FLAG"),
-	))
-	df[!, Not(:flag)]
-end
+# ╔═╡ 7b50b0fe-6001-458b-8d89-0e53b161cf53
+md"""
+# Fits 
 
-# ╔═╡ f2f70f68-b2fe-44ec-a9e8-1f3306979f09
+## Integrated MGMS relation: 
+
+``\log(M_\mathrm{H_2} [M_\odot]) = m \left( \log(M_\star [M_\odot]) - 10.5 \right) + \log(M_\mathrm{H_2})_{10.5}``
+
+where ``\log(M_\mathrm{H_2})_{10.5} = \log(M_\mathrm{H_2})(\log(M_\star) = 10.5)``.
+"""
+
+# ╔═╡ fe0aaf10-f5a0-42e4-88e4-39132f117f4e
 let
+	Ms_range = 8.5:0.1:11.5
+	a = 1.21 ± 0.03
+	logM10 = 9.61 ± 0.02
+	
+	logMH2 = [a * (logMs - 10.5) + logM10 for logMs in Ms_range]
+
+	values = Measurements.value.(logMH2)
+	uncertainties = Measurements.uncertainty.(logMH2)
+
 	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\mathrm{\log(M_\star \, / \, M_\odot)}", 
-		ylabel=L"\mathrm{\log(SFR \, / \, M_\odot \, yr^{-1})}", 
-		title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
+		xlabel=L"\log_{10}(\mathrm{M_\star \, / \, M_\odot})", 
+		ylabel=L"\log_{10}(\mathrm{M_\mathrm{H_2} \, / \, M_\odot})",
+		title=L"\mathrm{Local \,\, star\!-\!forming \,\, galaxies}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
 	)
+	
+	band!(ax, Ms_range, values .- uncertainties, values .+ uncertainties)
+	lines!(ax, Ms_range, values, color=:white, label=L"\mathrm{Average}")
 
-	subset!(df, :flag => f -> f .== 0.0)
-	subset!(df, :logSFR => sfr -> sfr .> -50)
-	subset!(df, :logM => m -> m .> 0.0)
-
-	scatter!(ax, df[!, :logM], df[!, :logSFR], color=:red, markersize=1)
+	axislegend(ax, position=:rb, labelsize=24)
 
 	f
 end
 
-# ╔═╡ f6f96531-02d5-4455-ae80-fa6dc2a7dc02
+# ╔═╡ b3f75d55-83db-4c05-bb87-5d18a137adf5
 let
+	redshifts = [0.05, 0.75, 1.3, 2.35]
+	Ms_range = 8.5:0.1:11.5
+	a = 1.13
+	logM10(z) = (-0.17 ± 0.03) * z^2 + (0.84 ± 0.09) * z + (9.77 ± 0.06)
+	
+	logMH2(z) = [a * (logMs - 10.5) + logM10(z) for logMs in Ms_range]
+
 	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\mathrm{\log(M_\star \, / \, M_\odot)}", 
-		ylabel=L"12 + \mathrm{\log(O / H)}", 
-		title=L"\mathrm{Metallicity \,\, vs. \,\, Mass}",
+		xlabel=L"\log_{10}(\mathrm{M_\star \, / \, M_\odot})", 
+		ylabel=L"\log_{10}(\mathrm{M_\mathrm{H_2} \, / \, M_\odot})",
+		title=L"\mathrm{High \,\, redshift \,\, galaxies}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -78,9 +83,44 @@ let
 		yticklabelsize=20,
 	)
 
-	subset!(df, :logOH => sfr -> sfr .> -50)
+	for z in redshifts
+		values = Measurements.value.(logMH2(z))
+		uncertainties = Measurements.uncertainty.(logMH2(z))
+		
+		band!(ax, Ms_range, values .- uncertainties, values .+ uncertainties)
+		lines!(ax, Ms_range, values; label=L"z = %$z")
+	end
 
-	scatter!(ax, df[!, :logM], df[!, :logOH], color = :red, markersize = 1)
+	axislegend(ax, position=:rb, labelsize=24)
+
+	f
+end
+
+# ╔═╡ 622bd837-d534-4d69-82fb-64b4d8712302
+let
+	Ms_range = 8.5:0.1:11.5
+	a = 2.14
+	logM10 = 8.88
+	
+	logMH2 = [a * (logMs - 10.5) + logM10 for logMs in Ms_range]
+
+	set_theme!(theme_black())
+	
+	f = Figure()
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log_{10}(\mathrm{M_\star \, / \, M_\odot})", 
+		ylabel=L"\log_{10}(\mathrm{M_\mathrm{H_2} \, / \, M_\odot})",
+		title=L"\mathrm{AGN}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+	
+	lines!(ax, Ms_range, logMH2; color=:red)
 
 	f
 end
@@ -89,13 +129,13 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.10.0"
-DataFrames = "~1.5.0"
-FITSIO = "~0.17.0"
+LaTeXStrings = "~1.3.0"
+Measurements = "~2.9.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -104,7 +144,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "0e3fe58398354ae46d708b13717362d63a2f580d"
+project_hash = "80f3e0770f0ce2525f41c96365a2bec95eaf94d2"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -167,18 +207,6 @@ version = "1.0.8+0"
 git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.2"
-
-[[deps.CFITSIO]]
-deps = ["CFITSIO_jll"]
-git-tree-sha1 = "8425c47db102577eefb93cb37b4480e750116b0d"
-uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
-version = "1.4.1"
-
-[[deps.CFITSIO_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "9c91a9358de42043c3101e3a29e60883345b0b39"
-uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
-version = "4.0.0+0"
 
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
@@ -271,21 +299,10 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.14.0"
-
-[[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "aa51303df86f8626a962fccb878430cdb0a97eee"
-uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.5.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -375,12 +392,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "c6033cc3892d0ef5bb9cd29b7f2f0331ea5184ea"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+0"
-
-[[deps.FITSIO]]
-deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
-git-tree-sha1 = "3b342f0c3bb37371e1e2ad37672a9c960f9abcb6"
-uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-version = "0.17.0"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
@@ -554,12 +565,6 @@ git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.3"
 
-[[deps.InlineStrings]]
-deps = ["Parsers"]
-git-tree-sha1 = "9cc2baf75c6d09f9da536ddf58eb2f29dedaf461"
-uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
-version = "1.4.0"
-
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "d979e54b71da82f3a65b62553da4fc3d18c9004c"
@@ -587,11 +592,6 @@ deps = ["Test"]
 git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
-
-[[deps.InvertedIndices]]
-git-tree-sha1 = "0dc7b50b8d436461be01300fd8cd45aa0274b038"
-uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.3.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
@@ -790,6 +790,12 @@ deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.0+0"
 
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf", "RecipesBase", "Requires"]
+git-tree-sha1 = "51d946d38d62709d6a2d37ea9bcc30c80c686801"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.9.0"
+
 [[deps.MiniQhull]]
 deps = ["QhullMiniWrapper_jll"]
 git-tree-sha1 = "9dc837d180ee49eeb7c8b77bb1c860452634b0d1"
@@ -962,23 +968,11 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
-[[deps.PooledArrays]]
-deps = ["DataAPI", "Future"]
-git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
-uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.2"
-
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
-
-[[deps.PrettyTables]]
-deps = ["Crayons", "Formatting", "LaTeXStrings", "Markdown", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "548793c7859e28ef026dba514752275ee871169f"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.2.3"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1033,6 +1027,12 @@ git-tree-sha1 = "dc84268fe0e3335a62e315a3a7cf2afa7178a734"
 uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
 version = "0.4.3"
 
+[[deps.RecipesBase]]
+deps = ["SnoopPrecompile"]
+git-tree-sha1 = "261dddd3b862bd2c940cf6ca4d1c8fe593e457c8"
+uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+version = "1.3.3"
+
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
@@ -1083,12 +1083,6 @@ deps = ["Dates"]
 git-tree-sha1 = "30449ee12237627992a99d5e30ae63e4d78cd24a"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.0"
-
-[[deps.SentinelArrays]]
-deps = ["Dates", "Random"]
-git-tree-sha1 = "77d3c4726515dca71f6d80fbb5e251088defe305"
-uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.3.18"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1196,11 +1190,6 @@ deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "Irrati
 git-tree-sha1 = "f625d686d5a88bcd2b15cd81f18f98186fdc0c9a"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.3.0"
-
-[[deps.StringManipulation]]
-git-tree-sha1 = "46da2434b41f41ac3594ee9816ce5541c6096123"
-uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.0"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
@@ -1421,10 +1410,11 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═0eb72a20-8b67-11ec-2556-57ab54e8e928
-# ╟─08b90676-1872-4f4e-84d7-8caa9d523a3b
-# ╟─c9af5533-1b90-4191-9d3f-e48ecc795e98
-# ╟─f2f70f68-b2fe-44ec-a9e8-1f3306979f09
-# ╟─f6f96531-02d5-4455-ae80-fa6dc2a7dc02
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
+# ╟─7b50b0fe-6001-458b-8d89-0e53b161cf53
+# ╟─fe0aaf10-f5a0-42e4-88e4-39132f117f4e
+# ╟─b3f75d55-83db-4c05-bb87-5d18a137adf5
+# ╟─622bd837-d534-4d69-82fb-64b4d8712302
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
