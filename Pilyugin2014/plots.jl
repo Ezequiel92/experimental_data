@@ -4,235 +4,140 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using  CairoMakie, DataFrames, Measurements, LaTeXStrings
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
 
-# ╔═╡ e5c8a798-83a0-4be6-8606-cdbbc47141b2
+# ╔═╡ 2f326d2c-7945-4205-8171-810918b021e8
+function parse_measurement(values::Vector)::Vector{Measurement}
+	
+	output = similar(values, Measurement)
+	
+	for (i, pair) in enumerate(values)
+		val_str, err_str = split(pair, "+or-")
+		output[i] = parse(Float64, val_str) ± parse(Float64, err_str)
+	end
+
+	return output
+	
+end;
+
+# ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# [Sánchez et al. (2022)](https://doi.org/10.48550/arXiv.2212.03738)
+# Pilyugin et al. (2014)
+
+[Table 2](https://iopscience.iop.org/1538-3881/147/6/131/suppdata/aj493749t2_ascii.txt?doi=10.1088/0004-6256/147/6/131)
 """
 
-# ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
+# ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+raw_data = readdlm("./data/aj493749t2_ascii.txt", skipstart=6, header=false);
+
+# ╔═╡ 7b50b0fe-6001-458b-8d89-0e53b161cf53
 md"""
 # Fits 
 
-## SFMS relation: 
+## Oxygen abundance: 
 
-``\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}}) = a \, \log(\mathrm{M_\star \, / \, M_\odot})  + b``
-
-``\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}}) = c \, \log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})  + d``
-
-## MGMS relation:
-
-``\log(\mathrm{M_\star \, / \, M_\odot}) = a \, \log(\mathrm{M_{gas} \, / \, M_\odot})  + b``
-
-``\log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}}) = c \, \log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})  + d``
-
-## SK relation:
-
-``\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}}) = a \, \log(\mathrm{M_{gas} \, / \, M_\odot})  + b``
-
-``\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}}) = c \, \log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}})  + d``
+``12 + \log(\mathrm{O / H}) = 12 + \log(\mathrm{O / H})_{R_0} + C_{O/H} \times (R / R_{25})``.
 """
 
-# ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-fit = DataFrame(
-	Relation = ["SFMS", "MGMS", "SK"], 
-	a = [0.83 ± 0.22, 1.18 ± 0.21, 0.63 ± 0.19], 
-	b = [-8.43 ± 0.93, -2.52 ± 0.83, -5.97 ± 0.67], 
-	c = [0.94 ± 0.22, 1.15 ± 0.19, 0.80 ± 0.18], 
-	d = [-10.08 ± 0.35, -0.92 ± 0.30, -9.34 ± 0.22], 
-)
-
-# ╔═╡ e1980dd7-549d-4770-8205-afe2a2120d9a
+# ╔═╡ a324e8e5-2dd0-4666-968a-4ddb0511462c
 let
-	SFMS = [fit[1, :a] * x + fit[1, :b] for x in 8.5:0.01:11.5]
+	labels   = raw_data[:, 1]
+	
+	logOH_R0 = parse_measurement(raw_data[:, 2])
+	COH_R25  = parse_measurement(raw_data[:, 3])
+	COH_kpc  = parse_measurement(raw_data[:, 4])
+	σ_logOH  = Float64.(raw_data[:, 5])
 
-	values = Measurements.value.(SFMS)
-	uncertainties = Measurements.uncertainty.(SFMS)
-
+	values = [
+		[Measurements.value(a + b * R) for R in 0:0.01:10] for 
+		(a, b) in zip(logOH_R0, COH_kpc)
+	]
+	uncertainties = [
+		[Measurements.uncertainty(a + b * R) for R in 0:0.01:10] for 
+		(a, b) in zip(logOH_R0, COH_kpc)
+	]
+	
 	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_\star \, / \, M_\odot})", 
-		ylabel=L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
-		title=L"\mathrm{SFMS \,\, relation}",
-		limits=(8, 12, -4, 4),
+		f[1,1],
+		xlabel=L"R \, / \, \mathrm{kpc}", 
+		ylabel=L"12 + \log_{10}(\mathrm{O / H})", 
+		title=L"\mathrm{Oxygen \, \, abundance}",
+		limits=(nothing, (7, 9.7)),
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
 	)
-
-	band!(ax, 8.5:0.01:11.5, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, 8.5:0.01:11.5, values, color=:white, label=L"\mathrm{Best Fit}")
-
-	axislegend(ax, position=:rb, labelsize=24)
-
+	
+	for (value, uncertainty) in zip(values, uncertainties)
+		band!(
+			ax, 
+			0:0.01:10, value .- uncertainty, value .+ uncertainty, 
+			color=(:red, 0.1),
+		)
+		lines!(ax,0:0.01:10, value, linewidth=2, color=(:orange, 0.3))
+	end
+	
 	f
 end
 
-# ╔═╡ 83277d24-acf5-4155-82c1-4dd77bf0a594
-let
-	SFMS = [fit[1, :c] * x + fit[1, :d] for x in 0.0:0.01:3.5]
+# ╔═╡ 66180e12-3e30-4394-8a24-561d0b282038
+md"""
+## Nitrogen abundance: 
 
-	values = Measurements.value.(SFMS)
-	uncertainties = Measurements.uncertainty.(SFMS)
+``12 + \log(\mathrm{N / H}) = 12 + \log(\mathrm{N / H})_{R_0} + C_{N/H} \times (R / R_{25})``.
+"""
+
+# ╔═╡ 498ca06f-9d00-4b7c-9164-79a74732faea
+let
+	labels   = raw_data[:, 1]
+	
+	logNH_R0 = parse_measurement(raw_data[:, 6])
+	CNH_R25  = parse_measurement(raw_data[:, 7])
+	CNH_kpc  = parse_measurement(raw_data[:, 8])
+	σ_logNH  = Float64.(raw_data[:, 9])
+
+	values = [
+		[Measurements.value(a + b * R) for R in 0:0.01:10] for 
+		(a, b) in zip(logNH_R0, CNH_kpc)
+	]
+	uncertainties = [
+		[Measurements.uncertainty(a + b * R) for R in 0:0.01:10] for 
+		(a, b) in zip(logNH_R0, CNH_kpc)
+	]
 
 	set_theme!(theme_black())
 	
 	f = Figure()
 	
 	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})", 
-		ylabel=L"\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}})", 
-		title=L"\mathrm{SFMS \,\, relation}",
-		limits=(-0.5, 4, -11, -5.5),
+		f[1,1],
+		xlabel=L"R \, / \, \mathrm{kpc}", 
+		ylabel=L"12 + \log_{10}(\mathrm{N / H})", 
+		title=L"\mathrm{Nitrogen\, \, abundance}",
+		limits=(nothing, (5, 9.7)),
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
 	)
-
-	band!(ax, 0.0:0.01:3.5, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, 0.0:0.01:3.5, values, color=:white, label=L"\mathrm{Best Fit}")
-
-	axislegend(ax, position=:rb, labelsize=24)
-
-	f
-end
-
-# ╔═╡ 2cbf8b90-81e3-4bac-bd13-12be04e65d6e
-let
-	MGMS = [fit[2, :a] * x + fit[2, :b] for x in 7.5:0.01:11]
-
-	values = Measurements.value.(MGMS)
-	uncertainties = Measurements.uncertainty.(MGMS)
-
-	set_theme!(theme_black())
 	
-	f = Figure()
+	for (value, uncertainty) in zip(values, uncertainties)
+		band!(
+			ax, 
+			0:0.01:10, value .- uncertainty, value .+ uncertainty, 
+			color=(:red, 0.1),
+		)
+		lines!(ax,0:0.01:10, value, linewidth=2, color=(:orange, 0.3))
+	end
 	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_{gas} \, / \, M_\odot})", 
-		ylabel=L"\log(\mathrm{M_\star \, / \, M_\odot})", 
-		title=L"\mathrm{MGMS \,\, relation}",
-		limits=(7, 11.5, 4, 13.5),
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	band!(ax, 7.5:0.01:11, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, 7.5:0.01:11, values, color=:white, label=L"\mathrm{Best Fit}")
-
-	axislegend(ax, position=:rb, labelsize=24)
-
-	f
-end
-
-# ╔═╡ 3ca4566d-a865-451c-a17e-c48fc04f526e
-let
-	MGMS = [fit[2, :c] * x + fit[2, :d] for x in 0.0:0.01:4]
-
-	values = Measurements.value.(MGMS)
-	uncertainties = Measurements.uncertainty.(MGMS)
-
-	set_theme!(theme_black())
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{\Sigma_\star \, / \, M_\odot \, pc^{-2}})", 
-		ylabel=L"\log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}})", 
-		title=L"\mathrm{MGMS \,\, relation}",
-		limits=(-0.5, 4.5, -2, 5.0),
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	band!(ax, 0.0:0.01:4, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, 0.0:0.01:4, values, color=:white, label=L"\mathrm{Best Fit}")
-
-	axislegend(ax, position=:rb, labelsize=24)
-
-	f
-end
-
-# ╔═╡ 8b4f7381-4d87-46f6-b32d-9a19a45fcbb7
-let
-	SK = [fit[3, :a] * x + fit[3, :b] for x in 7:0.01:12]
-
-	values = Measurements.value.(SK)
-	uncertainties = Measurements.uncertainty.(SK)
-
-	set_theme!(theme_black())
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_{gas} \, / \, M_\odot})", 
-		ylabel=L"\log(\mathrm{SFR \, / \, M_\odot \, yr^{-1}})", 
-		title=L"\mathrm{SK \,\, relation}",
-		limits=(6.5, 12.5, -4, 4.5),
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	band!(ax, 7:0.01:12, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, 7:0.01:12, values, color=:white, label=L"\mathrm{Best Fit}")
-
-	axislegend(ax, position=:rb, labelsize=24)
-
-	f
-end
-
-# ╔═╡ 8f1123c7-e513-4341-9342-d0560c68a901
-let
-	SK = [fit[3, :c] * x + fit[3, :d] for x in -2:0.01:2.5]
-
-	values = Measurements.value.(SK)
-	uncertainties = Measurements.uncertainty.(SK)
-
-	set_theme!(theme_black())
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{\Sigma_{gas} \, / \, M_\odot \, pc^{-2}})", 
-		ylabel=L"\log(\mathrm{\Sigma_{SFR} \, / \, M_\odot \, pc^{-2} \, yr^{-1}})", 
-		title=L"\mathrm{SK \,\, relation}",
-		limits=(-2.5, 3, -12, -6),
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	band!(ax, -2:0.01:2.5, values .- uncertainties, values .+ uncertainties)
-	lines!(ax, -2:0.01:2.5, values, color=:white, label=L"\mathrm{Best Fit}")
-
-	axislegend(ax, position=:rb, labelsize=24)
-
 	f
 end
 
@@ -240,13 +145,12 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.10.0"
-DataFrames = "~1.5.0"
 LaTeXStrings = "~1.3.0"
 Measurements = "~2.9.0"
 """
@@ -257,7 +161,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "6fea917b76ebf96577072a1fe71c45a8dec2b224"
+project_hash = "0637bf58d3f51cb3650576edef8f22fd5224bddb"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -412,21 +316,10 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.14.0"
-
-[[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "aa51303df86f8626a962fccb878430cdb0a97eee"
-uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.5.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -442,6 +335,10 @@ version = "1.0.0"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.DelimitedFiles]]
+deps = ["Mmap"]
+uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[deps.DensityInterface]]
 deps = ["InverseFunctions", "Test"]
@@ -689,12 +586,6 @@ git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.3"
 
-[[deps.InlineStrings]]
-deps = ["Parsers"]
-git-tree-sha1 = "9cc2baf75c6d09f9da536ddf58eb2f29dedaf461"
-uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
-version = "1.4.0"
-
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "d979e54b71da82f3a65b62553da4fc3d18c9004c"
@@ -722,11 +613,6 @@ deps = ["Test"]
 git-tree-sha1 = "49510dfcb407e572524ba94aeae2fced1f3feb0f"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
-
-[[deps.InvertedIndices]]
-git-tree-sha1 = "0dc7b50b8d436461be01300fd8cd45aa0274b038"
-uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.3.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
@@ -1103,23 +989,11 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
-[[deps.PooledArrays]]
-deps = ["DataAPI", "Future"]
-git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
-uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.2"
-
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
-
-[[deps.PrettyTables]]
-deps = ["Crayons", "Formatting", "LaTeXStrings", "Markdown", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "548793c7859e28ef026dba514752275ee871169f"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.2.3"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1231,12 +1105,6 @@ git-tree-sha1 = "30449ee12237627992a99d5e30ae63e4d78cd24a"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.0"
 
-[[deps.SentinelArrays]]
-deps = ["Dates", "Random"]
-git-tree-sha1 = "77d3c4726515dca71f6d80fbb5e251088defe305"
-uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.3.18"
-
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
@@ -1343,11 +1211,6 @@ deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "Irrati
 git-tree-sha1 = "f625d686d5a88bcd2b15cd81f18f98186fdc0c9a"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "1.3.0"
-
-[[deps.StringManipulation]]
-git-tree-sha1 = "46da2434b41f41ac3594ee9816ce5541c6096123"
-uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.3.0"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "GPUArraysCore", "StaticArraysCore", "Tables"]
@@ -1568,15 +1431,13 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─e5c8a798-83a0-4be6-8606-cdbbc47141b2
-# ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-# ╟─e1980dd7-549d-4770-8205-afe2a2120d9a
-# ╟─83277d24-acf5-4155-82c1-4dd77bf0a594
-# ╟─2cbf8b90-81e3-4bac-bd13-12be04e65d6e
-# ╟─3ca4566d-a865-451c-a17e-c48fc04f526e
-# ╟─8b4f7381-4d87-46f6-b32d-9a19a45fcbb7
-# ╟─8f1123c7-e513-4341-9342-d0560c68a901
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╠═2f326d2c-7945-4205-8171-810918b021e8
+# ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
+# ╠═27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+# ╟─7b50b0fe-6001-458b-8d89-0e53b161cf53
+# ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
+# ╟─66180e12-3e30-4394-8a24-561d0b282038
+# ╟─498ca06f-9d00-4b7c-9164-79a74732faea
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
