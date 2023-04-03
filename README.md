@@ -47,6 +47,8 @@ C. López-Cobá, S. F. Sánchez, J. P. Anderson, I. Cruz-González, L. Galbany, 
 
 #### Data products
 
+- Fits for the molecular mass vs. stellar mass relation (integrated MGMS relation).
+
 #### Reference
 
 W. M Baker, R. Maiolino, F. Belfiore, A. F. L. Bluck, M. Curti, D. Wylezalek, C. Bertemes, M. S. Bothwell, L. Lin, M. Thorp, H.-A. Pan, The molecular gas main sequence and Schmidt–Kennicutt relation are fundamental, the star-forming main sequence is a (useful) byproduct, _Monthly Notices of the Royal Astronomical Society_, Volume 518, Issue 3, January 2023, Pages 4767–4781, doi: 10.1093/mnras/stac3413
@@ -176,6 +178,7 @@ A. K. Leroy, E. Schinnerer, A. Hughes, E. Rosolowsky, J. Pety, A. Schruba, A. Us
 
 #### Data products
 
+- Oxygen and nitrogen abundance profiles.
 
 #### Reference
 
