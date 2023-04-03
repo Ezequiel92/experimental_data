@@ -43,6 +43,14 @@ A. Durbala, R. A. Finn, M. C. Odekon, M. P. Haynes, R. A. Koopmann and A. A. O'D
 
 C. López-Cobá, S. F. Sánchez, J. P. Anderson, I. Cruz-González, L. Galbany, T. Ruiz-Lara, J. K. Barrera-Ballesteros, J. L. Prieto and H. Kuncarayakti, The AMUSING++ Nearby Galaxy Compilation. I. Full Sample Characterization and Galactic-scale Outflow Selection, _The Astronomical Journal_, Volume 159, Issue 4, March 2020, Pages 167, doi: 10.3847/1538-3881/ab7848
 
+### [Baker et al. (2022)](https://doi.org/10.1093/mnras/stac3413)
+
+#### Data products
+
+#### Reference
+
+W. M Baker, R. Maiolino, F. Belfiore, A. F. L. Bluck, M. Curti, D. Wylezalek, C. Bertemes, M. S. Bothwell, L. Lin, M. Thorp, H.-A. Pan, The molecular gas main sequence and Schmidt–Kennicutt relation are fundamental, the star-forming main sequence is a (useful) byproduct, _Monthly Notices of the Royal Astronomical Society_, Volume 518, Issue 3, January 2023, Pages 4767–4781, doi: 10.1093/mnras/stac3413
+
 ### [Baldry et al. (2012)](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
 
 #### Data products
@@ -163,6 +171,15 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 #### Reference
 
 A. K. Leroy, E. Schinnerer, A. Hughes, E. Rosolowsky, J. Pety, A. Schruba, A. Usero, G. A. Blanc, M. Chevance, E. Emsellem, C. M. Faesi, C. N. Herrera, D. Liu, S. E. Meidt, M. Querejeta, T. Saito, K. M. Sandstrom, J. Sun, T. G. Williams, G. S. Anand, A. T. Barnes, E. A. Behrens, F. Belfiore, S. M. Benincasa, I. Bešlić, F. Bigiel, A. D. Bolatto, J. S. den Brok, Y. Cao, R. Chandar, J. Chastenet, I-D. Chiang, E. Congiu, D. A. Dale, S. Deger, C. Eibensteiner, O. V. Egorov, A. García-Rodríguez, S. C. O. Glover, K. Grasha, J. D. Henshaw, I-T. Ho, A. A. Kepley, J. Kim, R. S. Klessen, K. Kreckel, E. W. Koch, J. M. Diederik Kruijssen, K. L. Larson, J. C. Lee, L. A. Lopez, J. Machado, N. Mayker, R. McElroy, E. J. Murphy, E. C. Ostriker, H.-A. Pan, I. Pessa, J. Puschnig, A. Razza, P. Sánchez-Blázquez, F. Santoro, A. Sardone, F. Scheuermann, K. Sliwa, M. C. Sormani, S. K. Stuber, D. A. Thilker, J. A. Turner, D. Utomo, E. J. Watkins and B. Whitmore, PHANGS–ALMA: Arcsecond CO(2–1) Imaging of Nearby Star-forming Galaxies, _The Astrophysical Journal Supplement Series_, Volume 257, Issue 2, November 2021, Pages 43, doi: [10.3847/1538-4365/ac17f3](https://doi.org/10.3847/1538-4365/ac17f3)
+
+### [Pilyugin et al. 2014](https://doi.org/10.1088/0004-6256/147/6/131)
+
+#### Data products
+
+
+#### Reference
+
+L. S. Pilyugin, E. K. Grebel1, and A. Y. Kniazev,THE ABUNDANCE PROPERTIES OF NEARBY LATE-TYPE GALAXIES. I. THE DATA, _The Astronomical Journal_, Volume 147, Issue 6, May 2014, Pages 131, doi: 10.1088/0004-6256/147/6/131
 
 ### [Puertas et al. 2022](https://doi.org/10.1051/0004-6361/202141571)
 
@@ -364,3 +381,8 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 #### Reference
 
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, doi: 10.1088/0004-637x/791/2/130
+
+
+### TODO
+
+[Lisenfeld2023](https://arxiv.org/abs/2303.09473)
