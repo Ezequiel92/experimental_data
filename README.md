@@ -12,8 +12,8 @@ A web version of each notebook can be seen [here](https://ezequiel92.github.io/e
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
+- Integrated star formation rate.
+- Integrated stellar mass.
 
 #### Reference
 
@@ -23,9 +23,9 @@ G. B. Brammer, R. Sánchez-Janssen, I. Labbé, E. da Cunha, D. K. Erb, M. Franx,
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
-- Atomic mass.
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated atomic mass.
 
 #### Reference
 
@@ -35,8 +35,8 @@ A. Durbala, R. A. Finn, M. C. Odekon, M. P. Haynes, R. A. Koopmann and A. A. O'D
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
+- Integrated star formation rate.
+- Integrated stellar mass.
 - Redshifts.
 
 #### Reference
@@ -47,7 +47,7 @@ C. López-Cobá, S. F. Sánchez, J. P. Anderson, I. Cruz-González, L. Galbany, 
 
 #### Data products
 
-- Fits for the molecular mass vs. stellar mass relation (integrated MGMS relation).
+- Fits for the integrated molecular mass vs. integrated stellar mass relation (integrated MGMS relation).
 
 #### Reference
 
@@ -77,7 +77,7 @@ F. Bigiel, A. Leroy, F. Walter, E. Brinks, W. J. G. de Blok, B. Madore, and M. D
 
 #### Data products
 
-- Molecular mass of a group of galaxies.
+- Integrated molecular mass.
 
 #### Reference
 
@@ -87,11 +87,11 @@ E. J. Chung, M.-H. Rhee, H. Kim, Min S. Yun, M. Heyer, and J. S. Young, 12CO(J =
 
 #### Data products
 
-- Redshift.
-- Global star formation rate.
-- Stellar mass.
-- Molecular Hydrogen mass.
-- Atomic Hydrogen mass.
+- Redshifts.
+- Integrated star formation rate.
+- Integrated Stellar mass.
+- Integrated molecular mass.
+- Integrated atomic mass.
 
 #### Reference
 
@@ -117,8 +117,8 @@ R. C. Kennicutt, Jr., STAR FORMATION IN GALAXIES ALONG THE HUBBLE SEQUENCE, _Ann
 
 #### Data products
 
-- Global star formation rate.
-- Metallicity.
+- Integrated star formation rate.
+- Integrated metallicity.
 
 #### Reference
 
@@ -128,8 +128,8 @@ D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarl
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
+- Integrated star formation rate.
+- Integrated stellar mass.
 
 #### Reference
 
@@ -139,9 +139,9 @@ A. K. Leroy, K. M. Sandstrom, D. Lang, A. Lewis, S. Salim, E. A. Behrens, J. Cha
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
-- Global metallicity.
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated metallicity.
 - Fits for the data.
 
 #### Reference
@@ -154,9 +154,9 @@ F. Mannucci, G. Cresci, R. Maiolino, A. Marconi, A. Gnerucci, A fundamental rela
 
 - Star formation rate surface density profile.
 - Stellar mass surface density profile.
-- Molecular Hydrogen surface density profile.
-- Atomic Hydrogen surface density profile.
-- Oxygen, Nitrogen and Carbon concentration profiles.
+- Molecular mass surface density profile.
+- Atomic mass surface density profile.
+- Oxygen, nitrogen and carbon abundance profiles.
 
 #### Reference
 
@@ -166,9 +166,9 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
-- Atomic gas mass.
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated atomic  mass.
 
 #### Reference
 
@@ -188,10 +188,10 @@ L. S. Pilyugin, E. K. Grebel1, and A. Y. Kniazev,THE ABUNDANCE PROPERTIES OF NEA
 
 #### Data products
 
-- Global star formation rate.
-- Global stellar mass.
-- Metallicity.
-- Nitrogen abundance.
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated Metallicity.
+- Integrated oxygen and nitrogen abundance.
 
 #### Reference
 
@@ -201,9 +201,9 @@ S. D. Puertas, J. M. Vilchez, J. Iglesias-Páramo, M. Mollá, E. Pérez-Montero,
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
-- Global metallicity.
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated metallicity.
 
 #### Reference
 
@@ -213,9 +213,9 @@ S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher,
 
 #### Data products
 
-- Global star formation rate.
-- Stellar mass.
-- Global metallicity.
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated metallicity.
 - Fits for the data.
 
 #### Reference
@@ -236,7 +236,7 @@ S. F. Sánchez, D. C. Gómez Medina, J.K. Barrera-Ballesteros, L. Galbany, A. Bo
 
 #### Data products
 
-- Global star formation rate vs. stellar mass fits.
+- Fits for the Integrated star formation rate vs. stellar mass relation.
 
 #### Reference
 
@@ -246,12 +246,12 @@ C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. M
 
 #### Data products
 
-- Redshift.
-- Stellar mass.
-- Atomic Hydrogen mass.
-- Global metallicity.
-- Global stellar age.
-- Global star formation rate.
+- Redshifts.
+- Integrated stellar mass.
+- Integrated atomic mass.
+- Integrated metallicity.
+- Integrated stellar age.
+- Integrated star formation rate.
 
 ⚠ Note: The dataset `sdss_eboss_firefly-dr16.fits` is not included in the repo because is too heavy. It can be downloaded [here](https://data.sdss.org/sas/dr16/eboss/spectro/firefly/v1_1_1/sdss_eboss_firefly-dr16.fits).
 
@@ -259,7 +259,7 @@ C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. M
 
 #### Data products
 
-- Fits for the stellar mass, global star formation rate, global metallicity, and global specific star formation rate.
+- Fits for the stellar mass, integrated star formation rate, integrated metallicity, and integrated specific star formation rate relations.
 
 #### Reference
 
@@ -269,7 +269,7 @@ D. Sotillo-Ramos, M. A. Lara-López, A. M. Pérez-García, R. Pérez-Martínez, 
 
 #### Data products
 
-- Fits for the global star formation rate vs stellar mass.
+- Fits for the integrated star formation rate vs stellar mass relation.
 
 #### Reference
 
@@ -290,8 +290,8 @@ A. R. Tomczak, R. F. Quadri, K.-V. H. Tran, I. Labbé, C. M. Straatman, C. Papov
 
 #### Data products
 
-- Stellar mass.
-- Global metallicity.
+- Integrated stellar mass.
+- Integrated metallicity.
 - Fits for the data.
 
 #### Reference
@@ -302,9 +302,9 @@ C. A. Tremonti, T. M. Heckman, G. Kauffmann, J. Brinchmann, S. Charlot, S. D. Wh
 
 #### Data products
 
-- Molecular mass.
-- Stellar mass.
-- Global star formation arte.
+- Integrated molecular mass.
+- Integrated stellar mass.
+- Integrated star formation arte.
 - Fits for the Kennicutt–Schmidt law.
 
 #### Reference
@@ -322,7 +322,7 @@ Lee, L. C. Parker, K. Spekkens, A. R. H. Stevens and J. Sun, VERTICO III: The Ke
 
 #### Data products
 
-- Fits for the stellar mass, global star formation rate, global specific star formation rate, and redshift.
+- Fits for the stellar mass, integrated star formation rate, integrated specific star formation rate, and redshift relations.
 
 #### Reference
 
@@ -332,9 +332,9 @@ K. E. Whitaker, M. Franx, J. Leja, P. G. van Dokkum, A. Henry, R. E. Skelton, M.
 
 #### Data products
 
-- Stellar mass.
-- Global metallicity.
-- Global star formation rate.
+- Integrated stellar mass.
+- Integrated metallicity.
+- Integrated star formation rate.
 
 #### Reference
 
@@ -344,13 +344,13 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 
 #### Data products
 
-- Stellar mass.
-- Stellar mass surface density.
-- Global metallicity.
-- Global star formation rate.
-- Redshift.
-- Molecular Hydrogen mass.
-- Molecular Hydrogen mass fraction.
+- Integrated stellar mass.
+- Integrated stellar mass surface density.
+- Integrated metallicity.
+- Integrated star formation rate.
+- Redshifts.
+- Integrated molecular mass.
+- Integrated molecular mass fraction.
 
 #### Reference
 
@@ -362,11 +362,11 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 
 #### Data products
 
-- Stellar mass.
-- Stellar mass surface density.
-- Atomic Hydrogen mass.
-- Global star formation rate.
-- Redshift.
+- Integrated stellar mass.
+- Integrated stellar mass surface density.
+- Integrated atomic mass.
+- Integrated star formation rate.
+- Redshifts.
 - Gas mass fraction.
 
 #### Reference
@@ -379,7 +379,7 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 
 #### Data products
 
-- Fit for the stellar mass, redshift, and metallicity.
+- Fits for the stellar mass, redshift, and metallicity relations.
 
 #### Reference
 
