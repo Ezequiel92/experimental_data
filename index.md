@@ -6,6 +6,7 @@
   - 3D-HST ([web view](3D-HST/plots.html) - [download notebook](3D-HST/plots.jl)).
   - ALFALFA ([web view](ALFALFA/plots.html) - [download notebook](ALFALFA/plots.jl)).
   - AMUSING++ ([web view](AMUSING++/plots.html) - [download notebook](AMUSING++/plots.jl)).
+  - Baker2022 ([web view](Baker2022/plots.html) - [download notebook](Baker2022/plots.jl)).
   - Baldry2012 ([web view](Baldry2012/plots.html) - [download notebook](Baldry2012/plots.jl)).
   - Bigiel2008 ([web view](Bigiel2008/plots.html) - [download notebook](Bigiel2008/plots.jl)).
   - Chung2009 ([web view](Chung2009/plots.html) - [download notebook](Chung2009/plots.jl)).
@@ -16,6 +17,7 @@
   - Mannucci2010 ([web view](Mannucci2010/plots.html) - [download notebook](Mannucci2010/plots.jl)).
   - Mollá2015 ([web view](Mollá2015/plots.html) - [download notebook](Mollá2015/plots.jl)).
   - PHANGS–ALMA ([web view](PHANGS–ALMA/plots.html) - [download notebook](PHANGS–ALMA/plots.jl)).
+  - Pilyugin2014 ([web view](Pilyugin2014/plots.html) - [download notebook](Pilyugin2014/plots.jl)).
   - Puertas2022 ([web view](Puertas2022/plots.html) - [download notebook](Puertas2022/plots.jl)).
   - Sánchez2017 ([web view](Sánchez2017/plots.html) - [download notebook](Sánchez2017/plots.jl)).
   - Sánchez2019 ([web view](Sánchez2019/plots.html) - [download notebook](Sánchez2019/plots.jl)).
