@@ -89,7 +89,7 @@ E. J. Chung, M.-H. Rhee, H. Kim, Min S. Yun, M. Heyer, and J. S. Young, 12CO(J =
 
 - Redshifts.
 - Integrated star formation rate.
-- Integrated Stellar mass.
+- Integrated stellar mass.
 - Integrated molecular mass.
 - Integrated atomic mass.
 
