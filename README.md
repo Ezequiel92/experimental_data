@@ -389,3 +389,4 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 ### TODO
 
 [Lisenfeld2023](https://arxiv.org/abs/2303.09473)
+[Zhu2023](https://arxiv.org/abs/2304.11711)
