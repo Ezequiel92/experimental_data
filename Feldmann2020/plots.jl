@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.24
 
 using Markdown
 using InteractiveUtils
@@ -41,6 +41,9 @@ begin
 	mH2_err  = data[:, "e_MH2"]
 end;
 
+# ╔═╡ 86b8c500-d599-46c0-a311-30113f894a1a
+sfr
+
 # ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
 let
 	set_theme!(theme_black())
@@ -75,7 +78,7 @@ let
 		f[1,1], 
 		xlabel=L"\mathrm{redshift}",
 		ylabel=L"\mathrm{log(M_\star / M_\odot)}", 
-		title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
+		title=L"\mathrm{SFR \,\, vs. \,\, Redshift}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -118,7 +121,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "b8bc28ed83c182c8716dc01fa8612514cd472f64"
+project_hash = "febc4c8a5300d87fee5fb37cc73d4dd4ae9050d3"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1461,8 +1464,9 @@ version = "3.5.0+0"
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
 # ╟─64fcb795-bb09-4dbc-bbe4-6f3df60dced7
 # ╟─072bddde-dece-4d9f-990b-e374038ba7e6
-# ╟─34ce6570-6566-4981-908a-81eabcbca7bf
+# ╠═34ce6570-6566-4981-908a-81eabcbca7bf
 # ╠═5bedc2ff-9c1e-4c84-96fd-19c920a71dfc
+# ╠═86b8c500-d599-46c0-a311-30113f894a1a
 # ╟─118c5e5e-9845-44f2-b37b-45b39898198a
 # ╟─b7cb2f88-0b99-4a4e-8b69-48fda16ed1ee
 # ╟─00000000-0000-0000-0000-000000000001
