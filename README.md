@@ -391,3 +391,4 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 [Lisenfeld2023](https://arxiv.org/abs/2303.09473)
 [Zhu2023](https://arxiv.org/abs/2304.11711)
 [Ratcliffe2023](https://arxiv.org/abs/2305.13378)
+[Bigiel2010](http://dx.doi.org/10.1088/0004-6256/140/5/1194)
