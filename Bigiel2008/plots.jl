@@ -1,11 +1,11 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.26
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
-using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
+using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements, Unitful, UnitfulAstro
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
@@ -44,7 +44,7 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\log_{10}(\Sigma_\mathrm{HI,H2,gas} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
+		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, 10 \, \mathrm{M_\odot\,pc^{-2}})", 
 		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
 		title=L"\mathrm{H_2 \,\, (750 \, pc)}",
 		titlesize=30,
@@ -222,11 +222,15 @@ CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
 CairoMakie = "~0.10.0"
 LaTeXStrings = "~1.3.0"
 Measurements = "~2.9.0"
+Unitful = "~1.14.0"
+UnitfulAstro = "~1.2.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -235,7 +239,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "c0bd6aaa3164d8a8bec8d933ca8deec072893eb7"
+project_hash = "616bf09510ddafa55a2ff9ee35eaad6047c1a19a"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1362,6 +1366,24 @@ deps = ["REPL"]
 git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
+
+[[deps.Unitful]]
+deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
+git-tree-sha1 = "ba4aa36b2d5c98d6ed1f149da916b3ba46527b2b"
+uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
+version = "1.14.0"
+
+[[deps.UnitfulAngles]]
+deps = ["Dates", "Unitful"]
+git-tree-sha1 = "d6cfdb6ddeb388af1aea38d2b9905fa014d92d98"
+uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
+version = "0.6.2"
+
+[[deps.UnitfulAstro]]
+deps = ["Unitful", "UnitfulAngles"]
+git-tree-sha1 = "05adf5e3a3bd1038dd50ff6760cddd42380a7260"
+uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
+version = "1.2.0"
 
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
