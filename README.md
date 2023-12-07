@@ -387,8 +387,10 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 
 ### TODO
 
-[Lisenfeld2023](https://arxiv.org/abs/2303.09473)
-[Zhu2023](https://arxiv.org/abs/2304.11711)
-[Ratcliffe2023](https://arxiv.org/abs/2305.13378)
-[Bigiel2010](http://dx.doi.org/10.1088/0004-6256/140/5/1194)
+[Bigiel2010](https://doi.org/10.1088/0004-6256/140/5/1194)
+
+[Durbala2020](https://doi.org/10.3847/1538-3881/abc018)
+
+[Lisenfeld2023](https://doi.org/10.1051/0004-6361/202245675)
+
 [Messias2023](https://arxiv.org/abs/2312.02782)
