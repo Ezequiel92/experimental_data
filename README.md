@@ -73,6 +73,18 @@ I. K. Baldry, S. P. Driver, J. Loveday, E. N. Taylor, L. S. Kelvin, J. Liske, P.
 
 F. Bigiel, A. Leroy, F. Walter, E. Brinks, W. J. G. de Blok, B. Madore, and M. D. Thornley, THE STAR FORMATION LAW IN NEARBY GALAXIES ON SUB-KPC SCALES, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2846, doi: 10.1088/0004-6256/136/6/2846
 
+### [Bigiel et al. (2010)](https://doi.org/10.1088/0004-6256/140/5/1194)
+
+#### Data products
+
+- Star formation rate surface density.
+- Molecular mass surface density.
+- Atomic mass surface density.
+
+#### Reference
+
+F. Bigiel, A. Leroy, F. Walter, L. Blitz, E. Brinks, W. J. G. de Blok and B. Madore, EXTREMELY INEFFICIENT STAR FORMATION IN THE OUTER DISKS OF NEARBY GALAXIES, _The Astronomical Journal_, Volume 140, Issue 5, October 2010, Pages 1194, doi: 10.1088/0004-6256/140/5/1194
+
 ### [Chung et al. (2009)](https://doi.org/10.1088/0067-0049/184/2/199)
 
 #### Data products
@@ -386,8 +398,6 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, doi: 10.1088/0004-637x/791/2/130
 
 ### TODO
-
-[Bigiel2010](https://doi.org/10.1088/0004-6256/140/5/1194)
 
 [Durbala2020](https://doi.org/10.3847/1538-3881/abc018)
 
