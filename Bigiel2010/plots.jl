@@ -4,206 +4,231 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 134dae30-a3ff-11ee-23d8-c13bdc3ffe50
-using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, DataFramesMeta, FITSIO
+# ╔═╡ b77b1640-a3fb-11ee-13ec-2533240f5016
+using CairoMakie, LaTeXStrings, DataFrames, DelimitedFiles, Measurements, Unitful, UnitfulAstro
 
-# ╔═╡ 51bd9bae-6e26-435a-8f4e-2dc581e682f3
-md"""
-# 3D-HST Survey
+# ╔═╡ ac7bd34e-4e72-42e5-a969-41b2100ff7a9
+function parser(data::AbstractString)::Union{Float64,Missing}
+	clean_data = strip(data)
 
-[Photometry data](https://archive.stsci.edu/prepds/3d-hst/)
-"""
-
-# ╔═╡ 68fd083c-613d-43b9-8ace-5ce42f5077ea
-begin
-	aegis  = readdlm("./data/aegis_3dhst.v4.1.sfr", Float64, skipstart=11)
-	cosmos = readdlm("./data/cosmos_3dhst.v4.1.sfr", Float64, skipstart=11)
-	goodsn = readdlm("./data/goodsn_3dhst.v4.1.sfr", Float64, skipstart=11)
-	goodss = readdlm("./data/goodss_3dhst.v4.1.sfr", Float64, skipstart=11)
-	uds    = readdlm("./data/uds_3dhst.v4.1.sfr", Float64, skipstart=11)
-	
-	head = ["id", "sfr", "sfr_IR", "sfr_UV"]
-	
-	df_aegis  = DataFrame(aegis[:, 1:4], vec(head))
-	df_cosmos = DataFrame(cosmos[:, 1:4], vec(head))
-	df_goodsn = DataFrame(goodsn[:, 1:4], vec(head))
-	df_goodss = DataFrame(goodss[:, 1:4], vec(head))
-	df_uds    = DataFrame(uds[:, 1:4], vec(head))
-
-	dataframes = sort.([df_aegis, df_cosmos, df_goodsn, df_goodss, df_uds], :id)
-
-	mass = FITS("./data/3dhst_master.phot.v4.1.cat.FITS")[2]
-	
-	df_mass = sort(identity.(DataFrame(
-		id = read(mass, "id"),
-		field = read(mass, "field"),
-		log_mass = read(mass, "lmass"),
-	)), [:field, :id])
-
-	fields = sort(unique(df_mass[:, :field]))
-
-	for (data, field) in zip(dataframes, fields)
-		data[!, :log_mass] = @subset(df_mass, :field .== field)[:, :log_mass]
+	if isempty(clean_data)
+		return missing
 	end
+
+	return parse(Float64, clean_data)
 end;
 
-# ╔═╡ 39ce3832-f8ed-4ed8-b198-ec08d76eeeef
-let
-	sfr = [@subset(df, :sfr .> 0, :log_mass .> 0) for df in dataframes]
+# ╔═╡ 48c1620d-ecff-4367-bda8-41a3a4ce587d
+md"""
+# Bigiel et al. (2010)
 
-	set_theme!(theme_black())
+[Table 2](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t2_mrt.txt?Expires=1704202683&Signature=s7ZpfS53WATAEWuvDIz1td3ThKZQRQURYYpaWSiWmmPXVF9wlPZOhFYx1NUTK2FKFpntJO4QxVXjJhb4e0Y6aKs-WjhQUc4NW6iS6y1ZKH6wteR7hWXz7tDvlMndGu0OSdSZzgmAj2FBG~AW9LpuGmr7j3jBsJZ3Q5QVsEAab4asNffjhJuDSZPOyOfMFRV7oJlLJbpslNe1SsPRlSvB8bZe9yz3XBq7Cgq5egVNY~LWJZV41ZHwKw37Ua6emyfpTCXEtY5us6J9OIioWm0vn-VTQERG85Y~080czaFXr~tiUtrw4g6BAOo6YyY2kji0Pjp7NW-NuEBW89Q7DwFcsQ__&Key-Pair-Id=KL1D8TIY3N7T8)
+
+[Table 3](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t3_mrt.txt?Expires=1704202683&Signature=H3ZNBU07v69wcT13o6h0B8Hh4FmIUcKLyBhYOWabfrpiie8BGhMghB7yTrlG~ctSv1FSshNXtA-YKzhybp7nSI8to1ItRkyzzmhx9cGfGihNMPuiOwGM-tCWy5TpWDKQTRe9gBqhHZm8qgSwgEs8izt5~20fmVKtrF6-LFdjxmFy7goGxxhggAdlBudLk45WVzZay~Qfp2iCmb4eGGKJxvNuj3zuU89VK6YO2P3va1uOIwZdFM8RgP58KwwZMy18izr71Fiq7aTpusJ-qudA-wwl8eLRx~UeVcc1Lg4l88SbtKVQxJlyALuQL0hF2ng64kqHA9xBRzaFJRe13ITP3g__&Key-Pair-Id=KL1D8TIY3N7T8)
+"""
+
+# ╔═╡ 780e6028-ab2f-44a4-bffd-edcd7e572d1c
+begin
+	table_01 = DataFrame(
+		name=String[], 
+		logHI=Union{Float64,Missing}[],
+		e_logHI=Union{Float64,Missing}[],
+		logH2=Union{Float64,Missing}[],
+		e_logH2=Union{Float64,Missing}[],
+		logSFR=Union{Float64,Missing}[],
+		e_logSFR=Union{Float64,Missing}[],
+	)
 	
-	f = Figure()
+	raw_data_01 = readdlm(
+		"./data/aj351668t2_mrt.txt", 
+		'\t', 
+		skipstart=48, 
+		header=true,
+	)[1]
+	
+	for row in eachrow(raw_data_01)
+
+		data = row[1]
+	
+		name = strip(data[14:24])
+		
+		logHI = parser(data[26:29])
+		e_logHI = parser(data[31:34])
+	
+		logH2 = parser(data[36:39])
+		e_logH2 = parser(data[41:44])
+	
+		logSFR = parser(data[46:50])
+		e_logSFR = parser(data[52:56])
+
+		push!(table_01, [name  logHI e_logHI logH2 e_logH2 logSFR e_logSFR])
+		
+	end
+
+	galaxy_list_01 = unique(table_01[!, "name"])
+	table_01
+end
+
+# ╔═╡ f8d0cda2-2f5c-4f7a-b104-ab081e0d67a8
+function get_col_01(
+	n_gal::Int64, 
+	col::String,
+)::Vector{Union{Missing,Float64}}
+	
+	return filter(:name => n -> n == galaxy_list_01[n_gal], table_01)[!, col]
+	
+end;
+
+# ╔═╡ 198d1cbd-dfe4-4dda-b04f-bea7f24421bb
+let
+	n_gal = 1
+	HI = get_col_01(n_gal, "logHI") .± get_col_01(n_gal, "e_logHI")
+	H2 = get_col_01(n_gal, "logH2") .± get_col_01(n_gal, "e_logH2")
+	SFR = get_col_01(n_gal, "logSFR") .± get_col_01(n_gal, "e_logSFR")
+
+	idxs = map(ismissing, HI) .|| map(ismissing, H2) .|| map(ismissing, SFR)
+
+    deleteat!(HI, idxs)
+    deleteat!(H2, idxs)
+	deleteat!(SFR, idxs)
+	
+	set_theme!(theme_black())
+
+	f = Figure(size = (800, 800))
 	
 	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel=L"\mathrm{SFR \, / \, M_\odot \, yr^{-1}}", 
-		title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
+		f[1,1],
+		xlabel=L"\mathrm{log(\Sigma_{H_I} \, / \, M_\odot \, pc^{-2})}", 
+		ylabel=L"\mathrm{log(\Sigma_{SFR} \, / \, M_\odot \, yr^{-1} \, kpc^{-2})}", 
+		title=L"\mathrm{%$(galaxy_list_01[n_gal])}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
-		yscale=log10,
 	)
 
-	colors = [:red, :blue, :green, :orange, :cyan]
-
-	for (data, color) in zip(sfr, colors)
-		scatter!(
-			ax, 
-			data[!, :log_mass], data[!, :sfr],
-			markersize=2;
-			color,
-		) 
-	end
-
-	group_size = [
-		MarkerElement(
-			marker=:circle, 
-			markersize=12; 
-			color
-		) for (field, color) in zip(fields, colors)
-	]
-
-	Legend(
-		f[1, 1], 
-		group_size, 
-		fields, 
-		tellheight=false,
-        tellwidth=false,
-        margin=(10, 10, 10, 10),
-        halign=:right, 
-		valign=:bottom,
+	scatter!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		color=:red,
+		markersize=5,
+	) 
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(SFR),
+		color=:red,
+	)
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(HI),
+		color=:red,
+		direction=:x
 	)
 
 	f
 end
 
-# ╔═╡ 2a9a222e-bc4b-4dff-956f-a53682dd199f
-let
-	sfr = [@subset(df, :sfr_IR .> 0, :log_mass .> 0) for df in dataframes]
-
-	set_theme!(theme_black())
-	
-	f = Figure()
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel=L"\mathrm{SFR \, / \, M_\odot \, yr^{-1}}",  
-		title=L"\mathrm{SFR \,\, IR \,\, vs. \,\, Mass}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-		yscale=log10,
+# ╔═╡ 5c39eaeb-b752-4564-8c61-306718be975f
+begin
+	table_02 = DataFrame(
+		name=String[], 
+		logHI=Union{Float64,Missing}[],
+		e_logHI=Union{Float64,Missing}[],
+		SFR=Union{Float64,Missing}[],
+		e_SFR=Union{Float64,Missing}[],
 	)
+	
+	raw_data_02 = readdlm(
+		"./data/aj351668t3_mrt.txt", 
+		'\t', 
+		skipstart=46, 
+		header=true,
+	)[1]
+	
+	for row in eachrow(raw_data_02)
 
-	colors = [:red, :blue, :green, :orange, :cyan]
+		data = row[1]
+	
+		name = strip(data[9:19])
+		
+		logHI = parser(data[21:25])
+		e_logHI = parser(data[27:30])
+	
+		SFR = parser(data[32:37])
+		e_SFR = parser(data[39:42])
 
-	for (data, color) in zip(sfr, colors)
-		scatter!(
-			ax, 
-			data[!, :log_mass], data[!, :sfr_IR],
-			markersize=2;
-			color,
-		) 
+		push!(table_02, [name  logHI e_logHI SFR e_SFR])
+		
 	end
 
-	group_size = [
-		MarkerElement(
-			marker=:circle, 
-			markersize=12; 
-			color
-		) for (field, color) in zip(fields, colors)
-	]
-
-	Legend(
-		f[1, 1], 
-		group_size, 
-		fields, 
-		tellheight=false,
-        tellwidth=false,
-        margin=(10, 10, 10, 10),
-        halign=:right, 
-		valign=:bottom,
-	)
-
-	f
+	galaxy_list_02 = unique(table_02[!, "name"])
+	table_02
 end
 
-# ╔═╡ 6fb801ac-c514-4e56-8437-42ee5bfba1c2
-let
-	sfr = [@subset(df, :sfr_UV .> 0, :log_mass .> 0) for df in dataframes]
-
-	set_theme!(theme_black())
+# ╔═╡ e0fd87d5-087b-489f-88ba-13cb5e43cf1b
+function get_col_02(
+	n_gal::Int64, 
+	col::String,
+)::Vector{Union{Missing,Float64}}
 	
-	f = Figure()
+	return filter(:name => n -> n == galaxy_list_02[n_gal], table_02)[!, col]
+	
+end;
+
+# ╔═╡ 8f9b6a09-d5f4-46b8-ba75-d69f27195368
+let
+	n_gal = 1
+	HI = get_col_02(n_gal, "logHI") .± get_col_02(n_gal, "e_logHI")
+	SFR = get_col_02(n_gal, "SFR") .± get_col_02(n_gal, "e_SFR")
+
+	idxs = map(ismissing, HI) .|| map(ismissing, SFR)
+
+    deleteat!(HI, idxs)
+	deleteat!(SFR, idxs)
+	
+	set_theme!(theme_black())
+
+	f = Figure(size = (800, 800))
 	
 	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})", 
-		ylabel=L"\mathrm{SFR \, / \, M_\odot \, yr^{-1}}", 
-		title=L"\mathrm{SFR \,\, UV  \,\,  vs.  \,\,  Mass}",
+		f[1,1],
+		xlabel=L"\mathrm{log(\Sigma_{H_I} \, / \, M_\odot \, pc^{-2})}", 
+		ylabel=L"\mathrm{\Sigma_{SFR} \, / \, M_\odot \, yr^{-1} \, kpc^{-2}}", 
+		title=L"\mathrm{%$(galaxy_list_02[n_gal])}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
-		yscale=log10,
 	)
 
-	colors = [:red, :blue, :green, :orange, :cyan]
-
-	for (data, color) in zip(sfr, colors)
-		scatter!(
-			ax, 
-			data[!, :log_mass], data[!, :sfr_UV],
-			markersize=2;
-			color,
-		) 
-	end
-
-	group_size = [
-		MarkerElement(
-			marker=:circle, 
-			markersize=12; 
-			color
-		) for (field, color) in zip(fields, colors)
-	]
-
-	Legend(
-		f[1, 1], 
-		group_size, 
-		fields, 
-		tellheight=false,
-        tellwidth=false,
-        margin=(10, 10, 10, 10),
-        halign=:right, 
-		valign=:bottom,
+	scatter!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		color=:red,
+		markersize=5,
+	) 
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(SFR),
+		color=:red,
+	)
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(HI),
+		color=:red,
+		direction=:x
 	)
 
 	f
@@ -214,18 +239,20 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
 CairoMakie = "~0.11.4"
 DataFrames = "~1.6.1"
-DataFramesMeta = "~0.14.1"
 DelimitedFiles = "~1.9.1"
-FITSIO = "~0.17.1"
 LaTeXStrings = "~1.3.1"
+Measurements = "~2.11.0"
+Unitful = "~1.19.0"
+UnitfulAstro = "~1.2.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -234,7 +261,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.4"
 manifest_format = "2.0"
-project_hash = "9449ff0acd1cff980e599c9c9b9b8ad95db4558d"
+project_hash = "2a1dd646128e1603e423192434be7d06b97bdcc5"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -334,18 +361,6 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
-[[deps.CFITSIO]]
-deps = ["CFITSIO_jll"]
-git-tree-sha1 = "8425c47db102577eefb93cb37b4480e750116b0d"
-uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
-version = "1.4.1"
-
-[[deps.CFITSIO_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "ad23b7b1e932aee25f38f63ac3b6c368e63e7087"
-uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
-version = "4.3.1+0"
-
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 
@@ -384,11 +399,6 @@ deps = ["LinearAlgebra"]
 git-tree-sha1 = "f641eb0a4f00c343bbc32346e1217b86f3ce9dad"
 uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 version = "0.5.1"
-
-[[deps.Chain]]
-git-tree-sha1 = "8c4920235f6c561e401dfe569beb8b924adad003"
-uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-version = "0.5.0"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -491,12 +501,6 @@ deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "Inver
 git-tree-sha1 = "04c738083f29f86e62c8afc341f0967d8717bdb8"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 version = "1.6.1"
-
-[[deps.DataFramesMeta]]
-deps = ["Chain", "DataFrames", "MacroTools", "OrderedCollections", "Reexport"]
-git-tree-sha1 = "6970958074cd09727b9200685b8631b034c0eb16"
-uuid = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
-version = "0.14.1"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -624,12 +628,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "c6033cc3892d0ef5bb9cd29b7f2f0331ea5184ea"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+0"
-
-[[deps.FITSIO]]
-deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
-git-tree-sha1 = "a8924c203d66d4c5d72980572c6810213422a59d"
-uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-version = "0.17.1"
 
 [[deps.FastRounding]]
 deps = ["ErrorfreeArithmetic", "LinearAlgebra"]
@@ -879,12 +877,10 @@ deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArr
 git-tree-sha1 = "88a101217d7cb38a7b481ccd50d21876e1d1b0e0"
 uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 version = "0.15.1"
+weakdeps = ["Unitful"]
 
     [deps.Interpolations.extensions]
     InterpolationsUnitfulExt = "Unitful"
-
-    [deps.Interpolations.weakdeps]
-    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.IntervalArithmetic]]
 deps = ["CRlibm", "EnumX", "FastRounding", "LinearAlgebra", "Markdown", "Random", "RecipesBase", "RoundingEmulator", "SetRounding", "StaticArrays"]
@@ -1132,6 +1128,26 @@ version = "0.5.7"
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.2+0"
+
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf", "Requires"]
+git-tree-sha1 = "bdcde8ec04ca84aef5b124a17684bf3b302de00e"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.11.0"
+
+    [deps.Measurements.extensions]
+    MeasurementsBaseTypeExt = "BaseType"
+    MeasurementsJunoExt = "Juno"
+    MeasurementsRecipesBaseExt = "RecipesBase"
+    MeasurementsSpecialFunctionsExt = "SpecialFunctions"
+    MeasurementsUnitfulExt = "Unitful"
+
+    [deps.Measurements.weakdeps]
+    BaseType = "7fbed51b-1ef5-4d67-9085-a4a9b26f478c"
+    Juno = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
@@ -1747,6 +1763,32 @@ git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
 
+[[deps.Unitful]]
+deps = ["Dates", "LinearAlgebra", "Random"]
+git-tree-sha1 = "3c793be6df9dd77a0cf49d80984ef9ff996948fa"
+uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
+version = "1.19.0"
+
+    [deps.Unitful.extensions]
+    ConstructionBaseUnitfulExt = "ConstructionBase"
+    InverseFunctionsUnitfulExt = "InverseFunctions"
+
+    [deps.Unitful.weakdeps]
+    ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+    InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
+
+[[deps.UnitfulAngles]]
+deps = ["Dates", "Unitful"]
+git-tree-sha1 = "d6cfdb6ddeb388af1aea38d2b9905fa014d92d98"
+uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
+version = "0.6.2"
+
+[[deps.UnitfulAstro]]
+deps = ["Unitful", "UnitfulAngles"]
+git-tree-sha1 = "05adf5e3a3bd1038dd50ff6760cddd42380a7260"
+uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
+version = "1.2.0"
+
 [[deps.WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
@@ -1889,11 +1931,14 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═134dae30-a3ff-11ee-23d8-c13bdc3ffe50
-# ╟─51bd9bae-6e26-435a-8f4e-2dc581e682f3
-# ╠═68fd083c-613d-43b9-8ace-5ce42f5077ea
-# ╟─39ce3832-f8ed-4ed8-b198-ec08d76eeeef
-# ╟─2a9a222e-bc4b-4dff-956f-a53682dd199f
-# ╟─6fb801ac-c514-4e56-8437-42ee5bfba1c2
+# ╠═b77b1640-a3fb-11ee-13ec-2533240f5016
+# ╠═ac7bd34e-4e72-42e5-a969-41b2100ff7a9
+# ╠═f8d0cda2-2f5c-4f7a-b104-ab081e0d67a8
+# ╠═e0fd87d5-087b-489f-88ba-13cb5e43cf1b
+# ╟─48c1620d-ecff-4367-bda8-41a3a4ce587d
+# ╟─780e6028-ab2f-44a4-bffd-edcd7e572d1c
+# ╟─198d1cbd-dfe4-4dda-b04f-bea7f24421bb
+# ╟─5c39eaeb-b752-4564-8c61-306718be975f
+# ╟─8f9b6a09-d5f4-46b8-ba75-d69f27195368
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
