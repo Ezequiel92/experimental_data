@@ -9,9 +9,9 @@ using CairoMakie, LaTeXStrings, DataFrames, CSV
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Baldry et al. (2012)
+# [Baldry et al. (2012)](https://doi.org/10.1111/j.1365-2966.2012.20340.x)
 
-[Table 1](https://academic.oup.com/view-large/17354749)
+### [Data](https://academic.oup.com/view-large/17354749)
 """
 
 # ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0

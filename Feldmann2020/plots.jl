@@ -9,9 +9,9 @@ using  CSV, CairoMakie, LaTeXStrings, DataFrames, Measurements
 
 # ╔═╡ 64fcb795-bb09-4dbc-bbe4-6f3df60dced7
 md"""
-# Feldmann (2020)
+# [Feldmann (2020)](https://doi.org/10.1038/s42005-020-00493-0)
 
-[Supplementary Data 5](https://static-content.springer.com/esm/art%3A10.1038%2Fs42005-020-00493-0/MediaObjects/42005_2020_493_MOESM7_ESM.csv)
+### [Data](https://static-content.springer.com/esm/art%3A10.1038%2Fs42005-020-00493-0/MediaObjects/42005_2020_493_MOESM7_ESM.csv)
 """
 
 # ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6

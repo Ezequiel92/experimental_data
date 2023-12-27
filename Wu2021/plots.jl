@@ -9,13 +9,13 @@ using FITSIO, DataFrames, CairoMakie
 
 # ╔═╡ 08b90676-1872-4f4e-84d7-8caa9d523a3b
 md"""
-# Wu et al. (2021)
+# [Wu et al. (2021)](https://doi.org/10.1093/mnras/stab512)
 
-[Stellar masses](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/Data/stellarmass.html)
+### [Stellar masses](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/Data/stellarmass.html)
 
-[Star formation rates](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/sfrs.html)
+### [Star formation rates](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/sfrs.html)
 
-[Gas phase metallicities](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/oh.html)
+### [Gas phase metallicities](https://wwwmpa.mpa-garching.mpg.de/SDSS/DR7/oh.html)
 """
 
 # ╔═╡ c9af5533-1b90-4191-9d3f-e48ecc795e98

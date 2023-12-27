@@ -22,13 +22,13 @@ end;
 
 # ╔═╡ 71facef6-dd7b-4dc6-b32f-b543c3a203eb
 md"""
-# Tomczak et al. (2014)
+# [Tomczak et al. (2014)](https://doi.org/10.1088/0004-637x/783/2/85)
 
-[Table 1](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t1_ascii.txt?doi=10.1088/0004-637X/783/2/85)
+### [Table 1](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t1_ascii.txt?doi=10.1088/0004-637X/783/2/85)
 
-[Tabel 2](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t2_ascii.txt?doi=10.1088/0004-637X/783/2/85)
+### [Tabel 2](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t2_ascii.txt?doi=10.1088/0004-637X/783/2/85)
 
-[Table 3](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t3_ascii.txt?doi=10.1088/0004-637X/783/2/85)
+### [Table 3](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t3_ascii.txt?doi=10.1088/0004-637X/783/2/85)
 """
 
 # ╔═╡ 5d6c7470-9387-4058-8496-0fd8e0e3a925

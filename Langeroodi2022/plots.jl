@@ -21,7 +21,9 @@ end;
 
 # ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
 md"""
-# [Langeroodi et al. (2022)](https://doi.org/10.48550/arXiv.2212.02491)
+# [Langeroodi et al. (2022)](https://doi.org/10.3847/1538-4357/acdbc1)
+
+### [Data](https://archive.stsci.edu/doi/resolve/resolve.html?doi=10.17909/hnrr-sc32)
 """
 
 # ╔═╡ 97171b52-618c-4276-8a8f-31c07b9e573a

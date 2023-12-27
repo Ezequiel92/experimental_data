@@ -13,7 +13,9 @@ using  CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
 md"""
 # PHANGS–ALMA
 
-## [Leroy et al. (2021)](https://doi.org/10.3847/1538-4365/ac17f3)
+### [Leroy et al. (2021)](https://doi.org/10.3847/1538-4365/ac17f3)
+
+### [Data](https://almascience.eso.org/alma-data/lp/PHANGS)
 """
 
 # ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5

@@ -12,6 +12,8 @@ md"""
 # AMUSING++
 
 ### [López-Cobá et al. (2020)](https://doi.org/10.3847/1538-3881/ab7848)
+
+### [Data](https://content.cld.iop.org/journals/1538-3881/159/4/167/revision1/ajab7848t3_mrt.txt?Expires=1704290736&Signature=cTSOVNhHDui2uRWdVAVdCi3on7CNu0FTVRgkcLeeX-h9p~82Sxx8FQ~RqDm5-jKQHLDzdc63VvaOr6LP3WhLeBVB01gQdojJl2~q7xhhubQrxjVbeq38g0eWs6C5niQKQFHqFQ74BpvJ0W6LWWMETNGJ4BZ42IqZJtR~vf8TU9eL451docdxo31zBss05g33jyxj2L9sav3jN-gyBFQdZO0fxovbfhdSeWyRiMrlURZgAIEZa5x0gIMmhL1OZ-QRuY24XK2nEx3C6C3tCw-Tvziy9z~dcPtGAiOD6B9b5y4KxtmqqNrLooQaV8IhECpn3Cx0M0FxxWhdS~dw1oRE9Q__&Key-Pair-Id=KL1D8TIY3N7T8)
 """
 
 # ╔═╡ dd1d439d-47ee-4232-8524-c41115639c39

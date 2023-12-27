@@ -9,9 +9,9 @@ using DelimitedFiles, CairoMakie, LaTeXStrings, FITSIO, Statistics
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# xCOLD GASS
+# [xCOLD GASS](http://www.star.ucl.ac.uk/xCOLDGASS)
 
-[xCOLD GASS data](http://www.star.ucl.ac.uk/xCOLDGASS/data/xCOLDGASS_PubCat.fits)
+### [Data](http://www.star.ucl.ac.uk/xCOLDGASS/data/xCOLDGASS_PubCat.fits)
 """
 
 # ╔═╡ 30b5b786-9feb-4387-918b-9f26c85d0681

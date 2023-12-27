@@ -9,9 +9,9 @@ using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements, Color
 
 # ╔═╡ 6b70529a-5941-4c64-92ee-2add064119a4
 md"""
-# Zahid et al. (2014)
+# [Zahid et al. (2014)](https://doi.org/10.1088/0004-637x/791/2/130)
 
-[Table 2](https://iopscience.iop.org/0004-637X/791/2/130/suppdata/apj498704t2_ascii.txt?doi=10.1088/0004-637X/791/2/130)
+### [Data](https://iopscience.iop.org/0004-637X/791/2/130/suppdata/apj498704t2_ascii.txt?doi=10.1088/0004-637X/791/2/130)
 """
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686

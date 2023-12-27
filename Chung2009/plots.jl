@@ -21,7 +21,7 @@ end;
 md"""
 # [Chung et al. (2009)](https://doi.org/10.1088/0067-0049/184/2/199)
 
-[Table 3](https://iopscience.iop.org/0067-0049/184/2/199/suppdata/apjs300659t3_ascii.txt?doi=10.1088/0067-0049/184/2/199)
+### [Data](https://iopscience.iop.org/0067-0049/184/2/199/suppdata/apjs300659t3_ascii.txt?doi=10.1088/0067-0049/184/2/199)
 """
 
 # ╔═╡ fab15e2f-69ac-4c6e-a3f7-1b24efe9c58f

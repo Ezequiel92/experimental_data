@@ -13,7 +13,7 @@ using  CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
 md"""
 # [Leroy et al. (2019)](https://doi.org/10.3847/1538-4365/ab3925)
 
-## [Dowloads](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/ApJS/244/24)
+## [Data](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/ApJS/244/24)
 """
 
 # ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5

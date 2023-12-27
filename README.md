@@ -125,7 +125,7 @@ R. C. Kennicutt, Jr., The Global Schmidt Law in Star-forming Galaxies, _The Astr
 
 R. C. Kennicutt, Jr., STAR FORMATION IN GALAXIES ALONG THE HUBBLE SEQUENCE, _Annual Review of Astronomy and Astrophysics_, Volume 36, September 1998, Pages 189-231, doi: [10.1146/annurev.astro.36.1.189](https://doi.org/10.1146/annurev.astro.36.1.189)
 
-### [Langeroodi et al. (2022)](https://arxiv.org/abs/2212.02491)
+### [Langeroodi et al. (2022)](https://doi.org/10.3847/1538-4357/acdbc1)
 
 #### Data products
 
@@ -134,7 +134,7 @@ R. C. Kennicutt, Jr., STAR FORMATION IN GALAXIES ALONG THE HUBBLE SEQUENCE, _Ann
 
 #### Reference
 
-D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarlata, A. Zitrin, T. Broadhurst, J. M. Diego, X. Huang, A. V. Filippenko, R. J. Foley, S. Jha, A. M. Koekemoer, M. Oguri, I. Perez-Fournon, J. Pierel, F. Poidevin and L. Strolger, Evolution of the Mass-Metallicity Relation from Redshift z≈8 to the Local Universe, _arXiv_, doi: 10.48550/arXiv.2212.02491
+D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarlata, A. Zitrin, T. Broadhurst, J. M. Diego, X. Huang, A. V. Filippenko, R. J. Foley, S. Jha, A. M. Koekemoer, M. Oguri, I. Perez-Fournon, J. Pierel, F. Poidevin and L. Strolger, Evolution of the Mass–Metallicity Relation from Redshift z ≈ 8 to the Local Universe, _The Astrophysical Journal_, Volume 957, Issue 1,  October 2023, Pages 957, doi: [10.3847/1538-4357/acdbc1](https://doi.org/10.3847/1538-4357/acdbc1)
 
 ### [Leroy et al. (2019)](https://doi.org/10.3847/1538-4365/ab3925)
 
@@ -398,8 +398,6 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, doi: 10.1088/0004-637x/791/2/130
 
 ### TODO
-
-[Durbala2020](https://doi.org/10.3847/1538-3881/abc018)
 
 [Lisenfeld2023](https://doi.org/10.1051/0004-6361/202245675)
 

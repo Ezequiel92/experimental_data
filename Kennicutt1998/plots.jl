@@ -11,18 +11,18 @@ using CairoMakie, LaTeXStrings, Measurements
 md"""
 # Kennicutt-Schmidt law (1959-1998)
 
-M. Schmidt (1959) doi: [10.1086/146614](https://doi.org/10.1086/146614)
+### [M. Schmidt (1959)](https://doi.org/10.1086/146614)
 
-R. C. Kennicutt, Jr. (1989) doi: [10.1086/167834](https://doi.org/10.1086/167834)
+### [R. C. Kennicutt, Jr. (1989)](https://doi.org/10.1086/167834)
 
-R. C. Kennicutt, Jr. (1998) doi: [10.1086/305588](https://doi.org/10.1086/305588)
+### [R. C. Kennicutt, Jr. (1998)](https://doi.org/10.1086/305588)
 
-R. C. Kennicutt, Jr. (1998) doi: [10.1146/annurev.astro.36.1.189](https://doi.org/10.1146/annurev.astro.36.1.189)
+### [R. C. Kennicutt, Jr. (1998)](https://doi.org/10.1146/annurev.astro.36.1.189)
 """
 
 # ╔═╡ 66180e12-3e30-4394-8a24-561d0b282038
 md"""
-# Best fit (10.1086/305588)
+# Best fit (R. C. Kennicutt, Jr. (1998))
 
 ``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = (2.5 \pm 0.7) \times 10^{-4} \left( \dfrac{\Sigma_\mathrm{gas}}{\mathrm{M_\odot\,pc^{-2}}} \right)^{1.4 \pm 0.15}``
 """
