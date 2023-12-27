@@ -8,7 +8,9 @@ using InteractiveUtils
 using CairoMakie, LaTeXStrings, DataFrames, Measurements
 
 # ╔═╡ 77665012-5a65-4f89-9183-24d96fa5e62c
-md"# Schreiber et al. (2015)"
+md"""
+# [Schreiber et al. (2015)](https://doi.org/10.1051/0004-6361/201425017)
+"""
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""

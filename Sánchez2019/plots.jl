@@ -21,17 +21,17 @@ end;
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# Sánchez et al. (2019)
+# [Sánchez et al. (2019)](https://doi.org/10.1093/mnras/stz019)
 
-[SAMI galaxy survey](https://academic.oup.com/view-large/130412311)
+### [SAMI galaxy survey](https://academic.oup.com/view-large/130412311)
 
-[Table 1](https://academic.oup.com/view-large/130412182)
+### [Table 1](https://academic.oup.com/view-large/130412182)
 
-[Table 4](https://academic.oup.com/view-large/130412213)
+### [Table 4](https://academic.oup.com/view-large/130412213)
 
-[Table 5](https://academic.oup.com/view-large/130412215)
+### [Table 5](https://academic.oup.com/view-large/130412215)
 
-[Table 7](https://academic.oup.com/view-large/130412227)
+### [Table 7](https://academic.oup.com/view-large/130412227)
 """
 
 # ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6

@@ -11,7 +11,7 @@ using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, DataFramesMeta, FITS
 md"""
 # 3D-HST Survey
 
-[Photometry data](https://archive.stsci.edu/prepds/3d-hst/)
+### [Data](https://archive.stsci.edu/prepds/3d-hst/)
 """
 
 # ╔═╡ 68fd083c-613d-43b9-8ace-5ce42f5077ea

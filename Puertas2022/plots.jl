@@ -11,7 +11,7 @@ using CairoMakie, DelimitedFiles, LaTeXStrings, Measurements
 md"""
 # [Puertas et al. (2022)](https://doi.org/10.1051/0004-6361/202141571)
 
-### [Download](http://cdsarc.u-strasbg.fr/viz-bin/cat/J/A+A/666/A186#/browse)
+### [Data](http://cdsarc.u-strasbg.fr/viz-bin/cat/J/A+A/666/A186#/browse)
 """
 
 # ╔═╡ dd1d439d-47ee-4232-8524-c41115639c39

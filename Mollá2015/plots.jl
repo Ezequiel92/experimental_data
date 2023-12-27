@@ -9,9 +9,9 @@ using CairoMakie, CSV, DataFrames, LaTeXStrings
 
 # ╔═╡ 7aeeff01-b435-4b06-b69d-5011dc16e026
 md"""
-# Mollá et al. (2015)
+# [Mollá et al. (2015)](https://doi.org/10.1093/mnras/stv1102)
 
-[Table A3](https://academic.oup.com/view-large/78665042)
+### [Data](https://academic.oup.com/view-large/78665042)
 """
 
 # ╔═╡ 7c4df739-86e9-429a-bbb6-842679a93b44

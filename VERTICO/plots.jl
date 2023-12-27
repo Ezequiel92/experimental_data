@@ -19,7 +19,7 @@ end;
 
 # ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
 md"""
-# VERTICO
+# [VERTICO](https://www.verticosurvey.com/)
 
 ### [Leroy et al. (2019)](https://doi.org/10.3847/1538-4365/ab3925)
 ### [Brown et al. (2021)](https://doi.org/10.3847/1538-4365/ac28f5)

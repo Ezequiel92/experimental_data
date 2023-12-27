@@ -9,9 +9,9 @@ using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements
 
 # ╔═╡ 64fcb795-bb09-4dbc-bbe4-6f3df60dced7
 md"""
-# Tremonti et al. (2004)
+# [Tremonti et al. (2004)](https://doi.org/10.1086/423264)
 
-[Table 3](https://iopscience.iop.org/article/10.1086/423264/fulltext/59589.tables.html?doi=10.1086/423264)
+### [Data](https://iopscience.iop.org/article/10.1086/423264/fulltext/59589.tables.html?doi=10.1086/423264)
 """
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686

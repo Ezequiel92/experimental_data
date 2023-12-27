@@ -9,9 +9,9 @@ using CairoMakie, LaTeXStrings, DataFrames, Measurements, CSV
 
 # ╔═╡ a2533c07-a9bf-4600-aa67-c94e6cbb23b5
 md"""
-# Sotillo-Ramos et al. (2021)
+# [Sotillo-Ramos et al. (2021)](https://doi.org/10.1093/mnras/stab2641)
 
-[Table 3](https://academic.oup.com/view-large/304727848)
+### [Data](https://academic.oup.com/view-large/304727848)
 """
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686

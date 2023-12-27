@@ -23,9 +23,9 @@ end;
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Pilyugin et al. (2014)
+# [Pilyugin et al. 2014](https://doi.org/10.1088/0004-6256/147/6/131)
 
-[Table 2](https://iopscience.iop.org/1538-3881/147/6/131/suppdata/aj493749t2_ascii.txt?doi=10.1088/0004-6256/147/6/131)
+### [Data](https://iopscience.iop.org/1538-3881/147/6/131/suppdata/aj493749t2_ascii.txt?doi=10.1088/0004-6256/147/6/131)
 """
 
 # ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0

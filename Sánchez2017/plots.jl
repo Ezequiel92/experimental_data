@@ -9,9 +9,9 @@ using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Colors
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# Sánchez et al. (2017)
+# [Sánchez et al. (2017)](https://doi.org/10.1093/mnras/stx808)
 
-[Table B1](https://academic.oup.com/view-large/87568130)
+### [Data](https://academic.oup.com/view-large/87568130)
 """
 
 # ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6

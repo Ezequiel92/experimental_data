@@ -9,9 +9,9 @@ using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Measurements
 
 # ╔═╡ 77665012-5a65-4f89-9183-24d96fa5e62c
 md"""
-# Whitaker et al. (2014)
+# [Whitaker et al. (2014)](https://doi.org/10.1088/0004-637x/795/2/104)
 
-[Tables](https://doi.org/10.1088/0004-637X/795/2/104)
+### [Data](https://doi.org/10.1088/0004-637X/795/2/104)
 """
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686

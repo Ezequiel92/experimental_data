@@ -9,9 +9,9 @@ using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements, Unitful, UnitfulAs
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Bigiel et al. (2008)
+# [Bigiel et al. (2008)](https://doi.org/10.1088/0004-6256/136/6/2846)
 
-[Table 2](https://iopscience.iop.org/1538-3881/136/6/2846/suppdata/aj268500t2_ascii.txt?doi=10.1088/0004-6256/136/6/2846)
+### [Data](https://iopscience.iop.org/1538-3881/136/6/2846/suppdata/aj268500t2_ascii.txt?doi=10.1088/0004-6256/136/6/2846)
 """
 
 # ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0

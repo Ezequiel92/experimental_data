@@ -20,11 +20,11 @@ end;
 
 # ╔═╡ 48c1620d-ecff-4367-bda8-41a3a4ce587d
 md"""
-# Bigiel et al. (2010)
+# [Bigiel et al. (2010)](https://doi.org/10.1088/0004-6256/140/5/1194)
 
-[Table 2](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t2_mrt.txt?Expires=1704202683&Signature=s7ZpfS53WATAEWuvDIz1td3ThKZQRQURYYpaWSiWmmPXVF9wlPZOhFYx1NUTK2FKFpntJO4QxVXjJhb4e0Y6aKs-WjhQUc4NW6iS6y1ZKH6wteR7hWXz7tDvlMndGu0OSdSZzgmAj2FBG~AW9LpuGmr7j3jBsJZ3Q5QVsEAab4asNffjhJuDSZPOyOfMFRV7oJlLJbpslNe1SsPRlSvB8bZe9yz3XBq7Cgq5egVNY~LWJZV41ZHwKw37Ua6emyfpTCXEtY5us6J9OIioWm0vn-VTQERG85Y~080czaFXr~tiUtrw4g6BAOo6YyY2kji0Pjp7NW-NuEBW89Q7DwFcsQ__&Key-Pair-Id=KL1D8TIY3N7T8)
+### [Data 01](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t2_mrt.txt?Expires=1704202683&Signature=s7ZpfS53WATAEWuvDIz1td3ThKZQRQURYYpaWSiWmmPXVF9wlPZOhFYx1NUTK2FKFpntJO4QxVXjJhb4e0Y6aKs-WjhQUc4NW6iS6y1ZKH6wteR7hWXz7tDvlMndGu0OSdSZzgmAj2FBG~AW9LpuGmr7j3jBsJZ3Q5QVsEAab4asNffjhJuDSZPOyOfMFRV7oJlLJbpslNe1SsPRlSvB8bZe9yz3XBq7Cgq5egVNY~LWJZV41ZHwKw37Ua6emyfpTCXEtY5us6J9OIioWm0vn-VTQERG85Y~080czaFXr~tiUtrw4g6BAOo6YyY2kji0Pjp7NW-NuEBW89Q7DwFcsQ__&Key-Pair-Id=KL1D8TIY3N7T8)
 
-[Table 3](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t3_mrt.txt?Expires=1704202683&Signature=H3ZNBU07v69wcT13o6h0B8Hh4FmIUcKLyBhYOWabfrpiie8BGhMghB7yTrlG~ctSv1FSshNXtA-YKzhybp7nSI8to1ItRkyzzmhx9cGfGihNMPuiOwGM-tCWy5TpWDKQTRe9gBqhHZm8qgSwgEs8izt5~20fmVKtrF6-LFdjxmFy7goGxxhggAdlBudLk45WVzZay~Qfp2iCmb4eGGKJxvNuj3zuU89VK6YO2P3va1uOIwZdFM8RgP58KwwZMy18izr71Fiq7aTpusJ-qudA-wwl8eLRx~UeVcc1Lg4l88SbtKVQxJlyALuQL0hF2ng64kqHA9xBRzaFJRe13ITP3g__&Key-Pair-Id=KL1D8TIY3N7T8)
+### [Data 02](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t3_mrt.txt?Expires=1704202683&Signature=H3ZNBU07v69wcT13o6h0B8Hh4FmIUcKLyBhYOWabfrpiie8BGhMghB7yTrlG~ctSv1FSshNXtA-YKzhybp7nSI8to1ItRkyzzmhx9cGfGihNMPuiOwGM-tCWy5TpWDKQTRe9gBqhHZm8qgSwgEs8izt5~20fmVKtrF6-LFdjxmFy7goGxxhggAdlBudLk45WVzZay~Qfp2iCmb4eGGKJxvNuj3zuU89VK6YO2P3va1uOIwZdFM8RgP58KwwZMy18izr71Fiq7aTpusJ-qudA-wwl8eLRx~UeVcc1Lg4l88SbtKVQxJlyALuQL0hF2ng64kqHA9xBRzaFJRe13ITP3g__&Key-Pair-Id=KL1D8TIY3N7T8)
 """
 
 # ╔═╡ 780e6028-ab2f-44a4-bffd-edcd7e572d1c

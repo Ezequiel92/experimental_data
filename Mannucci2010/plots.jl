@@ -9,9 +9,9 @@ using  DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames
 
 # ╔═╡ e5c8a798-83a0-4be6-8606-cdbbc47141b2
 md"""
-# Mannucci et al. (2010)
+# [Mannucci et al. (2010)](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
 
-[Table 1](https://academic.oup.com/view-large/21366667)
+### [Data](https://academic.oup.com/view-large/21366667)
 """
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686

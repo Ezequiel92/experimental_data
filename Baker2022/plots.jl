@@ -9,7 +9,7 @@ using CairoMakie, LaTeXStrings, Measurements
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# Baker et al. (2022)
+# [Baker et al. (2022)](https://doi.org/10.1093/mnras/stac3413)
 """
 
 # ╔═╡ 7b50b0fe-6001-458b-8d89-0e53b161cf53

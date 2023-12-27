@@ -9,9 +9,9 @@ using DelimitedFiles, CairoMakie, LaTeXStrings, FITSIO, Statistics
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# xGASS
+# [xGASS](https://xgass.icrar.org/)
 
-[xGASS data](https://xgass.icrar.org/assets/data/xGASS_representative_sample.fits)
+### [Data](https://xgass.icrar.org/assets/data/xGASS_representative_sample.fits)
 """
 
 # ╔═╡ 30b5b786-9feb-4387-918b-9f26c85d0681

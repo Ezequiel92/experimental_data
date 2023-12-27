@@ -31,9 +31,9 @@ end;
 
 # ╔═╡ 7aeeff01-b435-4b06-b69d-5011dc16e026
 md"""
-# Thorne et al. (2021)
+# [Thorne et al. (2021)](https://doi.org/10.1093/mnras/stab1294)
 
-[Table D3](https://academic.oup.com/view-large/256108427)
+### [Data](https://academic.oup.com/view-large/256108427)
 """
 
 # ╔═╡ 75a6ab5f-ea1a-4eff-8f38-317b8037bf52
