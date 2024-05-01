@@ -22,9 +22,11 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: x64
-      - run: println("::set-output name=manifest_version::$(VERSION.major).$(VERSION.minor)")
-        shell: julia --color=yes {0}
-        id: manifest_version
+      #     "::set-output name={name}::{value}"
+      #     echo "{name}={value}" >> $GITHUB_OUTPUT
+      # - run: println("::set-output name=manifest_version::$(VERSION.major).$(VERSION.minor)")
+      #   shell: julia --color=yes {0}
+      #   id: manifest_version
       - name: Cache artifacts
         uses: actions/cache@v4
         env:
@@ -43,7 +45,7 @@ jobs:
       - run: julia --color=yes --project=@. -e 'import Pkg; Pkg.instantiate'
       - run: julia --color=yes --project=@. -e 'import Pkg; Pkg.update()'
       - run: git status
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: manifest_files
           path: Manifest.toml
