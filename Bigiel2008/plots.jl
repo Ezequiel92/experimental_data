@@ -1,11 +1,11 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.45
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
-using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements, Unitful, UnitfulAstro
+using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements, Unitful, UnitfulAstro, UnitfulAngles
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
@@ -215,6 +215,22 @@ let
 	f
 end
 
+# ╔═╡ b9e53bcc-33ef-4a1f-a1c6-88882064a6d2
+md"""
+# Physical radius
+"""
+
+# ╔═╡ f8c4c39b-f7ea-401c-9844-1d67a77eb13e
+let
+	# From Table 1 in F . Bigiel et al . (2008)
+	distances = [7.3, 11.1, 10.7, 4.7, 10.1, 8.0, 5.9] .* u"Mpc"
+	
+	# From Table 1 in F . Bigiel et al . (2008)
+	angles = [4.89, 3.71, 4.16, 3.88, 5.87, 3.88, 5.74] .* u"arcminute"
+
+	uconvert.(u"kpc", distances .* tan.(angles))
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -223,6 +239,7 @@ DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAngles = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
 UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
@@ -231,6 +248,7 @@ DelimitedFiles = "~1.9.1"
 LaTeXStrings = "~1.3.1"
 Measurements = "~2.11.0"
 Unitful = "~1.20.0"
+UnitfulAngles = "~0.7.2"
 UnitfulAstro = "~1.2.0"
 """
 
@@ -240,7 +258,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "bf161130d85c5cbed08937a93665dc3062c41648"
+project_hash = "9aab871936673fe2ef30d2fad32d9028be3b7541"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1676,5 +1694,7 @@ version = "3.5.0+0"
 # ╟─02f97852-4951-4853-bf20-508d6f859fef
 # ╟─66180e12-3e30-4394-8a24-561d0b282038
 # ╟─498ca06f-9d00-4b7c-9164-79a74732faea
+# ╟─b9e53bcc-33ef-4a1f-a1c6-88882064a6d2
+# ╠═f8c4c39b-f7ea-401c-9844-1d67a77eb13e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
