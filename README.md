@@ -480,3 +480,4 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 ### TODO
 
 [Messias2023](https://arxiv.org/abs/2312.02782)
+[Cheng2024](https://arxiv.org/abs/2407.10974)
