@@ -231,6 +231,41 @@ let
 	uconvert.(u"kpc", distances .* tan.(angles))
 end
 
+# ╔═╡ 22784fe9-a158-41e1-984f-729a9f8e6966
+md"""
+# Ranges
+"""
+
+# ╔═╡ a458947f-aa5e-460c-8e90-3d55a65f8ec3
+let
+	ΣH2_range = (3, 50) .* u"Msun*pc^-2"
+	logΣH2_range = round.(log10.(ustrip.(u"Msun*kpc^-2", ΣH2_range)); sigdigits=3)
+	
+	data = raw_data[1]
+	
+	A_error = parse.(Float64, split(data[end, 5], "+or-"))
+	N_error = parse.(Float64, split(data[end, 6], "+or-"))
+
+	A = A_error[1] ± A_error[2]
+	N = N_error[1] ± N_error[2]
+
+	logΣHs = log10.(uconvert.(Unitful.NoUnits, ΣH2_range ./ (10.0 * u"Msun*pc^-2")))
+	
+	logΣSFR = [A + N * logΣH for logΣH in logΣHs]
+	logΣSFR_range = round.(Measurements.value.(logΣSFR); sigdigits=3)
+
+	println("logΣH2 [Msun kpc^-2] range:        $(logΣH2_range)")
+	println("logΣSFR [Msun yr^-1 kpc^-2] range: $(logΣSFR_range)")
+end
+
+# ╔═╡ b48c8705-7320-4471-b532-41ee8a93c269
+let
+	ΣHI_max = 9 * u"Msun*pc^-2"
+	logΣHI_max = round(log10(ustrip(u"Msun*kpc^-2", ΣHI_max)); sigdigits=3)
+
+	println("logΣHI [Msun kpc^-2] max: $(logΣHI_max)")
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1696,5 +1731,8 @@ version = "3.5.0+0"
 # ╟─498ca06f-9d00-4b7c-9164-79a74732faea
 # ╟─b9e53bcc-33ef-4a1f-a1c6-88882064a6d2
 # ╠═f8c4c39b-f7ea-401c-9844-1d67a77eb13e
+# ╟─22784fe9-a158-41e1-984f-729a9f8e6966
+# ╠═a458947f-aa5e-460c-8e90-3d55a65f8ec3
+# ╠═b48c8705-7320-4471-b532-41ee8a93c269
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
