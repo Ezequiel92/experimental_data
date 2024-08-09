@@ -243,8 +243,8 @@ let
 	
 	data = raw_data[1]
 	
-	A_error = parse.(Float64, split(data[end, 5], "+or-"))
-	N_error = parse.(Float64, split(data[end, 6], "+or-"))
+	A_error = parse.(Float64, split(data[end, 2], "+or-"))
+	N_error = parse.(Float64, split(data[end, 3], "+or-"))
 
 	A = A_error[1] ± A_error[2]
 	N = N_error[1] ± N_error[2]
@@ -1726,9 +1726,9 @@ version = "3.5.0+0"
 # ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
 # ╟─fe0aaf10-f5a0-42e4-88e4-39132f117f4e
 # ╟─b3f75d55-83db-4c05-bb87-5d18a137adf5
-# ╟─02f97852-4951-4853-bf20-508d6f859fef
+# ╠═02f97852-4951-4853-bf20-508d6f859fef
 # ╟─66180e12-3e30-4394-8a24-561d0b282038
-# ╟─498ca06f-9d00-4b7c-9164-79a74732faea
+# ╠═498ca06f-9d00-4b7c-9164-79a74732faea
 # ╟─b9e53bcc-33ef-4a1f-a1c6-88882064a6d2
 # ╠═f8c4c39b-f7ea-401c-9844-1d67a77eb13e
 # ╟─22784fe9-a158-41e1-984f-729a9f8e6966
