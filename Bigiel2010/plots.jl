@@ -205,7 +205,7 @@ let
 	ax = Axis(
 		f[1,1],
 		xlabel=L"\mathrm{log(\Sigma_{H_I} \, / \, M_\odot \, pc^{-2})}", 
-		ylabel=L"\mathrm{\Sigma_{SFR} \, / \, M_\odot \, yr^{-1} \, kpc^{-2}}", 
+		ylabel=L"\mathrm{\Sigma_{SFR} \, / \, 10^{-5} \, M_\odot \, yr^{-1} \, kpc^{-2}}", 
 		title=L"\mathrm{%$(galaxy_list_02[n_gal])}",
 		titlesize=30,
 		xlabelsize=28,
@@ -238,6 +238,145 @@ let
 	)
 
 	f
+end
+
+# ╔═╡ 6797146a-b3a5-4cf0-bf2d-80f0934bb52b
+let
+
+	function limits(
+		list::Vector{Union{Missing, Float64}}, 
+		log::Bool, 
+		source_unit::Union{Unitful.Units,Unitful.Quantity},
+		target_unit::Unitful.Units,
+	)::Nothing
+
+		raw_limits = extrema(collect(skipmissings(list)[1]))
+
+		if log 
+			nice_limits = round.(
+				log10.(ustrip.(target_unit, exp10.(raw_limits) .* source_unit)); 
+				digits=2,
+			)
+		else
+			nice_limits = round.(
+				log10.(ustrip.(target_unit, raw_limits .* source_unit)); 
+				digits=2,
+			)
+		end
+
+		println("log10 range [$(target_unit)]: $(nice_limits)")
+
+		return nothing
+		
+	end
+
+	println("Table 2:\n")
+
+	println("HI:")
+
+	limits(
+		table_01_spirals[!, :logHI], 
+		true, 
+		u"Msun * pc^-2",
+		u"Msun * kpc^-2",
+	)
+
+	println("\nH2:")
+
+	limits(
+		table_01_spirals[!, :logH2], 
+		true, 
+		u"Msun * pc^-2",
+		u"Msun * kpc^-2",
+	)
+
+	println("\nSFR:")
+
+	limits(
+		table_01_spirals[!, :logSFR], 
+		true, 
+		u"Msun * kpc^-2 * yr^-1",
+		u"Msun * kpc^-2 * yr^-1",
+	)
+
+	println("\n\nTable 3:\n")
+
+	println("HI:")
+
+	limits(
+		table_02_spirals[!, :logHI], 
+		true, 
+		u"Msun * pc^-2",
+		u"Msun * kpc^-2",
+	)
+
+	println("\nSFR:")
+
+	limits(
+		table_02_spirals[!, :SFR], 
+		false, 
+		exp10(-5.0)u"Msun * kpc^-2 * yr^-1",
+		u"Msun * kpc^-2 * yr^-1",
+	)
+
+end
+
+# ╔═╡ 254b9b44-4025-4927-841f-f0d0b2062f23
+let
+
+	bigiel2008_spirals = [
+		"NGC 628", 
+		"NGC 3184",
+		"NGC 3521",
+		"NGC 4736",
+		"NGC 5055",
+		"NGC 5194",
+		"NGC 6946",
+	]
+
+	min_h2 = similar(bigiel2008_spirals, Float64)
+	max_h2 = similar(bigiel2008_spirals, Float64)
+	min_hi = similar(bigiel2008_spirals, Float64)
+	max_hi = similar(bigiel2008_spirals, Float64)
+	min_sfr = similar(bigiel2008_spirals, Float64)
+	max_sfr = similar(bigiel2008_spirals, Float64)
+
+	for (i, galaxy) in pairs(bigiel2008_spirals)
+
+		reduced_table = filter(:name => n -> n == galaxy, table_01_spirals)
+
+		logh2 = reduced_table[!, :logH2]
+		loghi = reduced_table[!, :logHI]
+		logsfr = reduced_table[!, :logSFR]
+
+		h2_idxs = map(ismissing, logh2)
+		hi_idxs = map(ismissing, loghi)
+		sfr_idxs = map(ismissing, logsfr)
+
+		delete_idxs = Vector{Bool}(h2_idxs .|| sfr_idxs .|| hi_idxs)
+
+		deleteat!(logh2, delete_idxs)
+		deleteat!(loghi, delete_idxs)
+		deleteat!(logsfr, delete_idxs)
+
+		min_h2[i], max_h2[i] = extrema(logh2)
+		min_hi[i], max_hi[i] = extrema(loghi)
+		min_sfr[i], max_sfr[i] = extrema(logsfr)
+
+	end
+
+	println("Ranges for spirals in Bigiel 2008 (seven spirals in Table 1):\n")
+
+	println(
+		"logΣH2 [Msun pc^-2] range: $((minimum(min_h2), maximum(max_h2)))"
+	)
+	println(
+		"logΣHI [Msun pc^-2] range: $((minimum(min_hi), maximum(max_hi)))"
+	)
+	println(
+		"logΣSFR [Msun yr^-1 kpc^-2] range: $((minimum(min_sfr), maximum(max_sfr)))"
+	)
+
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1774,5 +1913,7 @@ version = "3.6.0+0"
 # ╟─198d1cbd-dfe4-4dda-b04f-bea7f24421bb
 # ╟─5c39eaeb-b752-4564-8c61-306718be975f
 # ╟─8f9b6a09-d5f4-46b8-ba75-d69f27195368
+# ╟─6797146a-b3a5-4cf0-bf2d-80f0934bb52b
+# ╟─254b9b44-4025-4927-841f-f0d0b2062f23
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

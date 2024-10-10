@@ -59,6 +59,31 @@ let
 	f
 end
 
+# ╔═╡ 5554048c-c9e2-4960-b9df-484cd831be9f
+let
+	
+	# Ranges from Kennicutt (1998) (https://doi.org/10.1086/305588)
+	
+	println("Table 1 (normal spirals)\n")
+	
+	println("logΣHI      [Msun pc^-2]:        -0.41 to 1.37")
+	println("logΣH2      [Msun pc^-2]:        -0.71 to 1.63")
+	println("logΣ(HI+H2) [Msun pc^-2]:         0.25 to 1.7")
+	println("logΣSFR     [Msun yr^-1 kpc^-2]: -3.55 to -0.8")
+
+	println("\nTable 2 (infrared-selected circumnuclear starbursts)\n")
+
+	# Assumes there is no atomic gas so logΣH2 = logΣ(HI+H2) (Section 2.2)
+	println("logΣ(HI+H2) [Msun pc^-2]:         2.06 to 4.76")
+	println("logΣSFR     [Msun yr^-1 kpc^-2]: -1.11 to 2.98")
+
+	println("\nCombine\n")
+
+	println("logΣ(HI+H2) [Msun pc^-2]:         0.25 to 4.76")
+	println("logΣSFR     [Msun yr^-1 kpc^-2]: -3.55 to 2.98")
+	
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -76,7 +101,7 @@ Measurements = "~2.11.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.5"
 manifest_format = "2.0"
 project_hash = "ca9e1e1bdd48bea748526490528ededd5d0ff981"
 
@@ -1413,7 +1438,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.libfdk_aac_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1473,5 +1498,6 @@ version = "3.5.0+0"
 # ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
 # ╟─66180e12-3e30-4394-8a24-561d0b282038
 # ╟─498ca06f-9d00-4b7c-9164-79a74732faea
+# ╟─5554048c-c9e2-4960-b9df-484cd831be9f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
