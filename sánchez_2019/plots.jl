@@ -1,190 +1,61 @@
 ### A Pluto.jl notebook ###
 # v0.20.4
 
+#> [frontmatter]
+
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-using CairoMakie, LaTeXStrings, FITSIO
+# ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
+using CSV, CairoMakie, LaTeXStrings, DataFrames, Colors, FITSIO, Measurements
 
-# ╔═╡ c99f09f6-e92c-4279-bec5-24afa53cb837
-function filter_negatives(data_1::Vector, data_2::Vector)::NTuple{2,Vector}
-
-	data_a = copy(data_1)
-	data_b = copy(data_2)
-
-	# Filters out NaNs
-	deleteat!(data_b, collect(isnan.(data_a)))
-    filter!(!isnan, data_a)
-
-	deleteat!(data_a, collect(isnan.(data_b)))
-    filter!(!isnan, data_b)
-
-	# Filters out negative values (0 is allowed)
-	deleteat!(data_b, collect(data_a .< 0))
-    filter!(x -> x >= 0, data_a)
-
-	deleteat!(data_a, collect(data_b .< 0))
-    filter!(x -> x >= 0, data_b)
-
-	return data_a, data_b
+# ╔═╡ dfeea049-a273-45b2-9245-7a6fa9a1c820
+function parse_measurement(data::Vector)::Vector{Measurement{Float64}}
+	return [
+		measurement(
+			parse(Float64, match(r".*(?= \$\\pm)", val).match),
+			parse(Float64, match(r"(?<=\\pm\$ ).*", val).match),
+		) for val in data
+	]
 end;
 
-# ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-md"# [SDSS VACs](https://www.sdss.org/)"
-
-# ╔═╡ b9c6a0bd-10ae-4406-be37-07338d44f920
+# ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-## MaNGA Firefly value-added catalog
+# [Sánchez et al. (2019)](https://doi.org/10.1093/mnras/stz019)
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-firefly-value-added-catalog/)
+### [SAMI galaxy survey](https://academic.oup.com/view-large/130412311)
 
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_FIREFLY/FIREFLY_VER/manga_firefly.html)
+### [Table 1](https://academic.oup.com/view-large/130412182)
+
+### [Table 4](https://academic.oup.com/view-large/130412213)
+
+### [Table 5](https://academic.oup.com/view-large/130412215)
+
+### [Table 7](https://academic.oup.com/view-large/130412227)
 """
 
-# ╔═╡ 3d2c7655-f630-4ccb-8f40-38d41771dea8
-MaNGA_data = FITS("./data/manga-firefly-globalprop-v3_1_1-miles.fits")[2];
+# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
+md"## Measurements"
 
-# ╔═╡ 452718b6-7a7c-42c4-a2f5-6a9843b95057
-let
-	masses    = read(MaNGA_data, "PHOTOMETRIC_MASS")
-	redshifts = read(MaNGA_data, "REDSHIFT")
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
-
-	f
-end
-
-# ╔═╡ 8571241d-c988-4a17-839f-bfe67ce7189b
-md"""
-##  eBOSS Firefly Value-Added Catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/spectro/eboss-firefly-value-added-catalog)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/EBOSS_FIREFLY/FIREFLY_VER/sdss_eboss_firefly-DR16.html)
-"""
-
-# ╔═╡ 9007db12-d49a-479c-97f5-d87bafbe0a91
-if isfile("./data/sdss_eboss_firefly-dr16.fits")
-	eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2]
-end;
-
-# ╔═╡ 2864f808-f423-492a-8f2f-796fcb99e713
-let
-	if isfile("./data/sdss_eboss_firefly-dr16.fits")
-		IMF     = "Chabrier" # Options: Chabrier
-		LIBRARY = "MILES"    # Options: MILES or ELODIE
-
-		masses = read(eBOSS_data, "$(IMF)_$(LIBRARY)_total_mass")
-		ages   = read(eBOSS_data, "$(IMF)_$(LIBRARY)_age_lightW")
-
-		set_theme!(theme_black())
-
-		f = Figure()
-
-		ax = Axis(
-			f[1,1],
-			xlabel=L"\mathrm{M_\star / M_\odot}",
-			ylabel=L"\mathrm{age / yr}",
-			title=L"\mathrm{Light \,\, weighted \,\, age \,\, vs. \,\, Total \,\, mass}",
-			titlesize=30,
-			xlabelsize=28,
-			ylabelsize=28,
-			xticklabelsize=20,
-			yticklabelsize=20,
-			xscale=log10,
+# ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+begin
+	raw_gd = FITS("./data/published_table.fits")[2]
+	cols = FITSIO.colnames(raw_gd)
+	global_data = DataFrame()
+	for i in 2:2:(length(cols)-1)
+		global_data[:, cols[i]] = map(
+			x -> isnan(Measurements.value(x)) ? NaN : x, read(raw_gd, cols[i]) .± read(raw_gd, cols[i+1])
 		)
-
-		x, y = filter_negatives(masses, ages)
-
-		scatter!(ax, x, y, markersize=2)
-
-		f
-	else
-		println("sdss_eboss_firefly-dr16.fits is not included in the repository because is too heavy. See the README for a link to download it.")
 	end
+	global_data
 end
 
-# ╔═╡ e969d495-005e-44fb-8d17-f438038840c9
-md"""
-## MaNGA Pipe3D value added catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-pipe3d-value-added-catalog/)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_PIPE3D/MANGADRP_VER/PIPE3D_VER/SDSS17Pipe3D.html)
-"""
-
-# ╔═╡ ad14cd2e-6768-469e-8268-fefddf00c2b7
-Pipe3D_data = FITS("./data/SDSS17Pipe3D_v3_1_1.fits")[2];
-
-# ╔═╡ 7aec17e9-99fc-4cdf-96a1-6c97c3312d55
+# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
 let
-	WEIGHT = "M"  # Options: M (mass) or L (light)
-	SFR    = "Ha" # Options: Ha, ssp, SF or D_C
-
-	sfr         = read(Pipe3D_data, "log_SFR_$SFR")
-	masses      = read(Pipe3D_data, "log_Mass")
-	metallicity = read(Pipe3D_data, "ZH_$(WEIGHT)W_Re_fit")
-	ages        = read(Pipe3D_data, "Age_$(WEIGHT)W_Re_fit")
-	redshifts   = read(Pipe3D_data, "nsa_redshift")
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
-
-	f
-end
-
-# ╔═╡ 1b261741-4082-4ad8-abd9-3c2695453185
-md"""
-## HI-MaNGA value added catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/manga/hi-manga/)
-
-#### [Datamodel](https://arxiv.org/abs/2101.12680)
-"""
-
-# ╔═╡ 243e1c76-73c8-45ac-ac32-f9bb43725d0b
-HI_MaNGA_data = FITS("./data/himanga_dr2.fits")[2];
-
-# ╔═╡ 7e87d278-74ed-4646-a36d-247f8aea159f
-let
-	HI_masses = read(HI_MaNGA_data, "LOGMHI")
-	masses    = read(HI_MaNGA_data, "LOGMSTARS")
+	log_mass     = Measurements.value.(global_data[!, "log_mass"])
+	log_sfr      = Measurements.value.(global_data[!, "log_sfr"])
+	log_mass_err = Measurements.uncertainty.(global_data[!, "log_mass"])
+	log_sfr_err  = Measurements.uncertainty.(global_data[!, "log_sfr"])
 
 	set_theme!(theme_black())
 
@@ -193,8 +64,8 @@ let
 	ax = Axis(
 		f[1,1],
 		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
-		ylabel=L"\log(\mathrm{M_\mathrm{HI} / M_\odot})",
-		title=L"\mathrm{HI \,\, mass \,\, vs. \,\, Stellar \,\, mass}",
+		ylabel=L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})",
+		title=L"\mathrm{SFR \,\, vs. \,\, Mass}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -202,9 +73,412 @@ let
 		yticklabelsize=20,
 	)
 
-	x, y = filter_negatives(masses, HI_masses)
+	errorbars!(
+		ax,
+		log_mass,
+		log_sfr,
+		log_sfr_err,
+		whiskerwidth=8,
+		color=:blue,
+	)
+	errorbars!(
+		ax,
+		log_mass,
+		log_sfr,
+		log_mass_err,
+		whiskerwidth=8,
+		color=:blue,
+		direction=:x,
+	)
+	scatter!(ax, log_mass, log_sfr, color=:red, markersize=5)
 
-	scatter!(ax, x, y, markersize=2)
+	f
+end
+
+# ╔═╡ 704e36c5-24b8-421c-aef6-3ae8e05f28ad
+md"## Fits"
+
+# ╔═╡ d469d49f-e678-4ba9-abe9-5b08e4cbbd17
+md"""
+### Mass Metallicity relation (MZR)
+
+#### Best fit
+
+``y = a + b \, (x - c) \, \exp(-(x - c))``
+
+#### Polynomial fit
+
+``y = \displaystyle\sum_{i = 0}^{3} p_i \, x^i``
+
+where ``y = 12 + \log(\mathrm{O / H})``, ``x = \log(\mathrm{M_\star / M_\odot}) − 8`` and ``c = 3.5``.
+"""
+
+# ╔═╡ 0d31d0c2-afc0-4685-86e5-a0bfe21afc4c
+begin
+	raw_table_1 = CSV.read("./data/table_1.csv", DataFrame, header=2, comment="%")
+	table_1 = DataFrame(
+		indicator = raw_table_1[:, "Indicator"],
+		a         = parse_measurement(raw_table_1[:, "\$a\$"]),
+		b         = parse_measurement(raw_table_1[:, "\$b\$"]),
+		p0        = parse_measurement(raw_table_1[:, "\$p_0\$"]),
+		p1        = parse_measurement(raw_table_1[:, "\$p_1\$"]),
+		p2        = parse_measurement(raw_table_1[:, "\$p_2\$"]),
+		p3        = parse_measurement(raw_table_1[:, "\$p_3\$"]),
+	)
+end
+
+# ╔═╡ cf8df0da-1760-464e-9531-42ba2ef2c7aa
+let
+	c          = 3.5
+	indicators = table_1[:, :indicator]
+	a_s        = Measurements.value.(table_1[:, :a])
+	b_s        = Measurements.value.(table_1[:, :b])
+ 	y_s        = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 8",
+		ylabel=L"12 + \log(\mathrm{O / H})",
+		title=L"\mathrm{MZR  \,\, best  \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 0.5:0.05:3, y; color, linewidth=3, label)
+	end
+
+	axislegend(ax, position=:rb, nbanks=3, orientation=:horizontal)
+
+	f
+end
+
+# ╔═╡ 5705382a-bad5-4c65-b1fe-12f3ff20d872
+let
+	indicators = table_1[:, :indicator]
+	p0_s       = Measurements.value.(table_1[:, :p0])
+	p1_s       = Measurements.value.(table_1[:, :p1])
+	p2_s       = Measurements.value.(table_1[:, :p2])
+	p3_s       = Measurements.value.(table_1[:, :p3])
+ 	y_s        = [
+		x -> p0 + p1 * x + p2 * x^2 + p3 * x^3 for (p0, p1, p2, p3)
+		in zip(p0_s, p1_s, p2_s, p3_s)
+	]
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 8",
+		ylabel=L"12 + \log(\mathrm{O / H})",
+		title=L"\mathrm{MZR \,\, polynomial \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 0.5:0.05:3, y; color, linewidth=3, label)
+	end
+
+	axislegend(ax, position=:lt, nbanks=3, orientation=:horizontal)
+
+	f
+end
+
+# ╔═╡ 3932dd4a-e683-4f18-bbc6-b7e65eabe867
+md"""
+### Fundamental Mass Metallicity relation (FMR)
+
+#### Best fit
+
+``y = a + b \, (x - c) \, \exp(-(x - c))``
+
+#### Polynomial fit
+
+``y = \displaystyle\sum_{i = 0}^{3} p_i \, x^i``
+
+where
+
+``y = 12 + \log(\mathrm{O / H})``
+
+``x = μ - 8``
+
+``μ = \log(\mathrm{M_\star / M_\odot}) − 0.32 \, \log(\mathrm{SFR / M_\odot \, yr^{-1}})``
+
+``c = 3.5``.
+"""
+
+# ╔═╡ 3d2e76f8-6092-44af-a4d4-6e02e23311e5
+begin
+	raw_table_4 = CSV.read("./data/table_4.csv", DataFrame, header=2, comment="%")
+	table_4 = DataFrame(
+		indicator = raw_table_4[:, "Indicator"],
+		a         = parse_measurement(raw_table_4[:, "\$a\$"]),
+		b         = parse_measurement(raw_table_4[:, "\$b\$"]),
+		p0        = parse_measurement(raw_table_4[:, "\$p_0\$"]),
+		p1        = parse_measurement(raw_table_4[:, "\$p_1\$"]),
+		p2        = parse_measurement(raw_table_4[:, "\$p_2\$"]),
+		p3        = parse_measurement(raw_table_4[:, "\$p_3\$"]),
+	)
+end
+
+# ╔═╡ 2266aa08-eec0-4b18-92ab-64ebdcbb92f5
+let
+	c          = 3.5
+	indicators = table_4[:, :indicator]
+	a_s        = Measurements.value.(table_4[:, :a])
+	b_s        = Measurements.value.(table_4[:, :b])
+ 	y_s        = [x -> a + b * (x - c) * exp(-(x - c)) for (a, b) in zip(a_s, b_s)]
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\mu - 8",
+		ylabel=L"12 + \log(\mathrm{O / H})",
+		title=L"\mathrm{FMR  \,\, best  \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 1:0.05:3, y; color, linewidth=3, label)
+	end
+
+	axislegend(ax, position=:rb, nbanks=3, orientation=:horizontal)
+
+	f
+end
+
+# ╔═╡ ab335c39-0907-4bad-b659-724f7122303c
+let
+	indicators = table_4[:, :indicator]
+	p0_s       = Measurements.value.(table_4[:, :p0])
+	p1_s       = Measurements.value.(table_4[:, :p1])
+	p2_s       = Measurements.value.(table_4[:, :p2])
+	p3_s       = Measurements.value.(table_4[:, :p3])
+ 	y_s        = [
+		x -> p0 + p1 * x + p2 * x^2 + p3 * x^3 for (p0, p1, p2, p3)
+		in zip(p0_s, p1_s, p2_s, p3_s)
+	]
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 8",
+		ylabel=L"12 + \log(\mathrm{O / H})",
+		title=L"\mathrm{FMR  \,\, polynomial  \,\, fit}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		length(indicators),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (label, y, color) in zip(indicators, y_s, colors)
+		lines!(ax, 1:0.05:3, y; color, linewidth=3, label)
+	end
+
+	axislegend(ax, position=:lt, nbanks=3, orientation=:horizontal)
+
+	f
+end
+
+# ╔═╡ 96a8cf9f-be9e-499e-ab48-0d72f02318f7
+md"""
+### Fundamental Mass Metallicity relation d (FMRd)
+
+#### Best fit
+
+``y = a + b \, (x + d \, s - c) \, \exp(-(x + d \, s - c))``
+
+#### Polynomial fit
+
+``y = \displaystyle\sum_{i = 0}^{3} p_i \, x_d^i``
+
+where
+
+``y = 12 + \log(\mathrm{O / H})``
+
+``x = \log(\mathrm{M_\star / M_\odot}) - 8``
+
+``s = \log(\mathrm{SFR / M_\odot \, yr^{-1}})``
+
+``c = 3.5``
+"""
+
+# ╔═╡ eb67f33e-c523-43d4-b752-2207aeebdbd0
+begin
+	raw_table_5 = CSV.read("./data/table_5.csv", DataFrame, header=2, comment="%")
+	table_5 = DataFrame(
+		indicator = raw_table_5[:, "Indicator"],
+		a = parse_measurement(raw_table_5[:, "\$a\$"]),
+		b = parse_measurement(raw_table_5[:, "\$b\$"]),
+		d = parse_measurement(raw_table_5[:, "\$d\$"]),
+		dp = parse_measurement(raw_table_5[:, "\$dp\$"]),
+	)
+end
+
+# ╔═╡ b5ba7173-2217-4483-af30-cce18381b69f
+let
+	# x = L"\log(M_\star / M_\odot) - 8"
+	# y = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})"
+	# z = L"12 + \log(\mathrm{O / H})"
+
+	c          = 3.5
+	indicators = table_5[:, :indicator]
+	a_s        = Measurements.value.(table_5[:, :a])
+	b_s        = Measurements.value.(table_5[:, :b])
+	d_s        = Measurements.value.(table_5[:, :d])
+ 	z_s        = [
+		(x, y) -> a + b * (x + d * y - c) * exp(-(x + d * y - c)) for
+		(a, b, d) in zip(a_s, b_s, d_s)
+	]
+
+	set_theme!(theme_black())
+
+	f = Figure(size=(1000, 600))
+
+	colors = distinguishable_colors(
+		length(indicators),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
+		ax = Axis3(
+			f[mod1(i, 3), mod1(i, 4)],
+			xlabel=L"x",
+			ylabel=L"y",
+			zlabel=L"z",
+			title=L"\mathrm{%$title}",
+			titlesize=30,
+			xlabelsize=22,
+			ylabelsize=22,
+			zlabelsize=22,
+			xticklabelsize=16,
+			yticklabelsize=16,
+			zticklabelsize=16,
+		)
+		surface!(ax, 1:0.05:3, -1.5:0.01:-1, z; color)
+	end
+
+	f
+end
+
+# ╔═╡ 255fc776-c31a-4f88-bb98-dd069f3485e8
+md"""
+### Fundamental Mass Metallicity relation d (FMRd)
+
+#### Best fit
+
+``y = α \, s + β \, x + γ``
+
+where
+
+``y = \log(\mathrm{M_\star / M_\odot})``
+
+``x = 12 + \log(\mathrm{O / H})``
+
+``s = \log(\mathrm{SFR / M_\odot \, yr^{-1}})``
+"""
+
+# ╔═╡ 5d3cc3ad-0f29-43b1-a176-417d520586e5
+begin
+	raw_table_7 = CSV.read("./data/table_7.csv", DataFrame, header=2, comment="%")
+	table_7 = DataFrame(
+		indicator = raw_table_7[:, "Indicator"],
+		α = parse_measurement(raw_table_7[:, "\$\\alpha\$"]),
+		β = parse_measurement(raw_table_7[:, "\$\\beta\$"]),
+		γ = parse_measurement(raw_table_7[:, "\$\\gamma\$"]),
+	)
+end
+
+# ╔═╡ 183fca81-6140-4b94-8ce3-9ed8040f7f30
+let
+	# x = L"12 + \log(\mathrm{O / H})"
+	# y = L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})"
+	# z = L"\log(M_\star / M_\odot)"
+
+	indicators = table_7[:, :indicator]
+	α_s        = Measurements.value.(table_7[:, :α])
+	β_s        = Measurements.value.(table_7[:, :β])
+	γ_s        = Measurements.value.(table_7[:, :γ])
+ 	z_s        = [
+		(x, y) -> α * y + β * x + γ for (α, β, γ) in zip(α_s, β_s, γ_s)
+	]
+
+	set_theme!(theme_black())
+
+	f = Figure(size=(1000, 600))
+
+	colors = distinguishable_colors(
+		length(indicators),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed = true,
+	)
+
+	for (i, (title, z, color)) in enumerate(zip(indicators, z_s, colors))
+		ax = Axis3(
+			f[mod1(i, 3), mod1(i, 4)],
+			xlabel=L"x",
+			ylabel=L"y",
+			zlabel=L"z",
+			title=L"\mathrm{%$title}",
+			titlesize=30,
+			xlabelsize=22,
+			ylabelsize=22,
+			zlabelsize=22,
+			xticklabelsize=16,
+			yticklabelsize=16,
+			zticklabelsize=16,
+		)
+		surface!(ax, 8:0.01:9, -1.5:0.01:-1, z; color)
+	end
 
 	f
 end
@@ -212,14 +486,22 @@ end
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
+CSV = "~0.10.15"
 CairoMakie = "~0.13.2"
+Colors = "~0.13.0"
+DataFrames = "~1.7.0"
 FITSIO = "~0.17.4"
 LaTeXStrings = "~1.4.0"
+Measurements = "~2.12.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -228,7 +510,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.4"
 manifest_format = "2.0"
-project_hash = "ef55ee04a227ce19f6f23d36d38fa3a1b80be6ed"
+project_hash = "772cf0737eaf73eafdfd64623f1498ef418bcbe6"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -337,6 +619,12 @@ git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
 uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
 version = "1.0.1+0"
 
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
+git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.15"
+
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
 git-tree-sha1 = "71aa551c5c33f1a4415867fe06b7844faadb0ae9"
@@ -355,6 +643,12 @@ git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
 
+[[deps.Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "9cb23bbb1127eefb022b022481466c0f1127d430"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.2"
+
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
 git-tree-sha1 = "1713c74e00545bfe14605d2a2be1712de8fbcb58"
@@ -364,6 +658,12 @@ weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
     ChainRulesCoreSparseArraysExt = "SparseArrays"
+
+[[deps.CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "962834c22b66e32aa10f7611c08c8ca4e20749a9"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.8"
 
 [[deps.ColorBrewer]]
 deps = ["Colors", "JSON"]
@@ -434,10 +734,21 @@ git-tree-sha1 = "439e35b0b36e2e5881738abc8857bd92ad6ff9a8"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.3"
 
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
+
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "fb61b4812c49343d7ef0b533ba982c46021938a6"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.7.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -631,6 +942,11 @@ git-tree-sha1 = "846f7026a9decf3679419122b49f8a1fdb48d2d5"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.16+0"
 
+[[deps.Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+version = "1.11.0"
+
 [[deps.GeoFormatTypes]]
 git-tree-sha1 = "8e233d5167e63d708d41f87597433f59a0f213fe"
 uuid = "68eda718-8dee-11e9-39e7-89f7f65f511f"
@@ -747,6 +1063,19 @@ git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
 
+[[deps.InlineStrings]]
+git-tree-sha1 = "6a9fde685a7ac1eb3495f8e812c5a7c3711c2d5e"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.4.3"
+
+    [deps.InlineStrings.extensions]
+    ArrowTypesExt = "ArrowTypes"
+    ParsersExt = "Parsers"
+
+    [deps.InlineStrings.weakdeps]
+    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+    Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
 git-tree-sha1 = "0f14a5456bdc6b9731a5682f439a672750a09e48"
@@ -810,6 +1139,11 @@ weakdeps = ["Dates", "Test"]
     [deps.InverseFunctions.extensions]
     InverseFunctionsDatesExt = "Dates"
     InverseFunctionsTestExt = "Test"
+
+[[deps.InvertedIndices]]
+git-tree-sha1 = "6da3c4316095de0f5ee2ebd875df8721e7e0bdbe"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.3.1"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "e2222959fbc6c19554dc15174c81bf7bf3aa691c"
@@ -1047,6 +1381,28 @@ deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.6+0"
 
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf"]
+git-tree-sha1 = "3019b28107f63ee881f5883da916dd9b6aa294c1"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.12.0"
+
+    [deps.Measurements.extensions]
+    MeasurementsBaseTypeExt = "BaseType"
+    MeasurementsJunoExt = "Juno"
+    MeasurementsMakieExt = "Makie"
+    MeasurementsRecipesBaseExt = "RecipesBase"
+    MeasurementsSpecialFunctionsExt = "SpecialFunctions"
+    MeasurementsUnitfulExt = "Unitful"
+
+    [deps.Measurements.weakdeps]
+    BaseType = "7fbed51b-1ef5-4d67-9085-a4a9b26f478c"
+    Juno = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
 [[deps.Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "ec4f7fbeab05d7747bdf98eb74d130a2a2ed298d"
@@ -1227,6 +1583,12 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "36d8b4b899628fb92c2749eb488d884a926614d3"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.3"
+
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
 git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
@@ -1238,6 +1600,12 @@ deps = ["TOML"]
 git-tree-sha1 = "9306f6085165d270f7e3db02af26a400d580f5c6"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.3"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
+git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "2.4.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1347,6 +1715,12 @@ deps = ["Dates"]
 git-tree-sha1 = "3bac05bc7e74a75fd9cba4295cde4045d9fe2386"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.1"
+
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "712fb0231ee6f9120e005ccd56297abbc053e7e0"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.4.8"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1473,6 +1847,12 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
     StatsFunsChainRulesCoreExt = "ChainRulesCore"
     StatsFunsInverseFunctionsExt = "InverseFunctions"
 
+[[deps.StringManipulation]]
+deps = ["PrecompileTools"]
+git-tree-sha1 = "725421ae8e530ec29bcbdddbe91ff8053421d023"
+uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
+version = "0.4.1"
+
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
 git-tree-sha1 = "5a3a31c41e15a1e042d60f2f4942adccba05d3c9"
@@ -1582,6 +1962,12 @@ weakdeps = ["ConstructionBase", "InverseFunctions"]
     ConstructionBaseUnitfulExt = "ConstructionBase"
     InverseFunctionsUnitfulExt = "InverseFunctions"
 
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
 [[deps.WebP]]
 deps = ["CEnum", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "libwebp_jll"]
 git-tree-sha1 = "aa1ca3c47f119fbdae8770c29820e5e6119b83f2"
@@ -1593,6 +1979,11 @@ deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "1.0.0"
+
+[[deps.WorkerUtilities]]
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
+uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
+version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -1748,20 +2139,26 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-# ╟─c99f09f6-e92c-4279-bec5-24afa53cb837
-# ╟─0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-# ╟─b9c6a0bd-10ae-4406-be37-07338d44f920
-# ╠═3d2c7655-f630-4ccb-8f40-38d41771dea8
-# ╟─452718b6-7a7c-42c4-a2f5-6a9843b95057
-# ╟─8571241d-c988-4a17-839f-bfe67ce7189b
-# ╠═9007db12-d49a-479c-97f5-d87bafbe0a91
-# ╟─2864f808-f423-492a-8f2f-796fcb99e713
-# ╟─e969d495-005e-44fb-8d17-f438038840c9
-# ╠═ad14cd2e-6768-469e-8268-fefddf00c2b7
-# ╟─7aec17e9-99fc-4cdf-96a1-6c97c3312d55
-# ╟─1b261741-4082-4ad8-abd9-3c2695453185
-# ╠═243e1c76-73c8-45ac-ac32-f9bb43725d0b
-# ╟─7e87d278-74ed-4646-a36d-247f8aea159f
+# ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
+# ╟─dfeea049-a273-45b2-9245-7a6fa9a1c820
+# ╟─bc031ef8-6fa2-4feb-a354-000960395686
+# ╟─072bddde-dece-4d9f-990b-e374038ba7e6
+# ╟─75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
+# ╟─704e36c5-24b8-421c-aef6-3ae8e05f28ad
+# ╟─d469d49f-e678-4ba9-abe9-5b08e4cbbd17
+# ╟─0d31d0c2-afc0-4685-86e5-a0bfe21afc4c
+# ╟─cf8df0da-1760-464e-9531-42ba2ef2c7aa
+# ╟─5705382a-bad5-4c65-b1fe-12f3ff20d872
+# ╟─3932dd4a-e683-4f18-bbc6-b7e65eabe867
+# ╟─3d2e76f8-6092-44af-a4d4-6e02e23311e5
+# ╟─2266aa08-eec0-4b18-92ab-64ebdcbb92f5
+# ╟─ab335c39-0907-4bad-b659-724f7122303c
+# ╟─96a8cf9f-be9e-499e-ab48-0d72f02318f7
+# ╟─eb67f33e-c523-43d4-b752-2207aeebdbd0
+# ╟─b5ba7173-2217-4483-af30-cce18381b69f
+# ╟─255fc776-c31a-4f88-bb98-dd069f3485e8
+# ╟─5d3cc3ad-0f29-43b1-a176-417d520586e5
+# ╟─183fca81-6140-4b94-8ce3-9ed8040f7f30
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

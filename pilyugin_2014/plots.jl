@@ -4,147 +4,59 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-using CairoMakie, LaTeXStrings, FITSIO
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using CairoMakie, LaTeXStrings, DelimitedFiles, Measurements
 
-# ╔═╡ c99f09f6-e92c-4279-bec5-24afa53cb837
-function filter_negatives(data_1::Vector, data_2::Vector)::NTuple{2,Vector}
+# ╔═╡ 2f326d2c-7945-4205-8171-810918b021e8
+function parse_measurement(values::Vector)::Vector{Measurement}
 
-	data_a = copy(data_1)
-	data_b = copy(data_2)
+	output = similar(values, Measurement)
 
-	# Filters out NaNs
-	deleteat!(data_b, collect(isnan.(data_a)))
-    filter!(!isnan, data_a)
-
-	deleteat!(data_a, collect(isnan.(data_b)))
-    filter!(!isnan, data_b)
-
-	# Filters out negative values (0 is allowed)
-	deleteat!(data_b, collect(data_a .< 0))
-    filter!(x -> x >= 0, data_a)
-
-	deleteat!(data_a, collect(data_b .< 0))
-    filter!(x -> x >= 0, data_b)
-
-	return data_a, data_b
-end;
-
-# ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-md"# [SDSS VACs](https://www.sdss.org/)"
-
-# ╔═╡ b9c6a0bd-10ae-4406-be37-07338d44f920
-md"""
-## MaNGA Firefly value-added catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-firefly-value-added-catalog/)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_FIREFLY/FIREFLY_VER/manga_firefly.html)
-"""
-
-# ╔═╡ 3d2c7655-f630-4ccb-8f40-38d41771dea8
-MaNGA_data = FITS("./data/manga-firefly-globalprop-v3_1_1-miles.fits")[2];
-
-# ╔═╡ 452718b6-7a7c-42c4-a2f5-6a9843b95057
-let
-	masses    = read(MaNGA_data, "PHOTOMETRIC_MASS")
-	redshifts = read(MaNGA_data, "REDSHIFT")
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
-
-	f
-end
-
-# ╔═╡ 8571241d-c988-4a17-839f-bfe67ce7189b
-md"""
-##  eBOSS Firefly Value-Added Catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/spectro/eboss-firefly-value-added-catalog)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/EBOSS_FIREFLY/FIREFLY_VER/sdss_eboss_firefly-DR16.html)
-"""
-
-# ╔═╡ 9007db12-d49a-479c-97f5-d87bafbe0a91
-if isfile("./data/sdss_eboss_firefly-dr16.fits")
-	eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2]
-end;
-
-# ╔═╡ 2864f808-f423-492a-8f2f-796fcb99e713
-let
-	if isfile("./data/sdss_eboss_firefly-dr16.fits")
-		IMF     = "Chabrier" # Options: Chabrier
-		LIBRARY = "MILES"    # Options: MILES or ELODIE
-
-		masses = read(eBOSS_data, "$(IMF)_$(LIBRARY)_total_mass")
-		ages   = read(eBOSS_data, "$(IMF)_$(LIBRARY)_age_lightW")
-
-		set_theme!(theme_black())
-
-		f = Figure()
-
-		ax = Axis(
-			f[1,1],
-			xlabel=L"\mathrm{M_\star / M_\odot}",
-			ylabel=L"\mathrm{age / yr}",
-			title=L"\mathrm{Light \,\, weighted \,\, age \,\, vs. \,\, Total \,\, mass}",
-			titlesize=30,
-			xlabelsize=28,
-			ylabelsize=28,
-			xticklabelsize=20,
-			yticklabelsize=20,
-			xscale=log10,
-		)
-
-		x, y = filter_negatives(masses, ages)
-
-		scatter!(ax, x, y, markersize=2)
-
-		f
-	else
-		println("sdss_eboss_firefly-dr16.fits is not included in the repository because is too heavy. See the README for a link to download it.")
+	for (i, pair) in enumerate(values)
+		val_str, err_str = split(pair, "+or-")
+		output[i] = parse(Float64, val_str) ± parse(Float64, err_str)
 	end
-end
 
-# ╔═╡ e969d495-005e-44fb-8d17-f438038840c9
+	return output
+
+end;
+
+# ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-## MaNGA Pipe3D value added catalog
+# [Pilyugin et al. 2014](https://doi.org/10.1088/0004-6256/147/6/131)
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-pipe3d-value-added-catalog/)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_PIPE3D/MANGADRP_VER/PIPE3D_VER/SDSS17Pipe3D.html)
+### [Data](https://iopscience.iop.org/1538-3881/147/6/131/suppdata/aj493749t2_ascii.txt?doi=10.1088/0004-6256/147/6/131)
 """
 
-# ╔═╡ ad14cd2e-6768-469e-8268-fefddf00c2b7
-Pipe3D_data = FITS("./data/SDSS17Pipe3D_v3_1_1.fits")[2];
+# ╔═╡ 27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+raw_data = readdlm("./data/aj493749t2_ascii.txt", skipstart=6, header=false);
 
-# ╔═╡ 7aec17e9-99fc-4cdf-96a1-6c97c3312d55
+# ╔═╡ 7b50b0fe-6001-458b-8d89-0e53b161cf53
+md"""
+# Fits
+
+## Oxygen abundance:
+
+``12 + \log(\mathrm{O / H}) = 12 + \log(\mathrm{O / H})_{R_0} + C_{O/H} \times (R / R_{25})``.
+"""
+
+# ╔═╡ a324e8e5-2dd0-4666-968a-4ddb0511462c
 let
-	WEIGHT = "M"  # Options: M (mass) or L (light)
-	SFR    = "Ha" # Options: Ha, ssp, SF or D_C
+	labels   = raw_data[:, 1]
 
-	sfr         = read(Pipe3D_data, "log_SFR_$SFR")
-	masses      = read(Pipe3D_data, "log_Mass")
-	metallicity = read(Pipe3D_data, "ZH_$(WEIGHT)W_Re_fit")
-	ages        = read(Pipe3D_data, "Age_$(WEIGHT)W_Re_fit")
-	redshifts   = read(Pipe3D_data, "nsa_redshift")
+	logOH_R0 = parse_measurement(raw_data[:, 2])
+	COH_R25  = parse_measurement(raw_data[:, 3])
+	COH_kpc  = parse_measurement(raw_data[:, 4])
+	σ_logOH  = Float64.(raw_data[:, 5])
+
+	values = [
+		[Measurements.value(a + b * R) for R in 0:0.01:10] for
+		(a, b) in zip(logOH_R0, COH_kpc)
+	]
+	uncertainties = [
+		[Measurements.uncertainty(a + b * R) for R in 0:0.01:10] for
+		(a, b) in zip(logOH_R0, COH_kpc)
+	]
 
 	set_theme!(theme_black())
 
@@ -152,9 +64,10 @@ let
 
 	ax = Axis(
 		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
+		xlabel=L"R \, / \, \mathrm{kpc}",
+		ylabel=L"12 + \log_{10}(\mathrm{O / H})",
+		title=L"\mathrm{Oxygen \, \, abundance}",
+		limits=(nothing, (7, 9.7)),
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -162,29 +75,42 @@ let
 		yticklabelsize=20,
 	)
 
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
+	for (value, uncertainty) in zip(values, uncertainties)
+		band!(
+			ax,
+			0:0.01:10, value .- uncertainty, value .+ uncertainty,
+			color=(:red, 0.1),
+		)
+		lines!(ax,0:0.01:10, value, linewidth=2, color=(:orange, 0.3))
+	end
 
 	f
 end
 
-# ╔═╡ 1b261741-4082-4ad8-abd9-3c2695453185
+# ╔═╡ 66180e12-3e30-4394-8a24-561d0b282038
 md"""
-## HI-MaNGA value added catalog
+## Nitrogen abundance:
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/hi-manga/)
-
-#### [Datamodel](https://arxiv.org/abs/2101.12680)
+``12 + \log(\mathrm{N / H}) = 12 + \log(\mathrm{N / H})_{R_0} + C_{N/H} \times (R / R_{25})``.
 """
 
-# ╔═╡ 243e1c76-73c8-45ac-ac32-f9bb43725d0b
-HI_MaNGA_data = FITS("./data/himanga_dr2.fits")[2];
-
-# ╔═╡ 7e87d278-74ed-4646-a36d-247f8aea159f
+# ╔═╡ 498ca06f-9d00-4b7c-9164-79a74732faea
 let
-	HI_masses = read(HI_MaNGA_data, "LOGMHI")
-	masses    = read(HI_MaNGA_data, "LOGMSTARS")
+	labels   = raw_data[:, 1]
+
+	logNH_R0 = parse_measurement(raw_data[:, 6])
+	CNH_R25  = parse_measurement(raw_data[:, 7])
+	CNH_kpc  = parse_measurement(raw_data[:, 8])
+	σ_logNH  = Float64.(raw_data[:, 9])
+
+	values = [
+		[Measurements.value(a + b * R) for R in 0:0.01:10] for
+		(a, b) in zip(logNH_R0, CNH_kpc)
+	]
+	uncertainties = [
+		[Measurements.uncertainty(a + b * R) for R in 0:0.01:10] for
+		(a, b) in zip(logNH_R0, CNH_kpc)
+	]
 
 	set_theme!(theme_black())
 
@@ -192,9 +118,10 @@ let
 
 	ax = Axis(
 		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
-		ylabel=L"\log(\mathrm{M_\mathrm{HI} / M_\odot})",
-		title=L"\mathrm{HI \,\, mass \,\, vs. \,\, Stellar \,\, mass}",
+		xlabel=L"R \, / \, \mathrm{kpc}",
+		ylabel=L"12 + \log_{10}(\mathrm{N / H})",
+		title=L"\mathrm{Nitrogen\, \, abundance}",
+		limits=(nothing, (5, 9.7)),
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -202,9 +129,14 @@ let
 		yticklabelsize=20,
 	)
 
-	x, y = filter_negatives(masses, HI_masses)
-
-	scatter!(ax, x, y, markersize=2)
+	for (value, uncertainty) in zip(values, uncertainties)
+		band!(
+			ax,
+			0:0.01:10, value .- uncertainty, value .+ uncertainty,
+			color=(:red, 0.1),
+		)
+		lines!(ax,0:0.01:10, value, linewidth=2, color=(:orange, 0.3))
+	end
 
 	f
 end
@@ -213,13 +145,15 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
 
 [compat]
 CairoMakie = "~0.13.2"
-FITSIO = "~0.17.4"
+DelimitedFiles = "~1.9.1"
 LaTeXStrings = "~1.4.0"
+Measurements = "~2.12.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -228,7 +162,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.4"
 manifest_format = "2.0"
-project_hash = "ef55ee04a227ce19f6f23d36d38fa3a1b80be6ed"
+project_hash = "8875e1640a41bafa0d3eaf49fe40e5fc4cb1bb06"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -315,18 +249,6 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
-[[deps.CFITSIO]]
-deps = ["CFITSIO_jll"]
-git-tree-sha1 = "fc0abb338eb8d90bc186ccf0a47c90825952c950"
-uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
-version = "1.4.2"
-
-[[deps.CFITSIO_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "b90d32054fc88f97dd926022f554180e744e4d7d"
-uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
-version = "4.4.0+0"
-
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 version = "1.11.0"
@@ -354,6 +276,12 @@ deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jl
 git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
+
+[[deps.Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "9cb23bbb1127eefb022b022481466c0f1127d430"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.2"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -461,6 +389,12 @@ git-tree-sha1 = "5620ff4ee0084a6ab7097a27ba0c19290200b037"
 uuid = "927a84f5-c5f4-47a5-9785-b46e178433df"
 version = "1.6.4"
 
+[[deps.DelimitedFiles]]
+deps = ["Mmap"]
+git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
+uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+version = "1.9.1"
+
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
@@ -538,12 +472,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "4d81ed14783ec49ce9f2e168208a12ce1815aa25"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+3"
-
-[[deps.FITSIO]]
-deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
-git-tree-sha1 = "8b68d078e8ec3660b7e95528f1a888c5222d2fb4"
-uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-version = "0.17.4"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
@@ -1046,6 +974,28 @@ version = "0.6.2"
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.6+0"
+
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf"]
+git-tree-sha1 = "3019b28107f63ee881f5883da916dd9b6aa294c1"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.12.0"
+
+    [deps.Measurements.extensions]
+    MeasurementsBaseTypeExt = "BaseType"
+    MeasurementsJunoExt = "Juno"
+    MeasurementsMakieExt = "Makie"
+    MeasurementsRecipesBaseExt = "RecipesBase"
+    MeasurementsSpecialFunctionsExt = "SpecialFunctions"
+    MeasurementsUnitfulExt = "Unitful"
+
+    [deps.Measurements.weakdeps]
+    BaseType = "7fbed51b-1ef5-4d67-9085-a4a9b26f478c"
+    Juno = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
@@ -1748,20 +1698,13 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-# ╟─c99f09f6-e92c-4279-bec5-24afa53cb837
-# ╟─0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-# ╟─b9c6a0bd-10ae-4406-be37-07338d44f920
-# ╠═3d2c7655-f630-4ccb-8f40-38d41771dea8
-# ╟─452718b6-7a7c-42c4-a2f5-6a9843b95057
-# ╟─8571241d-c988-4a17-839f-bfe67ce7189b
-# ╠═9007db12-d49a-479c-97f5-d87bafbe0a91
-# ╟─2864f808-f423-492a-8f2f-796fcb99e713
-# ╟─e969d495-005e-44fb-8d17-f438038840c9
-# ╠═ad14cd2e-6768-469e-8268-fefddf00c2b7
-# ╟─7aec17e9-99fc-4cdf-96a1-6c97c3312d55
-# ╟─1b261741-4082-4ad8-abd9-3c2695453185
-# ╠═243e1c76-73c8-45ac-ac32-f9bb43725d0b
-# ╟─7e87d278-74ed-4646-a36d-247f8aea159f
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╠═2f326d2c-7945-4205-8171-810918b021e8
+# ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
+# ╠═27fa7ac6-ba4a-4cdd-ac80-65c8c0e6bce0
+# ╟─7b50b0fe-6001-458b-8d89-0e53b161cf53
+# ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
+# ╟─66180e12-3e30-4394-8a24-561d0b282038
+# ╟─498ca06f-9d00-4b7c-9164-79a74732faea
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

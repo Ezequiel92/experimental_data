@@ -4,157 +4,150 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-using CairoMakie, LaTeXStrings, FITSIO
+# ╔═╡ b77b1640-a3fb-11ee-13ec-2533240f5016
+using CairoMakie, LaTeXStrings, DataFrames, DelimitedFiles, Measurements, Unitful, UnitfulAstro
 
-# ╔═╡ c99f09f6-e92c-4279-bec5-24afa53cb837
-function filter_negatives(data_1::Vector, data_2::Vector)::NTuple{2,Vector}
+# ╔═╡ ac7bd34e-4e72-42e5-a969-41b2100ff7a9
+function parserWS(data::AbstractString)::Union{Float64,Missing}
+	
+	clean_data = strip(data)
 
-	data_a = copy(data_1)
-	data_b = copy(data_2)
+	!isempty(clean_data) || return missing
 
-	# Filters out NaNs
-	deleteat!(data_b, collect(isnan.(data_a)))
-    filter!(!isnan, data_a)
-
-	deleteat!(data_a, collect(isnan.(data_b)))
-    filter!(!isnan, data_b)
-
-	# Filters out negative values (0 is allowed)
-	deleteat!(data_b, collect(data_a .< 0))
-    filter!(x -> x >= 0, data_a)
-
-	deleteat!(data_a, collect(data_b .< 0))
-    filter!(x -> x >= 0, data_b)
-
-	return data_a, data_b
+	return parse(Float64, clean_data)
+	
 end;
 
-# ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-md"# [SDSS VACs](https://www.sdss.org/)"
-
-# ╔═╡ b9c6a0bd-10ae-4406-be37-07338d44f920
+# ╔═╡ 48c1620d-ecff-4367-bda8-41a3a4ce587d
 md"""
-## MaNGA Firefly value-added catalog
+# [Bigiel et al. (2010)](https://doi.org/10.1088/0004-6256/140/5/1194)
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-firefly-value-added-catalog/)
+### [Data 01](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t2_mrt.txt?Expires=1704202683&Signature=s7ZpfS53WATAEWuvDIz1td3ThKZQRQURYYpaWSiWmmPXVF9wlPZOhFYx1NUTK2FKFpntJO4QxVXjJhb4e0Y6aKs-WjhQUc4NW6iS6y1ZKH6wteR7hWXz7tDvlMndGu0OSdSZzgmAj2FBG~AW9LpuGmr7j3jBsJZ3Q5QVsEAab4asNffjhJuDSZPOyOfMFRV7oJlLJbpslNe1SsPRlSvB8bZe9yz3XBq7Cgq5egVNY~LWJZV41ZHwKw37Ua6emyfpTCXEtY5us6J9OIioWm0vn-VTQERG85Y~080czaFXr~tiUtrw4g6BAOo6YyY2kji0Pjp7NW-NuEBW89Q7DwFcsQ__&Key-Pair-Id=KL1D8TIY3N7T8)
 
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_FIREFLY/FIREFLY_VER/manga_firefly.html)
+### [Data 02](https://content.cld.iop.org/journals/1538-3881/140/5/1194/revision1/aj351668t3_mrt.txt?Expires=1704202683&Signature=H3ZNBU07v69wcT13o6h0B8Hh4FmIUcKLyBhYOWabfrpiie8BGhMghB7yTrlG~ctSv1FSshNXtA-YKzhybp7nSI8to1ItRkyzzmhx9cGfGihNMPuiOwGM-tCWy5TpWDKQTRe9gBqhHZm8qgSwgEs8izt5~20fmVKtrF6-LFdjxmFy7goGxxhggAdlBudLk45WVzZay~Qfp2iCmb4eGGKJxvNuj3zuU89VK6YO2P3va1uOIwZdFM8RgP58KwwZMy18izr71Fiq7aTpusJ-qudA-wwl8eLRx~UeVcc1Lg4l88SbtKVQxJlyALuQL0hF2ng64kqHA9xBRzaFJRe13ITP3g__&Key-Pair-Id=KL1D8TIY3N7T8)
 """
 
-# ╔═╡ 3d2c7655-f630-4ccb-8f40-38d41771dea8
-MaNGA_data = FITS("./data/manga-firefly-globalprop-v3_1_1-miles.fits")[2];
-
-# ╔═╡ 452718b6-7a7c-42c4-a2f5-6a9843b95057
-let
-	masses    = read(MaNGA_data, "PHOTOMETRIC_MASS")
-	redshifts = read(MaNGA_data, "REDSHIFT")
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
+# ╔═╡ 780e6028-ab2f-44a4-bffd-edcd7e572d1c
+begin
+	table_01 = DataFrame(
+		gtype=String[],
+		name=String[], 
+		logHI=Union{Float64,Missing}[],
+		e_logHI=Union{Float64,Missing}[],
+		logH2=Union{Float64,Missing}[],
+		e_logH2=Union{Float64,Missing}[],
+		logSFR=Union{Float64,Missing}[],
+		e_logSFR=Union{Float64,Missing}[],
 	)
+	
+	raw_data_01 = readdlm(
+		"./data/aj351668t2_mrt.txt", 
+		'\t', 
+		skipstart=48, 
+		header=true,
+	)[1]
+	
+	for row in eachrow(raw_data_01)
 
-	x, y = filter_negatives(redshifts, masses)
+		data = row[1]
 
-	scatter!(ax, x, y, markersize=2)
+		gtype = strip(data[1:13])
+	
+		name = strip(data[14:24])
+		
+		logHI = parserWS(data[26:29])
+		e_logHI = parserWS(data[31:34])
+	
+		logH2 = parserWS(data[36:39])
+		e_logH2 = parserWS(data[41:44])
+	
+		logSFR = parserWS(data[46:50])
+		e_logSFR = parserWS(data[52:56])
 
-	f
-end
-
-# ╔═╡ 8571241d-c988-4a17-839f-bfe67ce7189b
-md"""
-##  eBOSS Firefly Value-Added Catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/spectro/eboss-firefly-value-added-catalog)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/EBOSS_FIREFLY/FIREFLY_VER/sdss_eboss_firefly-DR16.html)
-"""
-
-# ╔═╡ 9007db12-d49a-479c-97f5-d87bafbe0a91
-if isfile("./data/sdss_eboss_firefly-dr16.fits")
-	eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2]
-end;
-
-# ╔═╡ 2864f808-f423-492a-8f2f-796fcb99e713
-let
-	if isfile("./data/sdss_eboss_firefly-dr16.fits")
-		IMF     = "Chabrier" # Options: Chabrier
-		LIBRARY = "MILES"    # Options: MILES or ELODIE
-
-		masses = read(eBOSS_data, "$(IMF)_$(LIBRARY)_total_mass")
-		ages   = read(eBOSS_data, "$(IMF)_$(LIBRARY)_age_lightW")
-
-		set_theme!(theme_black())
-
-		f = Figure()
-
-		ax = Axis(
-			f[1,1],
-			xlabel=L"\mathrm{M_\star / M_\odot}",
-			ylabel=L"\mathrm{age / yr}",
-			title=L"\mathrm{Light \,\, weighted \,\, age \,\, vs. \,\, Total \,\, mass}",
-			titlesize=30,
-			xlabelsize=28,
-			ylabelsize=28,
-			xticklabelsize=20,
-			yticklabelsize=20,
-			xscale=log10,
-		)
-
-		x, y = filter_negatives(masses, ages)
-
-		scatter!(ax, x, y, markersize=2)
-
-		f
-	else
-		println("sdss_eboss_firefly-dr16.fits is not included in the repository because is too heavy. See the README for a link to download it.")
+		push!(table_01, [gtype name  logHI e_logHI logH2 e_logH2 logSFR e_logSFR])
+		
 	end
+
+	galaxy_list_01 = unique(table_01[!, "name"])
+	table_01_spirals = filter(:gtype => n -> n == "Spirals", table_01)
 end
 
-# ╔═╡ e969d495-005e-44fb-8d17-f438038840c9
-md"""
-## MaNGA Pipe3D value added catalog
+# ╔═╡ f8d0cda2-2f5c-4f7a-b104-ab081e0d67a8
+function get_col_01(
+	n_gal::Int64, 
+	col::String,
+)::Vector{Union{Missing,Float64}}
+	
+	return filter(:name => n -> n == galaxy_list_01[n_gal], table_01)[!, col]
+	
+end;
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-pipe3d-value-added-catalog/)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_PIPE3D/MANGADRP_VER/PIPE3D_VER/SDSS17Pipe3D.html)
-"""
-
-# ╔═╡ ad14cd2e-6768-469e-8268-fefddf00c2b7
-Pipe3D_data = FITS("./data/SDSS17Pipe3D_v3_1_1.fits")[2];
-
-# ╔═╡ 7aec17e9-99fc-4cdf-96a1-6c97c3312d55
+# ╔═╡ 3f6a2b0d-48e8-45dc-b2da-9b84e6244a1b
 let
-	WEIGHT = "M"  # Options: M (mass) or L (light)
-	SFR    = "Ha" # Options: Ha, ssp, SF or D_C
-
-	sfr         = read(Pipe3D_data, "log_SFR_$SFR")
-	masses      = read(Pipe3D_data, "log_Mass")
-	metallicity = read(Pipe3D_data, "ZH_$(WEIGHT)W_Re_fit")
-	ages        = read(Pipe3D_data, "Age_$(WEIGHT)W_Re_fit")
-	redshifts   = read(Pipe3D_data, "nsa_redshift")
-
 	set_theme!(theme_black())
 
-	f = Figure()
-
+	f = Figure(size = (800, 800))
+	
 	ax = Axis(
 		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
+		xlabel=L"\mathrm{log(\Sigma_{H_2} \, / \, M_\odot \, pc^{-2})}", 
+		ylabel=L"\mathrm{log(\Sigma_{SFR} \, / \, M_\odot \, yr^{-1} \, kpc^{-2})}",
+		limits=(-2, 5, -4, 1),
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+	
+	for n_gal in eachindex(galaxy_list_01)
+	
+		H2 = get_col_01(n_gal, "logH2") .± get_col_01(n_gal, "e_logH2")
+		SFR = get_col_01(n_gal, "logSFR") .± get_col_01(n_gal, "e_logSFR")
+
+		idxs = map(ismissing, H2) .|| map(ismissing, SFR)
+
+    	deleteat!(H2, idxs)
+		deleteat!(SFR, idxs)
+
+		if any(isempty, [H2, SFR])
+			continue
+		end
+	
+		scatter!(
+			ax, 
+			Float64.(Measurements.value.(H2)), 
+			Float64.(Measurements.value.(SFR)), 
+			markersize=5,
+		) 
+
+	end
+
+	f
+end
+
+# ╔═╡ 198d1cbd-dfe4-4dda-b04f-bea7f24421bb
+let
+	n_gal = 1
+	HI = get_col_01(n_gal, "logHI") .± get_col_01(n_gal, "e_logHI")
+	H2 = get_col_01(n_gal, "logH2") .± get_col_01(n_gal, "e_logH2")
+	SFR = get_col_01(n_gal, "logSFR") .± get_col_01(n_gal, "e_logSFR")
+
+	idxs = map(ismissing, HI) .|| map(ismissing, H2) .|| map(ismissing, SFR)
+
+    deleteat!(HI, idxs)
+    deleteat!(H2, idxs)
+	deleteat!(SFR, idxs)
+	
+	set_theme!(theme_black())
+
+	f = Figure(size = (800, 800))
+	
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\mathrm{log(\Sigma_{H_I} \, / \, M_\odot \, pc^{-2})}", 
+		ylabel=L"\mathrm{log(\Sigma_{SFR} \, / \, M_\odot \, yr^{-1} \, kpc^{-2})}", 
+		title=L"\mathrm{%$(galaxy_list_01[n_gal])}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -162,39 +155,102 @@ let
 		yticklabelsize=20,
 	)
 
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
+	scatter!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		color=:red,
+		markersize=5,
+	) 
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(SFR),
+		color=:red,
+	)
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(HI),
+		color=:red,
+		direction=:x
+	)
 
 	f
 end
 
-# ╔═╡ 1b261741-4082-4ad8-abd9-3c2695453185
-md"""
-## HI-MaNGA value added catalog
+# ╔═╡ 5c39eaeb-b752-4564-8c61-306718be975f
+begin
+	table_02 = DataFrame(
+		gtype=String[],
+		name=String[], 
+		logHI=Union{Float64,Missing}[],
+		e_logHI=Union{Float64,Missing}[],
+		SFR=Union{Float64,Missing}[],
+		e_SFR=Union{Float64,Missing}[],
+	)
+	
+	raw_data_02 = readdlm(
+		"./data/aj351668t3_mrt.txt", 
+		'\t', 
+		skipstart=46, 
+		header=true,
+	)[1]
+	
+	for row in eachrow(raw_data_02)
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/hi-manga/)
+		data = row[1]
 
-#### [Datamodel](https://arxiv.org/abs/2101.12680)
-"""
+		gtype = strip(data[1:8])
+	
+		name = strip(data[9:19])
+		
+		logHI = parserWS(data[21:25])
+		e_logHI = parserWS(data[27:30])
+	
+		SFR = parserWS(data[32:37])
+		e_SFR = parserWS(data[39:42])
 
-# ╔═╡ 243e1c76-73c8-45ac-ac32-f9bb43725d0b
-HI_MaNGA_data = FITS("./data/himanga_dr2.fits")[2];
+		push!(table_02, [gtype name  logHI e_logHI SFR e_SFR])
+		
+	end
 
-# ╔═╡ 7e87d278-74ed-4646-a36d-247f8aea159f
+	galaxy_list_02 = unique(table_02[!, "name"])
+	table_02_spirals = filter(:gtype => n -> n == "Spirals", table_02)
+end
+
+# ╔═╡ e0fd87d5-087b-489f-88ba-13cb5e43cf1b
+function get_col_02(
+	n_gal::Int64, 
+	col::String,
+)::Vector{Union{Missing,Float64}}
+	
+	return filter(:name => n -> n == galaxy_list_02[n_gal], table_02)[!, col]
+	
+end;
+
+# ╔═╡ 8f9b6a09-d5f4-46b8-ba75-d69f27195368
 let
-	HI_masses = read(HI_MaNGA_data, "LOGMHI")
-	masses    = read(HI_MaNGA_data, "LOGMSTARS")
+	n_gal = 1
+	HI = get_col_02(n_gal, "logHI") .± get_col_02(n_gal, "e_logHI")
+	SFR = get_col_02(n_gal, "SFR") .± get_col_02(n_gal, "e_SFR")
 
+	idxs = map(ismissing, HI) .|| map(ismissing, SFR)
+
+    deleteat!(HI, idxs)
+	deleteat!(SFR, idxs)
+	
 	set_theme!(theme_black())
 
-	f = Figure()
-
+	f = Figure(size = (800, 800))
+	
 	ax = Axis(
 		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
-		ylabel=L"\log(\mathrm{M_\mathrm{HI} / M_\odot})",
-		title=L"\mathrm{HI \,\, mass \,\, vs. \,\, Stellar \,\, mass}",
+		xlabel=L"\mathrm{log(\Sigma_{H_I} \, / \, M_\odot \, pc^{-2})}", 
+		ylabel=L"\mathrm{\Sigma_{SFR} \, / \, 10^{-5} \, M_\odot \, yr^{-1} \, kpc^{-2}}", 
+		title=L"\mathrm{%$(galaxy_list_02[n_gal])}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -202,24 +258,190 @@ let
 		yticklabelsize=20,
 	)
 
-	x, y = filter_negatives(masses, HI_masses)
-
-	scatter!(ax, x, y, markersize=2)
+	scatter!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		color=:red,
+		markersize=5,
+	) 
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(SFR),
+		color=:red,
+	)
+	errorbars!(
+		ax, 
+		Measurements.value.(HI), 
+		Measurements.value.(SFR), 
+		Measurements.uncertainty.(HI),
+		color=:red,
+		direction=:x
+	)
 
 	f
+end
+
+# ╔═╡ 6797146a-b3a5-4cf0-bf2d-80f0934bb52b
+let
+
+	function limits(
+		list::Vector{Union{Missing, Float64}}, 
+		log::Bool, 
+		source_unit::Union{Unitful.Units,Unitful.Quantity},
+		target_unit::Unitful.Units,
+	)::Nothing
+
+		raw_limits = extrema(collect(skipmissings(list)[1]))
+
+		if log 
+			nice_limits = round.(
+				log10.(ustrip.(target_unit, exp10.(raw_limits) .* source_unit)); 
+				digits=2,
+			)
+		else
+			nice_limits = round.(
+				log10.(ustrip.(target_unit, raw_limits .* source_unit)); 
+				digits=2,
+			)
+		end
+
+		println("log10 range [$(target_unit)]: $(nice_limits)")
+
+		return nothing
+		
+	end
+
+	println("Table 2:\n")
+
+	println("HI:")
+
+	limits(
+		table_01_spirals[!, :logHI], 
+		true, 
+		u"Msun * pc^-2",
+		u"Msun * kpc^-2",
+	)
+
+	println("\nH2:")
+
+	limits(
+		table_01_spirals[!, :logH2], 
+		true, 
+		u"Msun * pc^-2",
+		u"Msun * kpc^-2",
+	)
+
+	println("\nSFR:")
+
+	limits(
+		table_01_spirals[!, :logSFR], 
+		true, 
+		u"Msun * kpc^-2 * yr^-1",
+		u"Msun * kpc^-2 * yr^-1",
+	)
+
+	println("\n\nTable 3:\n")
+
+	println("HI:")
+
+	limits(
+		table_02_spirals[!, :logHI], 
+		true, 
+		u"Msun * pc^-2",
+		u"Msun * kpc^-2",
+	)
+
+	println("\nSFR:")
+
+	limits(
+		table_02_spirals[!, :SFR], 
+		false, 
+		exp10(-5.0)u"Msun * kpc^-2 * yr^-1",
+		u"Msun * kpc^-2 * yr^-1",
+	)
+
+end
+
+# ╔═╡ 254b9b44-4025-4927-841f-f0d0b2062f23
+let
+
+	bigiel2008_spirals = [
+		"NGC 628", 
+		"NGC 3184",
+		"NGC 3521",
+		"NGC 4736",
+		"NGC 5055",
+		"NGC 5194",
+		"NGC 6946",
+	]
+
+	min_h2 = similar(bigiel2008_spirals, Float64)
+	max_h2 = similar(bigiel2008_spirals, Float64)
+	min_hi = similar(bigiel2008_spirals, Float64)
+	max_hi = similar(bigiel2008_spirals, Float64)
+	min_sfr = similar(bigiel2008_spirals, Float64)
+	max_sfr = similar(bigiel2008_spirals, Float64)
+
+	for (i, galaxy) in pairs(bigiel2008_spirals)
+
+		reduced_table = filter(:name => n -> n == galaxy, table_01_spirals)
+
+		logh2 = reduced_table[!, :logH2]
+		loghi = reduced_table[!, :logHI]
+		logsfr = reduced_table[!, :logSFR]
+
+		h2_idxs = map(ismissing, logh2)
+		hi_idxs = map(ismissing, loghi)
+		sfr_idxs = map(ismissing, logsfr)
+
+		delete_idxs = Vector{Bool}(h2_idxs .|| sfr_idxs .|| hi_idxs)
+
+		deleteat!(logh2, delete_idxs)
+		deleteat!(loghi, delete_idxs)
+		deleteat!(logsfr, delete_idxs)
+
+		min_h2[i], max_h2[i] = extrema(logh2)
+		min_hi[i], max_hi[i] = extrema(loghi)
+		min_sfr[i], max_sfr[i] = extrema(logsfr)
+
+	end
+
+	println("Ranges for spirals in Bigiel 2008 (seven spirals in Table 1):\n")
+
+	println(
+		"logΣH2 [Msun pc^-2] range: $((minimum(min_h2), maximum(max_h2)))"
+	)
+	println(
+		"logΣHI [Msun pc^-2] range: $((minimum(min_hi), maximum(max_hi)))"
+	)
+	println(
+		"logΣSFR [Msun yr^-1 kpc^-2] range: $((minimum(min_sfr), maximum(max_sfr)))"
+	)
+
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
 CairoMakie = "~0.13.2"
-FITSIO = "~0.17.4"
+DataFrames = "~1.7.0"
+DelimitedFiles = "~1.9.1"
 LaTeXStrings = "~1.4.0"
+Measurements = "~2.12.0"
+Unitful = "~1.22.0"
+UnitfulAstro = "~1.2.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -228,7 +450,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.4"
 manifest_format = "2.0"
-project_hash = "ef55ee04a227ce19f6f23d36d38fa3a1b80be6ed"
+project_hash = "dc59b785708f6c9b9d5d3e0b995c1a71772cdd95"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -315,18 +537,6 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
-[[deps.CFITSIO]]
-deps = ["CFITSIO_jll"]
-git-tree-sha1 = "fc0abb338eb8d90bc186ccf0a47c90825952c950"
-uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
-version = "1.4.2"
-
-[[deps.CFITSIO_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "b90d32054fc88f97dd926022f554180e744e4d7d"
-uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
-version = "4.4.0+0"
-
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 version = "1.11.0"
@@ -354,6 +564,12 @@ deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jl
 git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
+
+[[deps.Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "9cb23bbb1127eefb022b022481466c0f1127d430"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.2"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
@@ -434,10 +650,21 @@ git-tree-sha1 = "439e35b0b36e2e5881738abc8857bd92ad6ff9a8"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.3"
 
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
+
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "fb61b4812c49343d7ef0b533ba982c46021938a6"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.7.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -460,6 +687,12 @@ deps = ["AdaptivePredicates", "EnumX", "ExactPredicates", "Random"]
 git-tree-sha1 = "5620ff4ee0084a6ab7097a27ba0c19290200b037"
 uuid = "927a84f5-c5f4-47a5-9785-b46e178433df"
 version = "1.6.4"
+
+[[deps.DelimitedFiles]]
+deps = ["Mmap"]
+git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
+uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+version = "1.9.1"
 
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -538,12 +771,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "4d81ed14783ec49ce9f2e168208a12ce1815aa25"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+3"
-
-[[deps.FITSIO]]
-deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
-git-tree-sha1 = "8b68d078e8ec3660b7e95528f1a888c5222d2fb4"
-uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-version = "0.17.4"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
@@ -630,6 +857,11 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "846f7026a9decf3679419122b49f8a1fdb48d2d5"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.16+0"
+
+[[deps.Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+version = "1.11.0"
 
 [[deps.GeoFormatTypes]]
 git-tree-sha1 = "8e233d5167e63d708d41f87597433f59a0f213fe"
@@ -747,6 +979,19 @@ git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
 
+[[deps.InlineStrings]]
+git-tree-sha1 = "6a9fde685a7ac1eb3495f8e812c5a7c3711c2d5e"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.4.3"
+
+    [deps.InlineStrings.extensions]
+    ArrowTypesExt = "ArrowTypes"
+    ParsersExt = "Parsers"
+
+    [deps.InlineStrings.weakdeps]
+    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+    Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
 git-tree-sha1 = "0f14a5456bdc6b9731a5682f439a672750a09e48"
@@ -810,6 +1055,11 @@ weakdeps = ["Dates", "Test"]
     [deps.InverseFunctions.extensions]
     InverseFunctionsDatesExt = "Dates"
     InverseFunctionsTestExt = "Test"
+
+[[deps.InvertedIndices]]
+git-tree-sha1 = "6da3c4316095de0f5ee2ebd875df8721e7e0bdbe"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.3.1"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "e2222959fbc6c19554dc15174c81bf7bf3aa691c"
@@ -1047,6 +1297,28 @@ deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.6+0"
 
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf"]
+git-tree-sha1 = "3019b28107f63ee881f5883da916dd9b6aa294c1"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.12.0"
+
+    [deps.Measurements.extensions]
+    MeasurementsBaseTypeExt = "BaseType"
+    MeasurementsJunoExt = "Juno"
+    MeasurementsMakieExt = "Makie"
+    MeasurementsRecipesBaseExt = "RecipesBase"
+    MeasurementsSpecialFunctionsExt = "SpecialFunctions"
+    MeasurementsUnitfulExt = "Unitful"
+
+    [deps.Measurements.weakdeps]
+    BaseType = "7fbed51b-1ef5-4d67-9085-a4a9b26f478c"
+    Juno = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
 [[deps.Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "ec4f7fbeab05d7747bdf98eb74d130a2a2ed298d"
@@ -1227,6 +1499,12 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "36d8b4b899628fb92c2749eb488d884a926614d3"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.3"
+
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
 git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
@@ -1238,6 +1516,12 @@ deps = ["TOML"]
 git-tree-sha1 = "9306f6085165d270f7e3db02af26a400d580f5c6"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.3"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
+git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "2.4.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1347,6 +1631,12 @@ deps = ["Dates"]
 git-tree-sha1 = "3bac05bc7e74a75fd9cba4295cde4045d9fe2386"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.1"
+
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "712fb0231ee6f9120e005ccd56297abbc053e7e0"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.4.8"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1473,6 +1763,12 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
     StatsFunsChainRulesCoreExt = "ChainRulesCore"
     StatsFunsInverseFunctionsExt = "InverseFunctions"
 
+[[deps.StringManipulation]]
+deps = ["PrecompileTools"]
+git-tree-sha1 = "725421ae8e530ec29bcbdddbe91ff8053421d023"
+uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
+version = "0.4.1"
+
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
 git-tree-sha1 = "5a3a31c41e15a1e042d60f2f4942adccba05d3c9"
@@ -1581,6 +1877,18 @@ weakdeps = ["ConstructionBase", "InverseFunctions"]
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
     InverseFunctionsUnitfulExt = "InverseFunctions"
+
+[[deps.UnitfulAngles]]
+deps = ["Dates", "Unitful"]
+git-tree-sha1 = "79875b1f2e4bf918f0702a5980816955066d9ae2"
+uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
+version = "0.7.2"
+
+[[deps.UnitfulAstro]]
+deps = ["Unitful", "UnitfulAngles"]
+git-tree-sha1 = "da7577e6a726959b14f7451674d00b78d10ca30f"
+uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
+version = "1.2.1"
 
 [[deps.WebP]]
 deps = ["CEnum", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "libwebp_jll"]
@@ -1748,20 +2056,17 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-# ╟─c99f09f6-e92c-4279-bec5-24afa53cb837
-# ╟─0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-# ╟─b9c6a0bd-10ae-4406-be37-07338d44f920
-# ╠═3d2c7655-f630-4ccb-8f40-38d41771dea8
-# ╟─452718b6-7a7c-42c4-a2f5-6a9843b95057
-# ╟─8571241d-c988-4a17-839f-bfe67ce7189b
-# ╠═9007db12-d49a-479c-97f5-d87bafbe0a91
-# ╟─2864f808-f423-492a-8f2f-796fcb99e713
-# ╟─e969d495-005e-44fb-8d17-f438038840c9
-# ╠═ad14cd2e-6768-469e-8268-fefddf00c2b7
-# ╟─7aec17e9-99fc-4cdf-96a1-6c97c3312d55
-# ╟─1b261741-4082-4ad8-abd9-3c2695453185
-# ╠═243e1c76-73c8-45ac-ac32-f9bb43725d0b
-# ╟─7e87d278-74ed-4646-a36d-247f8aea159f
+# ╠═b77b1640-a3fb-11ee-13ec-2533240f5016
+# ╠═ac7bd34e-4e72-42e5-a969-41b2100ff7a9
+# ╠═f8d0cda2-2f5c-4f7a-b104-ab081e0d67a8
+# ╠═e0fd87d5-087b-489f-88ba-13cb5e43cf1b
+# ╟─48c1620d-ecff-4367-bda8-41a3a4ce587d
+# ╟─780e6028-ab2f-44a4-bffd-edcd7e572d1c
+# ╟─3f6a2b0d-48e8-45dc-b2da-9b84e6244a1b
+# ╟─198d1cbd-dfe4-4dda-b04f-bea7f24421bb
+# ╟─5c39eaeb-b752-4564-8c61-306718be975f
+# ╟─8f9b6a09-d5f4-46b8-ba75-d69f27195368
+# ╟─6797146a-b3a5-4cf0-bf2d-80f0934bb52b
+# ╟─254b9b44-4025-4927-841f-f0d0b2062f23
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -4,187 +4,59 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-using CairoMakie, LaTeXStrings, FITSIO
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames, Colors
 
-# ╔═╡ c99f09f6-e92c-4279-bec5-24afa53cb837
-function filter_negatives(data_1::Vector, data_2::Vector)::NTuple{2,Vector}
-
-	data_a = copy(data_1)
-	data_b = copy(data_2)
-
-	# Filters out NaNs
-	deleteat!(data_b, collect(isnan.(data_a)))
-    filter!(!isnan, data_a)
-
-	deleteat!(data_a, collect(isnan.(data_b)))
-    filter!(!isnan, data_b)
-
-	# Filters out negative values (0 is allowed)
-	deleteat!(data_b, collect(data_a .< 0))
-    filter!(x -> x >= 0, data_a)
-
-	deleteat!(data_a, collect(data_b .< 0))
-    filter!(x -> x >= 0, data_b)
-
-	return data_a, data_b
-end;
-
-# ╔═╡ 0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-md"# [SDSS VACs](https://www.sdss.org/)"
-
-# ╔═╡ b9c6a0bd-10ae-4406-be37-07338d44f920
-md"""
-## MaNGA Firefly value-added catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-firefly-value-added-catalog/)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_FIREFLY/FIREFLY_VER/manga_firefly.html)
-"""
-
-# ╔═╡ 3d2c7655-f630-4ccb-8f40-38d41771dea8
-MaNGA_data = FITS("./data/manga-firefly-globalprop-v3_1_1-miles.fits")[2];
-
-# ╔═╡ 452718b6-7a7c-42c4-a2f5-6a9843b95057
-let
-	masses    = read(MaNGA_data, "PHOTOMETRIC_MASS")
-	redshifts = read(MaNGA_data, "REDSHIFT")
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
-
-	f
-end
-
-# ╔═╡ 8571241d-c988-4a17-839f-bfe67ce7189b
-md"""
-##  eBOSS Firefly Value-Added Catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/spectro/eboss-firefly-value-added-catalog)
-
-#### [Datamodel](https://data.sdss.org/datamodel/files/EBOSS_FIREFLY/FIREFLY_VER/sdss_eboss_firefly-DR16.html)
-"""
-
-# ╔═╡ 9007db12-d49a-479c-97f5-d87bafbe0a91
-if isfile("./data/sdss_eboss_firefly-dr16.fits")
-	eBOSS_data = FITS("./data/sdss_eboss_firefly-dr16.fits")[2]
-end;
-
-# ╔═╡ 2864f808-f423-492a-8f2f-796fcb99e713
-let
-	if isfile("./data/sdss_eboss_firefly-dr16.fits")
-		IMF     = "Chabrier" # Options: Chabrier
-		LIBRARY = "MILES"    # Options: MILES or ELODIE
-
-		masses = read(eBOSS_data, "$(IMF)_$(LIBRARY)_total_mass")
-		ages   = read(eBOSS_data, "$(IMF)_$(LIBRARY)_age_lightW")
-
-		set_theme!(theme_black())
-
-		f = Figure()
-
-		ax = Axis(
-			f[1,1],
-			xlabel=L"\mathrm{M_\star / M_\odot}",
-			ylabel=L"\mathrm{age / yr}",
-			title=L"\mathrm{Light \,\, weighted \,\, age \,\, vs. \,\, Total \,\, mass}",
-			titlesize=30,
-			xlabelsize=28,
-			ylabelsize=28,
-			xticklabelsize=20,
-			yticklabelsize=20,
-			xscale=log10,
-		)
-
-		x, y = filter_negatives(masses, ages)
-
-		scatter!(ax, x, y, markersize=2)
-
-		f
-	else
-		println("sdss_eboss_firefly-dr16.fits is not included in the repository because is too heavy. See the README for a link to download it.")
+# ╔═╡ 464b0b77-2e6d-4f3d-a24d-b2db04fff3ed
+function parse_txt(reg::Regex, data::Vector)::Vector{Float64}
+	result = Float64[]
+	for val in data
+		if val == -9999
+			push!(result, NaN)
+		else
+			push!(result, parse(Float64, match(reg, val).match))
+		end
 	end
-end
+	return result
+end;
 
-# ╔═╡ e969d495-005e-44fb-8d17-f438038840c9
+# ╔═╡ 71facef6-dd7b-4dc6-b32f-b543c3a203eb
 md"""
-## MaNGA Pipe3D value added catalog
+# [Tomczak et al. (2014)](https://doi.org/10.1088/0004-637x/783/2/85)
 
-#### [Dowloads](https://www.sdss.org/dr17/manga/manga-data/manga-pipe3d-value-added-catalog/)
+### [Table 1](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t1_ascii.txt?doi=10.1088/0004-637X/783/2/85)
 
-#### [Datamodel](https://data.sdss.org/datamodel/files/MANGA_PIPE3D/MANGADRP_VER/PIPE3D_VER/SDSS17Pipe3D.html)
+### [Tabel 2](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t2_ascii.txt?doi=10.1088/0004-637X/783/2/85)
+
+### [Table 3](https://iopscience.iop.org/0004-637X/783/2/85/suppdata/apj490758t3_ascii.txt?doi=10.1088/0004-637X/783/2/85)
 """
 
-# ╔═╡ ad14cd2e-6768-469e-8268-fefddf00c2b7
-Pipe3D_data = FITS("./data/SDSS17Pipe3D_v3_1_1.fits")[2];
+# ╔═╡ 5d6c7470-9387-4058-8496-0fd8e0e3a925
+md"# GSMF"
 
-# ╔═╡ 7aec17e9-99fc-4cdf-96a1-6c97c3312d55
-let
-	WEIGHT = "M"  # Options: M (mass) or L (light)
-	SFR    = "Ha" # Options: Ha, ssp, SF or D_C
-
-	sfr         = read(Pipe3D_data, "log_SFR_$SFR")
-	masses      = read(Pipe3D_data, "log_Mass")
-	metallicity = read(Pipe3D_data, "ZH_$(WEIGHT)W_Re_fit")
-	ages        = read(Pipe3D_data, "Age_$(WEIGHT)W_Re_fit")
-	redshifts   = read(Pipe3D_data, "nsa_redshift")
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"z",
-		ylabel=L"\log(\mathrm{M_\star / M_\odot})",
-		title=L"\mathrm{Mass \,\, vs. \,\, redshift}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
+# ╔═╡ 867ef2b9-3acd-4c71-99c8-17288e0f3915
+begin
+	raw_data_total = readdlm("./data/raw_table_01_total.txt")
+	data_total     = DataFrame(
+		"log(m/m_sun)" => raw_data_total[3:end, 1],
 	)
-
-	x, y = filter_negatives(redshifts, masses)
-
-	scatter!(ax, x, y, markersize=2)
-
-	f
+	for i in 2:size(raw_data_total, 2)
+		col                                  = raw_data_total[3:end, i]
+		z_range                              = raw_data_total[1, i]
+		data_total[!, z_range]               = parse_txt(r"(?<=\$).*(?=\^)", col)
+		data_total[!, z_range * "_err_up"]   = parse_txt(r"(?<=\^{).*(?=}_)", col)
+		data_total[!, z_range * "_err_down"] = parse_txt(r"(?<=_{).*(?=})", col)
+	end
+	data_total
 end
 
-# ╔═╡ 1b261741-4082-4ad8-abd9-3c2695453185
-md"""
-## HI-MaNGA value added catalog
-
-#### [Dowloads](https://www.sdss.org/dr17/manga/hi-manga/)
-
-#### [Datamodel](https://arxiv.org/abs/2101.12680)
-"""
-
-# ╔═╡ 243e1c76-73c8-45ac-ac32-f9bb43725d0b
-HI_MaNGA_data = FITS("./data/himanga_dr2.fits")[2];
-
-# ╔═╡ 7e87d278-74ed-4646-a36d-247f8aea159f
+# ╔═╡ a324e8e5-2dd0-4666-968a-4ddb0511462c
 let
-	HI_masses = read(HI_MaNGA_data, "LOGMHI")
-	masses    = read(HI_MaNGA_data, "LOGMSTARS")
+	ϕs         = [data_total[:, zr] for zr in raw_data_total[1, 2:end]]
+	higherrors = [data_total[:, zr * "_err_up"] for zr in raw_data_total[1, 2:end]]
+	lowerrors  = [data_total[:, zr * "_err_down"] for zr in raw_data_total[1, 2:end]]
+	mass       = Float64[data_total[:, "log(m/m_sun)"]...]
+	z_ranges   = raw_data_total[1, 2:end]
 
 	set_theme!(theme_black())
 
@@ -193,8 +65,8 @@ let
 	ax = Axis(
 		f[1,1],
 		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
-		ylabel=L"\log(\mathrm{M_\mathrm{HI} / M_\odot})",
-		title=L"\mathrm{HI \,\, mass \,\, vs. \,\, Stellar \,\, mass}",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Total}",
 		titlesize=30,
 		xlabelsize=28,
 		ylabelsize=28,
@@ -202,9 +74,499 @@ let
 		yticklabelsize=20,
 	)
 
-	x, y = filter_negatives(masses, HI_masses)
+	colors = distinguishable_colors(
+		length(ϕs),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
 
-	scatter!(ax, x, y, markersize=2)
+	iterator = zip(ϕs, higherrors, lowerrors, colors, z_ranges)
+
+	for (ϕ, higherror, lowerror, color, zrange) in iterator
+		scatterlines!(ax, mass, ϕ; color, label=zrange)
+		errorbars!(ax, mass, ϕ, abs.(lowerror), higherror, whiskerwidth=10; color)
+	end
+
+	axislegend(ax, position=:lb)
+
+	f
+end
+
+# ╔═╡ b75b88fa-a22c-48f7-a795-89b663f654f9
+begin
+	raw_data_sf = readdlm("./data/raw_table_01_starforming.txt")
+	data_sf     = DataFrame(
+		"log(m/m_sun)" => raw_data_sf[3:end, 1],
+	)
+	for i in 2:size(raw_data_sf, 2)
+		col                               = raw_data_sf[3:end, i]
+		z_range                           = raw_data_sf[1, i]
+		data_sf[!, z_range]               = parse_txt(r"(?<=\$).*(?=\^)", col)
+		data_sf[!, z_range * "_err_up"]   = parse_txt(r"(?<=\^{).*(?=}_)", col)
+		data_sf[!, z_range * "_err_down"] = parse_txt(r"(?<=_{).*(?=})", col)
+	end
+	data_sf
+end
+
+# ╔═╡ 130e0183-1308-4511-8b6f-c7923ef0a5b9
+let
+	ϕs         = [data_sf[:, zr] for zr in raw_data_sf[1, 2:end]]
+	higherrors = [data_sf[:, zr * "_err_up"] for zr in raw_data_sf[1, 2:end]]
+	lowerrors  = [data_sf[:, zr * "_err_down"] for zr in raw_data_sf[1, 2:end]]
+	mass       = Float64[data_sf[:, "log(m/m_sun)"]...]
+	z_ranges   = raw_data_sf[1, 2:end]
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Star \,\, forming}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		length(ϕs),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	iterator = zip(ϕs, higherrors, lowerrors, colors, z_ranges)
+
+	for (ϕ, higherror, lowerror, color, zrange) in iterator
+		scatterlines!(ax, mass, ϕ; color, label=zrange)
+		errorbars!(ax, mass, ϕ, abs.(lowerror), higherror, whiskerwidth=10; color)
+	end
+
+	axislegend(ax, position=:lb)
+
+	f
+end
+
+# ╔═╡ c9909329-1d65-46c6-b3bd-867b340a013b
+begin
+	raw_data_qu = readdlm("./data/raw_table_01_quiescent.txt")
+	data_qu     = DataFrame(
+		"log(m/m_sun)" => raw_data_qu[3:end, 1],
+	)
+	for i in 2:size(raw_data_qu, 2)
+		col                               = raw_data_qu[3:end, i]
+		z_range                           = raw_data_qu[1, i]
+		data_qu[!, z_range]               = parse_txt(r"(?<=\$).*(?=\^)", col)
+		data_qu[!, z_range * "_err_up"]   = parse_txt(r"(?<=\^{).*(?=}_)", col)
+		data_qu[!, z_range * "_err_down"] = parse_txt(r"(?<=_{).*(?=})", col)
+	end
+	data_qu
+end
+
+# ╔═╡ c82377af-b895-4ec3-97e4-cff1684f1e54
+let
+	ϕs         = [data_qu[:, zr] for zr in raw_data_qu[1, 2:end]]
+	higherrors = [data_qu[:, zr * "_err_up"] for zr in raw_data_qu[1, 2:end]]
+	lowerrors  = [data_qu[:, zr * "_err_down"] for zr in raw_data_qu[1, 2:end]]
+	mass       = Float64[data_qu[:, "log(m/m_sun)"]...]
+	z_ranges   = raw_data_qu[1, 2:end]
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Quiescent}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		length(ϕs),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	iterator = zip(ϕs, higherrors, lowerrors, colors, z_ranges)
+
+	for (ϕ, higherror, lowerror, color, zrange) in iterator
+		scatterlines!(ax, mass, ϕ; color, label=zrange)
+		errorbars!(ax, mass, ϕ, abs.(lowerror), higherror, whiskerwidth=10; color)
+	end
+
+	axislegend(ax, position=:lb)
+
+	f
+end
+
+# ╔═╡ 830592c8-a8ae-4e3a-840e-c1f29728f475
+md"# Best-fit of the Schechter galaxy stellar mass function (GSMF)"
+
+# ╔═╡ 5ae30e66-1dde-4b11-b55a-0e350287aef5
+md"## Single"
+
+# ╔═╡ dbe59bd6-666b-488a-997e-d84aa31657fb
+function single_schechter(m::Float64, params::Vector{Float64})::Float64
+
+	# m  = log10(M/M⊙)
+	# ms = log10(M⋆/M⊙)
+	ms, α, logΦ = params
+	Φ           = 10^logΦ
+
+	return log(10) * Φ * 10^((m - ms) * (α + 1)) * exp(-10^(m - ms))
+
+end;
+
+# ╔═╡ 1befdebb-d245-4b4f-9957-c5fe9c209d32
+begin
+	raw_fit3_total = readdlm("./data/raw_table_03_total.txt")
+	fit3_total     = DataFrame(
+		"redshift" => raw_fit3_total[2:end, 1],
+		"chi2" => raw_fit3_total[2:end, end],
+	)
+	for i in 2:(size(raw_fit3_total, 2) - 1)
+		col                             = raw_fit3_total[2:end, i]
+		z_range                         = raw_fit3_total[1, i]
+		fit3_total[!, z_range]          = parse_txt(r"^.*(?=(\+or-))", col)
+		fit3_total[!, z_range * "_err"] = parse_txt(r"(?<=\+or-).*", col)
+	end
+	fit3_total
+end
+
+# ╔═╡ 3ace77bf-7031-4078-b66d-2a042b5ae68b
+let
+	mass = LinRange(8, 12, 100)
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Total}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		size(fit3_total, 1),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (row, color) in zip(eachrow(fit3_total), colors)
+		ϕ = single_schechter.(mass, ([row."Log(M*)", row."alpha", row."Log(Phi*)"],))
+		lines!(ax, mass, ϕ; color, label=row."redshift", linewidth=3)
+	end
+
+	axislegend(ax, position=:rt)
+
+	f
+end
+
+# ╔═╡ e9091b1e-9cdd-40e7-a4bd-d35635242866
+begin
+	raw_fit3_sf = readdlm("./data/raw_table_03_starforming.txt")
+	fit3_sf     = DataFrame(
+		"redshift" => raw_fit3_sf[2:end, 1],
+		"chi2" => raw_fit3_sf[2:end, end],
+	)
+	for i in 2:(size(raw_fit3_sf, 2) - 1)
+		col                          = raw_fit3_sf[2:end, i]
+		z_range                      = raw_fit3_sf[1, i]
+		fit3_sf[!, z_range]          = parse_txt(r"^.*(?=(\+or-))", col)
+		fit3_sf[!, z_range * "_err"] = parse_txt(r"(?<=\+or-).*", col)
+	end
+	fit3_sf
+end
+
+# ╔═╡ 3d2733c2-8c50-44a9-b73a-8588a03e393c
+let
+	mass = LinRange(8, 12, 100)
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Star \,\, forming}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		size(fit3_sf, 1),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (row, color) in zip(eachrow(fit3_sf), colors)
+		ϕ = single_schechter.(mass, ([row."Log(M*)", row."alpha", row."Log(Phi*)"],))
+		lines!(ax, mass, ϕ; color, label=row."redshift", linewidth=3)
+	end
+
+	axislegend(ax, position=:rt)
+
+	f
+end
+
+# ╔═╡ f4937927-f629-4598-ab11-c20d6bc5c04d
+begin
+	raw_fit3_qu = readdlm("./data/raw_table_03_quiescent.txt")
+	fit3_qu     = DataFrame(
+		"redshift" => raw_fit3_qu[2:end, 1],
+		"chi2" => raw_fit3_qu[2:end, end],
+	)
+	for i in 2:(size(raw_fit3_qu, 2) - 1)
+		col                          = raw_fit3_qu[2:end, i]
+		z_range                      = raw_fit3_qu[1, i]
+		fit3_qu[!, z_range]          = parse_txt(r"^.*(?=(\+or-))", col)
+		fit3_qu[!, z_range * "_err"] = parse_txt(r"(?<=\+or-).*", col)
+	end
+	fit3_qu
+end
+
+# ╔═╡ 4dd60ebc-caaa-4d02-a362-94ff97cd8ab8
+let
+	mass = LinRange(8, 12, 100)
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Quiescent}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		size(fit3_qu, 1),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (row, color) in zip(eachrow(fit3_qu), colors)
+		ϕ = single_schechter.(mass, ([row."Log(M*)", row."alpha", row."Log(Phi*)"],))
+		lines!(ax, mass, ϕ; color, label=row."redshift", linewidth=3)
+	end
+
+	axislegend(ax, position=:rt)
+
+	f
+end
+
+# ╔═╡ 9c0aef00-bfe0-4ef5-a0f0-284a04b5e484
+md"## Double"
+
+# ╔═╡ 6c2e848b-137b-4ba4-ae62-016a64259531
+function double_schechter(m::Float64, params::Vector{Float64})::Float64
+
+	# m  = log10(M/M⊙)
+	# ms = log10(M⋆/M⊙)
+	ms, α1, α2, logΦ1, logΦ2 = params
+	Φ1, Φ2                   = 10 .^ [logΦ1, logΦ2]
+
+	return log(10) * exp(-10^(m - ms)) * 10^(m - ms) * (Φ1 * 10^((m - ms) * α1) + Φ2 * 10^((m - ms) * α2))
+
+end;
+
+# ╔═╡ 9a7d24c2-d816-45d7-977a-8b4da1c65c23
+begin
+	raw_fit2_total = readdlm("./data/raw_table_02_total.txt")
+	fit2_total     = DataFrame(
+		"redshift" => raw_fit2_total[2:end, 1],
+		"chi2" => raw_fit2_total[2:end, end],
+	)
+	for i in 2:(size(raw_fit2_total, 2) - 1)
+		col                             = raw_fit2_total[2:end, i]
+		z_range                         = raw_fit2_total[1, i]
+		fit2_total[!, z_range]          = parse_txt(r"^.*(?=(\+or-))", col)
+		fit2_total[!, z_range * "_err"] = parse_txt(r"(?<=\+or-).*", col)
+	end
+	fit2_total
+end
+
+# ╔═╡ a1f7550d-9092-4be4-b5bb-6ffb1ff1d997
+let
+	mass = LinRange(8, 12, 100)
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Total}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		size(fit2_total, 1),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (row, color) in zip(eachrow(fit2_total), colors)
+		ϕ = double_schechter.(mass, ([
+			row."Log(M*)",
+			row."alpha_1",
+			row."alpha_2",
+			row."Log(Phi^*_1)",
+			row."Log(Phi^*_2)",
+		],))
+		lines!(ax, mass, ϕ; color, label=row."redshift", linewidth=3)
+	end
+
+	axislegend(ax, position=:rt)
+
+	f
+end
+
+# ╔═╡ eefe1eb4-3bda-4107-b005-03870d9bf238
+begin
+	raw_fit2_sf = readdlm("./data/raw_table_02_starforming.txt")
+	fit2_sf     = DataFrame(
+		"redshift" => raw_fit2_sf[2:end, 1],
+		"chi2" => raw_fit2_sf[2:end, end],
+	)
+	for i in 2:(size(raw_fit2_sf, 2) - 1)
+		col                          = raw_fit2_sf[2:end, i]
+		z_range                      = raw_fit2_sf[1, i]
+		fit2_sf[!, z_range]          = parse_txt(r"^.*(?=(\+or-))", col)
+		fit2_sf[!, z_range * "_err"] = parse_txt(r"(?<=\+or-).*", col)
+	end
+	fit2_sf
+end
+
+# ╔═╡ 3e050a04-1c8c-4661-89f8-7e51095167dd
+let
+	mass = LinRange(8, 12, 100)
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Star \,\, forming}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		size(fit2_sf, 1),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (row, color) in zip(eachrow(fit2_sf), colors)
+		ϕ = double_schechter.(mass, ([
+			row."Log(M*)",
+			row."alpha_1",
+			row."alpha_2",
+			row."Log(Phi^*_1)",
+			row."Log(Phi^*_2)",
+		],))
+		lines!(ax, mass, ϕ; color, label=row."redshift", linewidth=3)
+	end
+
+	axislegend(ax, position=:rt)
+
+	f
+end
+
+# ╔═╡ 3774b1ae-58b4-43c6-95a5-ecc1dae8fb94
+begin
+	raw_fit2_qu = readdlm("./data/raw_table_02_quiescent.txt")
+	fit2_qu     = DataFrame(
+		"redshift" => raw_fit2_qu[2:end, 1],
+		"chi2" => raw_fit2_qu[2:end, end],
+	)
+	for i in 2:(size(raw_fit2_qu, 2) - 1)
+		col                          = raw_fit2_qu[2:end, i]
+		z_range                      = raw_fit2_qu[1, i]
+		fit2_qu[!, z_range]          = parse_txt(r"^.*(?=(\+or-))", col)
+		fit2_qu[!, z_range * "_err"] = parse_txt(r"(?<=\+or-).*", col)
+	end
+	fit2_qu
+end
+
+# ╔═╡ 0214ef85-219a-4b6e-9e6b-bc6938d49524
+let
+	mass = LinRange(8, 12, 100)
+
+	set_theme!(theme_black())
+
+	f = Figure()
+
+	ax = Axis(
+		f[1,1],
+		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
+		ylabel=L"\log(\phi \, / \, \mathrm{dex^{-1} \, Mpc^{-3}})",
+		title=L"\mathrm{Quiescent}",
+		titlesize=30,
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	colors = distinguishable_colors(
+		size(fit2_qu, 1),
+		[RGB(1,1,1), RGB(0,0,0)],
+		dropseed=true,
+	)
+
+	for (row, color) in zip(eachrow(fit2_qu), colors)
+		ϕ = double_schechter.(mass, ([
+			row."Log(M*)",
+			row."alpha_1",
+			row."alpha_2",
+			row."Log(Phi^*_1)",
+			row."Log(Phi^*_2)",
+		],))
+		lines!(ax, mass, ϕ; color, label=row."redshift", linewidth=3)
+	end
+
+	axislegend(ax, position=:rt)
 
 	f
 end
@@ -213,12 +575,16 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 
 [compat]
 CairoMakie = "~0.13.2"
-FITSIO = "~0.17.4"
+Colors = "~0.13.0"
+DataFrames = "~1.7.0"
+DelimitedFiles = "~1.9.1"
 LaTeXStrings = "~1.4.0"
 """
 
@@ -228,7 +594,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.4"
 manifest_format = "2.0"
-project_hash = "ef55ee04a227ce19f6f23d36d38fa3a1b80be6ed"
+project_hash = "f2b8f87c7dc1b89417c9635687a129a39ce60a62"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -314,18 +680,6 @@ version = "1.0.9+0"
 git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
-
-[[deps.CFITSIO]]
-deps = ["CFITSIO_jll"]
-git-tree-sha1 = "fc0abb338eb8d90bc186ccf0a47c90825952c950"
-uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
-version = "1.4.2"
-
-[[deps.CFITSIO_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "b90d32054fc88f97dd926022f554180e744e4d7d"
-uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
-version = "4.4.0+0"
 
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
@@ -434,10 +788,21 @@ git-tree-sha1 = "439e35b0b36e2e5881738abc8857bd92ad6ff9a8"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.3"
 
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
+
 [[deps.DataAPI]]
 git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.16.0"
+
+[[deps.DataFrames]]
+deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "fb61b4812c49343d7ef0b533ba982c46021938a6"
+uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+version = "1.7.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -460,6 +825,12 @@ deps = ["AdaptivePredicates", "EnumX", "ExactPredicates", "Random"]
 git-tree-sha1 = "5620ff4ee0084a6ab7097a27ba0c19290200b037"
 uuid = "927a84f5-c5f4-47a5-9785-b46e178433df"
 version = "1.6.4"
+
+[[deps.DelimitedFiles]]
+deps = ["Mmap"]
+git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
+uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+version = "1.9.1"
 
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -538,12 +909,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "4d81ed14783ec49ce9f2e168208a12ce1815aa25"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.10+3"
-
-[[deps.FITSIO]]
-deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
-git-tree-sha1 = "8b68d078e8ec3660b7e95528f1a888c5222d2fb4"
-uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
-version = "0.17.4"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
@@ -630,6 +995,11 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "846f7026a9decf3679419122b49f8a1fdb48d2d5"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.16+0"
+
+[[deps.Future]]
+deps = ["Random"]
+uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+version = "1.11.0"
 
 [[deps.GeoFormatTypes]]
 git-tree-sha1 = "8e233d5167e63d708d41f87597433f59a0f213fe"
@@ -747,6 +1117,19 @@ git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
 
+[[deps.InlineStrings]]
+git-tree-sha1 = "6a9fde685a7ac1eb3495f8e812c5a7c3711c2d5e"
+uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
+version = "1.4.3"
+
+    [deps.InlineStrings.extensions]
+    ArrowTypesExt = "ArrowTypes"
+    ParsersExt = "Parsers"
+
+    [deps.InlineStrings.weakdeps]
+    ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
+    Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
 git-tree-sha1 = "0f14a5456bdc6b9731a5682f439a672750a09e48"
@@ -810,6 +1193,11 @@ weakdeps = ["Dates", "Test"]
     [deps.InverseFunctions.extensions]
     InverseFunctionsDatesExt = "Dates"
     InverseFunctionsTestExt = "Test"
+
+[[deps.InvertedIndices]]
+git-tree-sha1 = "6da3c4316095de0f5ee2ebd875df8721e7e0bdbe"
+uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
+version = "1.3.1"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "e2222959fbc6c19554dc15174c81bf7bf3aa691c"
@@ -1227,6 +1615,12 @@ git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
 uuid = "647866c9-e3ac-4575-94e7-e3d426903924"
 version = "0.1.2"
 
+[[deps.PooledArrays]]
+deps = ["DataAPI", "Future"]
+git-tree-sha1 = "36d8b4b899628fb92c2749eb488d884a926614d3"
+uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
+version = "1.4.3"
+
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
 git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
@@ -1238,6 +1632,12 @@ deps = ["TOML"]
 git-tree-sha1 = "9306f6085165d270f7e3db02af26a400d580f5c6"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.3"
+
+[[deps.PrettyTables]]
+deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "Reexport", "StringManipulation", "Tables"]
+git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
+uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
+version = "2.4.0"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1347,6 +1747,12 @@ deps = ["Dates"]
 git-tree-sha1 = "3bac05bc7e74a75fd9cba4295cde4045d9fe2386"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.2.1"
+
+[[deps.SentinelArrays]]
+deps = ["Dates", "Random"]
+git-tree-sha1 = "712fb0231ee6f9120e005ccd56297abbc053e7e0"
+uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+version = "1.4.8"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1472,6 +1878,12 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
     [deps.StatsFuns.extensions]
     StatsFunsChainRulesCoreExt = "ChainRulesCore"
     StatsFunsInverseFunctionsExt = "InverseFunctions"
+
+[[deps.StringManipulation]]
+deps = ["PrecompileTools"]
+git-tree-sha1 = "725421ae8e530ec29bcbdddbe91ff8053421d023"
+uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
+version = "0.4.1"
 
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
@@ -1748,20 +2160,32 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═dd8fad00-c7ed-11ec-1cac-3f9440b58a8f
-# ╟─c99f09f6-e92c-4279-bec5-24afa53cb837
-# ╟─0b20ad79-bcdc-4d5b-9e13-0b630e5dff94
-# ╟─b9c6a0bd-10ae-4406-be37-07338d44f920
-# ╠═3d2c7655-f630-4ccb-8f40-38d41771dea8
-# ╟─452718b6-7a7c-42c4-a2f5-6a9843b95057
-# ╟─8571241d-c988-4a17-839f-bfe67ce7189b
-# ╠═9007db12-d49a-479c-97f5-d87bafbe0a91
-# ╟─2864f808-f423-492a-8f2f-796fcb99e713
-# ╟─e969d495-005e-44fb-8d17-f438038840c9
-# ╠═ad14cd2e-6768-469e-8268-fefddf00c2b7
-# ╟─7aec17e9-99fc-4cdf-96a1-6c97c3312d55
-# ╟─1b261741-4082-4ad8-abd9-3c2695453185
-# ╠═243e1c76-73c8-45ac-ac32-f9bb43725d0b
-# ╟─7e87d278-74ed-4646-a36d-247f8aea159f
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╟─464b0b77-2e6d-4f3d-a24d-b2db04fff3ed
+# ╟─71facef6-dd7b-4dc6-b32f-b543c3a203eb
+# ╟─5d6c7470-9387-4058-8496-0fd8e0e3a925
+# ╟─867ef2b9-3acd-4c71-99c8-17288e0f3915
+# ╟─a324e8e5-2dd0-4666-968a-4ddb0511462c
+# ╟─b75b88fa-a22c-48f7-a795-89b663f654f9
+# ╟─130e0183-1308-4511-8b6f-c7923ef0a5b9
+# ╟─c9909329-1d65-46c6-b3bd-867b340a013b
+# ╟─c82377af-b895-4ec3-97e4-cff1684f1e54
+# ╟─830592c8-a8ae-4e3a-840e-c1f29728f475
+# ╟─5ae30e66-1dde-4b11-b55a-0e350287aef5
+# ╟─dbe59bd6-666b-488a-997e-d84aa31657fb
+# ╟─1befdebb-d245-4b4f-9957-c5fe9c209d32
+# ╟─3ace77bf-7031-4078-b66d-2a042b5ae68b
+# ╟─e9091b1e-9cdd-40e7-a4bd-d35635242866
+# ╟─3d2733c2-8c50-44a9-b73a-8588a03e393c
+# ╟─f4937927-f629-4598-ab11-c20d6bc5c04d
+# ╟─4dd60ebc-caaa-4d02-a362-94ff97cd8ab8
+# ╟─9c0aef00-bfe0-4ef5-a0f0-284a04b5e484
+# ╟─6c2e848b-137b-4ba4-ae62-016a64259531
+# ╟─9a7d24c2-d816-45d7-977a-8b4da1c65c23
+# ╟─a1f7550d-9092-4be4-b5bb-6ffb1ff1d997
+# ╟─eefe1eb4-3bda-4107-b005-03870d9bf238
+# ╟─3e050a04-1c8c-4661-89f8-7e51095167dd
+# ╟─3774b1ae-58b4-43c6-95a5-ecc1dae8fb94
+# ╟─0214ef85-219a-4b6e-9e6b-bc6938d49524
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
