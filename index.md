@@ -3,36 +3,37 @@
 
 ## Notebooks:
 
-  - 3D-HST ([web view](3D-HST/plots.html) - [download notebook](3D-HST/plots.jl)).
-  - ALFALFA ([web view](ALFALFA/plots.html) - [download notebook](ALFALFA/plots.jl)).
-  - AMUSING++ ([web view](AMUSING++/plots.html) - [download notebook](AMUSING++/plots.jl)).
-  - Baker2022 ([web view](Baker2022/plots.html) - [download notebook](Baker2022/plots.jl)).
-  - Baldry2012 ([web view](Baldry2012/plots.html) - [download notebook](Baldry2012/plots.jl)).
-  - Bigiel2008 ([web view](Bigiel2008/plots.html) - [download notebook](Bigiel2008/plots.jl)).
-  - Bigiel2010 ([web view](Bigiel2010/plots.html) - [download notebook](Bigiel2010/plots.jl)).
-  - Chung2009 ([web view](Chung2009/plots.html) - [download notebook](Chung2009/plots.jl)).
-  - Feldmann2020 ([web view](Feldmann2020/plots.html) - [download notebook](Feldmann2020/plots.jl)).
-  - Kennicutt1998 ([web view](Kennicutt1998/plots.html) - [download notebook](Kennicutt1998/plots.jl)).
-  - Langeroodi2022 ([web view](Langeroodi2022/plots.html) - [download notebook](Langeroodi2022/plots.jl)).
-  - Leroy2019 ([web view](Leroy2019/plots.html) - [download notebook](Leroy2019/plots.jl)).
-  - Lisenfeld2023 ([web view](Lisenfeld2023/plots.html) - [download notebook](Lisenfeld2023/plots.jl)).
-  - Mannucci2010 ([web view](Mannucci2010/plots.html) - [download notebook](Mannucci2010/plots.jl)).
-  - Mollá2015 ([web view](Mollá2015/plots.html) - [download notebook](Mollá2015/plots.jl)).
-  - PHANGS–ALMA ([web view](PHANGS–ALMA/plots.html) - [download notebook](PHANGS–ALMA/plots.jl)).
-  - Pilyugin2014 ([web view](Pilyugin2014/plots.html) - [download notebook](Pilyugin2014/plots.jl)).
-  - Puertas2022 ([web view](Puertas2022/plots.html) - [download notebook](Puertas2022/plots.jl)).
-  - Sánchez2017 ([web view](Sánchez2017/plots.html) - [download notebook](Sánchez2017/plots.jl)).
-  - Sánchez2019 ([web view](Sánchez2019/plots.html) - [download notebook](Sánchez2019/plots.jl)).
-  - Sánchez2022 ([web view](Sánchez2022/plots.html) - [download notebook](Sánchez2022/plots.jl)).
-  - Schreiber2015 ([web view](Schreiber2015/plots.html) - [download notebook](Schreiber2015/plots.jl)).
-  - SDSS_VAC ([web view](SDSS_VAC/plots.html) - [download notebook](SDSS_VAC/plots.jl)).
-  - Sotillo-Ramos2021 ([web view](Sotillo-Ramos2021/plots.html) - [download notebook](Sotillo-Ramos2021/plots.jl)).
-  - Thorne2021 ([web view](Thorne2021/plots.html) - [download notebook](Thorne2021/plots.jl)).
-  - Tomczak2014 ([web view](Tomczak2014/plots.html) - [download notebook](Tomczak2014/plots.jl)).
-  - Tremonti2004 ([web view](Tremonti2004/plots.html) - [download notebook](Tremonti2004/plots.jl)).
-  - VERTICO ([web view](VERTICO/plots.html) - [download notebook](VERTICO/plots.jl)).
-  - Whitaker2014 ([web view](Whitaker2014/plots.html) - [download notebook](Whitaker2014/plots.jl)).
-  - Wu2021 ([web view](Wu2021/plots.html) - [download notebook](Wu2021/plots.jl)).
-  - xCOLD_GASS ([web view](xCOLD_GASS/plots.html) - [download notebook](xCOLD_GASS/plots.jl)).
-  - xGASS ([web view](xGASS/plots.html) - [download notebook](xGASS/plots.jl)).
-  - Zahid2014 ([web view](Zahid2014/plots.html) - [download notebook](Zahid2014/plots.jl)).
+  - 3D-HST Survey ([web view](3d-hst/plots.html) - [download notebook](3d-hst/plots.jl)).
+  - ALFALFA ([web view](alfalfa/plots.html) - [download notebook](alfalfa/plots.jl)).
+  - AMUSING++ ([web view](amusing++/plots.html) - [download notebook](amusing++/plots.jl)).
+  - Baker et al. (2022) ([web view](baker_2022/plots.html) - [download notebook](baker_2022/plots.jl)).
+  - Baldry et al. (2012) ([web view](baldry_2012/plots.html) - [download notebook](baldry_2012/plots.jl)).
+  - Bigiel et al. (2008) ([web view](bigiel_2008/plots.html) - [download notebook](bigiel_2008/plots.jl)).
+  - Bigiel et al. (2010) ([web view](bigiel_2010/plots.html) - [download notebook](bigiel_2010/plots.jl)).
+  - Chung et al. (2009) ([web view](chung_2009/plots.html) - [download notebook](chung_2009/plots.jl)).
+  - Feldmann (2020) ([web view](feldmann_2020/plots.html) - [download notebook](feldmann_2020/plots.jl)).
+  - Kennicutt-Schmidt law (1959-1998) ([web view](kennicutt_1998/plots.html) - [download notebook](kennicutt_1998/plots.jl)).
+  - Langeroodi et al. (2022) ([web view](langeroodi_2022/plots.html) - [download notebook](langeroodi_2022/plots.jl)).
+  - Leroy et al. (2019) ([web view](leroy_2019/plots.html) - [download notebook](leroy_2019/plots.jl)).
+  - Lisenfeld et al. (2023) ([web view](lisenfeld_2023/plots.html) - [download notebook](lisenfeld_2023/plots.jl)).
+  - Mannucci et al. (2010) ([web view](mannucci_2010/plots.html) - [download notebook](mannucci_2010/plots.jl)).
+  - Mollá et al. (2015) ([web view](mollá_2015/plots.html) - [download notebook](mollá_2015/plots.jl)).
+  - PHANGS–ALMA ([web view](phangs–alma/plots.html) - [download notebook](phangs–alma/plots.jl)).
+  - Pilyugin et al. (2014) ([web view](pilyugin_2014/plots.html) - [download notebook](pilyugin_2014/plots.jl)).
+  - Puertas et al. (2022) ([web view](puertas_2022/plots.html) - [download notebook](puertas_2022/plots.jl)).
+  - Sánchez et al. (2017) ([web view](sánchez_2017/plots.html) - [download notebook](sánchez_2017/plots.jl)).
+  - Sánchez et al. (2019) ([web view](sánchez_2019/plots.html) - [download notebook](sánchez_2019/plots.jl)).
+  - Sánchez et al. (2022) ([web view](sánchez_2022/plots.html) - [download notebook](sánchez_2022/plots.jl)).
+  - Schreiber et al. (2015) ([web view](schreiber_2015/plots.html) - [download notebook](schreiber_2015/plots.jl)).
+  - SDSS value-added catalogs ([web view](sdss_vac/plots.html) - [download notebook](sdss_vac/plots.jl)).
+  - Sotillo-Ramos et al. (2021) ([web view](sotillo-ramos_2021/plots.html) - [download notebook](sotillo-ramos_2021/plots.jl)).
+  - Sun et al. (2023) ([web view](sun_2023/plots.html) - [download notebook](sun_2023/plots.jl)).
+  - Thorne et al. (2021) ([web view](thorne_2021/plots.html) - [download notebook](thorne_2021/plots.jl)).
+  - Tomczak et al. (2014) ([web view](tomczak_2014/plots.html) - [download notebook](tomczak_2014/plots.jl)).
+  - Tremonti et al. (2004) ([web view](tremonti_2004/plots.html) - [download notebook](tremonti_2004/plots.jl)).
+  - VERTICO ([web view](vertico/plots.html) - [download notebook](vertico/plots.jl)).
+  - Whitaker et al. (2014) ([web view](whitaker_2014/plots.html) - [download notebook](whitaker_2014/plots.jl)).
+  - Wu et al. (2021) ([web view](wu_2021/plots.html) - [download notebook](wu_2021/plots.jl)).
+  - xCOLD GASS ([web view](xcold_gass/plots.html) - [download notebook](xcold_gass/plots.jl)).
+  - xGASS ([web view](xgass/plots.html) - [download notebook](xgass/plots.jl)).
+  - Zahid et al. (2014) ([web view](zahid_2014/plots.html) - [download notebook](zahid_2014/plots.jl)).
