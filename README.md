@@ -232,7 +232,7 @@ A. K. Leroy, E. Schinnerer, A. Hughes, E. Rosolowsky, J. Pety, A. Schruba, A. Us
 
 
 
-### [Pilyugin et al. 2014](https://doi.org/10.1088/0004-6256/147/6/131)
+### [Pilyugin et al. (2014)](https://doi.org/10.1088/0004-6256/147/6/131)
 
 #### Data products
 
@@ -244,7 +244,7 @@ L. S. Pilyugin, E. K. Grebel1, and A. Y. Kniazev,THE ABUNDANCE PROPERTIES OF NEA
 
 
 
-### [Puertas et al. 2022](https://doi.org/10.1051/0004-6361/202141571)
+### [Puertas et al. (2022)](https://doi.org/10.1051/0004-6361/202141571)
 
 #### Data products
 
@@ -336,6 +336,19 @@ C. Schreiber, M. Pannella, D. Elbaz, M. Béthermin, H. Inami, M. Dickinson, B. M
 #### Reference
 
 D. Sotillo-Ramos, M. A. Lara-López, A. M. Pérez-García, R. Pérez-Martínez, A. M. Hopkins, B. W. Holwerda, J. Liske, A. R. López-Sánchez, M. S. Owers and K. A. Pimbblet, Galaxy and mass assembly (GAMA): The environmental impact on SFR and metallicity in galaxy groups, _Monthly Notices of the Royal Astronomical Society_, Volume 508, Issue 2, December 2021, Pages 1817–1830, doi: 10.1093/mnras/stab2641
+
+
+
+### [Sun et al. (2023)](https://doi.org/10.3847/2041-8213/acbd9c)
+
+#### Data products
+
+- Star formation rate surface density.
+- Molecular mass surface density.
+
+#### Reference
+
+J. Sun, A. K. Leroy, E. C. Ostriker, S. Meidt, E. Rosolowsky, E. Schinnerer, C. D. Wilson, D. Utomo, F. Belfiore, G. A. Blanc, E. Emsellem, C. Faesi, B. Groves, A. Hughes, E. W. Koch, K. Kreckel, D. Liu, H.-A. Pan, J. Pety, M. Querejeta, A. Razza, T. Saito, A. Sardone, A. Usero, T. G. Williams, F. Bigiel, A. D. Bolatto, M. Chevance, D. A. Dale, J. Gensior, S. C. O. Glover, K. Grasha, J. D. Henshaw, M. J. Jiménez-Donaire, R. S. Klessen, J. M. Diederik Kruijssen, E. J. Murphy, L. Neumann, Y.-H. Teng, D. A. Thilker, Star Formation Laws and Efficiencies across 80 Nearby Galaxies, _The Astrophysical Journal Letters_, Volume 945, Number 2, March 2023, Pages L19, doi: 10.3847/2041-8213/acbd9c
 
 
 
@@ -480,5 +493,7 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 ### TODO
 
 [Messias2023](https://arxiv.org/abs/2312.02782)
+
 [Cheng2024](https://arxiv.org/abs/2407.10974)
+
 [Behroozi2019](https://bitbucket.org/pbehroozi/universemachine/src/main/#markdown-header-cosmic-star-formation-rates)
