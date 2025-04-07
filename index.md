@@ -34,6 +34,6 @@
   - VERTICO ([web view](vertico/plots.html) - [download notebook](vertico/plots.jl)).
   - Whitaker et al. (2014) ([web view](whitaker_2014/plots.html) - [download notebook](whitaker_2014/plots.jl)).
   - Wu et al. (2021) ([web view](wu_2021/plots.html) - [download notebook](wu_2021/plots.jl)).
-  - xCOLD GASS ([web view](xcold_gass/plots.html) - [download notebook](xcold_gass/plots.jl)).
+  - xCOLD GASS ([web view](xcold-gass/plots.html) - [download notebook](xcold-gass/plots.jl)).
   - xGASS ([web view](xgass/plots.html) - [download notebook](xgass/plots.jl)).
   - Zahid et al. (2014) ([web view](zahid_2014/plots.html) - [download notebook](zahid_2014/plots.jl)).
