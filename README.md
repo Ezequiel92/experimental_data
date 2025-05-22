@@ -128,6 +128,18 @@ R. Feldmann, The link between star formation and gas in nearby galaxies, _Commun
 
 
 
+### [Haardt et al. (2012)](https://doi.org/10.1088/0004-637X/746/2/125)
+
+#### Data products
+
+- Hydrogen photoionization rate vs. redshift, due to the metagalactic ultraviolet background radiation.
+
+#### Reference
+
+F. Haardt, P. Madau, RADIATIVE TRANSFER IN A CLUMPY UNIVERSE. IV. NEW SYNTHESIS MODELS OF THE COSMIC UV/X-RAY BACKGROUND, _The Astrophysical Journal_, Volume 746, Issue 2, February 2012, Pages 125, doi: [10.1088/0004-637x/746/2/125] (https://doi.org/10.1088/0004-637x/746/2/125)
+
+
+
 ### Kennicutt-Schmidt law (1959-1998)
 
 #### Data products
@@ -256,6 +268,18 @@ L. S. Pilyugin, E. K. Grebel1, and A. Y. Kniazev,THE ABUNDANCE PROPERTIES OF NEA
 #### Reference
 
 S. D. Puertas, J. M. Vilchez, J. Iglesias-Páramo, M. Mollá, E. Pérez-Montero, C. Kehrig, L. S. Pilyugin and I. A. Zinchenko, Mass–metallicity and star formation rate in galaxies: A complex relation tuned to stellar age, _Astronomy & Astrophysics_, Volume 666, Issue A186, October 2022, doi: [10.1051/0004-6361/202141571](https://doi.org/10.1051/0004-6361/202141571)
+
+
+
+### [Rahmati et al. (2013)](https://doi.org/10.1093/mnras/stt066)
+
+#### Data products
+
+- Hydrogen photoionization rate vs. redshift, due to the metagalactic ultraviolet background radiation.
+
+#### Reference
+
+A. Rahmati, A. H. Pawlik, M. Raičevic̀, J. Schaye, On the evolution of the H i column density distribution in cosmological simulations, _Monthly Notices of the Royal Astronomical Society_, Volume 430, Issue 3, April 2013, Pages 2427–2445, doi: [10.1093/mnras/stt066](https://doi.org/10.1093/mnras/stt066)
 
 
 
@@ -494,6 +518,8 @@ H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwan
 
 [Messias2023](https://arxiv.org/abs/2312.02782)
 
-[Cheng2024](https://arxiv.org/abs/2407.10974)
+[Cheng2024](https://academic.oup.com/mnras/article/532/3/3604/7716039?login=false)
 
 [Behroozi2019](https://bitbucket.org/pbehroozi/universemachine/src/main/#markdown-header-cosmic-star-formation-rates)
+
+[Guo2023](https://arxiv.org/abs/2307.07078)
