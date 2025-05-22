@@ -1,197 +1,158 @@
 ### A Pluto.jl notebook ###
 # v0.20.8
 
+#> [frontmatter]
+
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames
-
-# ╔═╡ e5c8a798-83a0-4be6-8606-cdbbc47141b2
-md"""
-# [Mannucci et al. (2010)](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
-
-### [Data](https://academic.oup.com/view-large/21366667)
-"""
+using CairoMakie, DataFrames, JLD2, Integrals, LaTeXStrings, Measurements, Unitful, UnitfulAstro
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# Fits
-
-## M-Z relation:
-
-``12 + \log(O / H) = a + b \, x + c \, x^2 + d \, x^3 + e \, x^4``
-
-where ``x = \log(M_\star / M_\odot) - 10``.
-
-## M-Z-SFR relation:
-
-``12 + \log(O / H) = a + b \, x + c \, y + d \, x^2 + e \, x \, y + f \, y^2``
-
-where ``y = \log(SFR / M_\odot \, yr^{-1})``.
-
-## Z-μ relation:
-
-``12 + \log(O / H) = a + b \, z + c \, z^2 + d \, z^3 + e \, z^4``
-
-where ``z = \mu_{0.32} - 10`` and ``\mu_\alpha = \log(M_\star / M_\odot) - \alpha \, \log(SFR / M_\odot \, yr^{-1})``.
+# [McMillan (2011)](https://doi.org/10.1111/j.1365-2966.2011.18564.x)
 """
 
-# ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-fit = DataFrame(
-	Relation = ["M-Z", "M-Z-SFR", "Z-mu"],
-	a = [8.96, 8.9, 8.9],
-	b = [0.31, 0.37, 0.39],
-	c = [-0.23, -0.14, -0.2],
-	d = [-0.017, -0.19, -0.077],
-	e = [0.046, 0.12, 0.064],
-	f = [missing, -0.054, missing],
-)
+# ╔═╡ 63568597-d6ce-4a8d-b8a4-d0cee44b280c
+md"""
+# Fits for the stellar density profile
 
-# ╔═╡ e1980dd7-549d-4770-8205-afe2a2120d9a
-let
-	MZ = x -> fit[1, :a] + fit[1, :b] * x + fit[1, :c] * x^2 + fit[1, :d] * x^3 + fit[1, :e] * x^4
+## Bulge
 
-	set_theme!(theme_black())
+From section 2.1 we have
 
-	f = Figure()
+``\rho_\mathrm{b} = \dfrac{\rho_\mathrm{b, 0}}{(1 + r' / r_0)^\alpha} \, \exp(-(r' / r_\mathrm{cut})^2)``
 
-	ax = Axis(
-		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 10",
-		ylabel=L"12 + \log(\mathrm{O / H})",
-		title=L"\mathrm{Mass - Metallicity \,\, relation}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
+where 
 
-	lines!(ax, -1..1, MZ, color=:red)
+``r' = \sqrt{R^2 + \left( \dfrac{z}{q} \right)^{\!2}}``
 
-	f
-end
+and ``\alpha = 1.8``, ``r_0 = 0.075 \, \mathrm{kpc}``, ``q = 0.5``, and ``r_\mathrm{cut} = 2.1 \, \mathrm{kpc}``, and the best fit for the parameteris (Table 2 in Section 5)
 
-# ╔═╡ 92ee56f1-4ffc-4880-b654-2af1803a7ecc
-let
-	xs = ys = LinRange(-1, 1, 100)
+``\rho_\mathrm{b, 0} = 95.6 \pm 6.9 \, \mathrm{M_\odot \, pc^{-3}}``.
 
-	MZSFR = (x, y) -> fit[2, :a] + fit[2, :b] * x + fit[2, :c] * y + fit[2, :d] * x^2 + fit[2, :e] * x * y + fit[2, :f] * y^2
+## Thin and thick disk
 
-	set_theme!(theme_black())
+From section 2.2 we have
 
-	f = Figure(size=(800,600))
+``\rho_\mathrm{d} = \dfrac{\Sigma_\mathrm{d, 0}}{2 \, z_\mathrm{d}} \, \exp\left(-\dfrac{|z|}{z_\mathrm{d}} - \dfrac{R}{R_\mathrm{d}}\right)``
 
-	ax = Axis3(
-		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 10",
-		ylabel=L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})",
-		zlabel=L"12 + \log(\mathrm{O / H})",
-		title=L"\mathrm{Mass - Metallicity - SFR \,\, relation}",
-		titlesize=30,
-		xlabelsize=26,
-		ylabelsize=26,
-		zlabelsize=26,
-		xticklabelsize=20,
-		yticklabelsize=20,
-		zticklabelsize=20,
-		aspect=(1,1,1),
-	)
+where ``z_\mathrm{d, thin} = 0.3 \, \mathrm{kpc}``, ``z_\mathrm{d, thick} = 0.9 \, \mathrm{kpc}``, and the best fits for the parameters are (Table 2 in Section 5)
 
-	surface!(ax, xs, ys, MZSFR)
+``\Sigma_\mathrm{d, 0, thin} = 816.6 \pm 123 \, \mathrm{M_\odot \, pc^{-2}}``
 
-	f
-end
+``R_\mathrm{d, thin} = 2.9 \pm 0.22 \, \mathrm{kpc}``
 
-# ╔═╡ d5d72028-0074-4a85-844b-22039058de69
-let
-	Mμ = x -> fit[3, :a] + fit[3, :b] * x + fit[3, :c] * x^2 + fit[3, :d] * x^3 + fit[3, :e] * x^4
+``\Sigma_\mathrm{d, 0, thick} = 209.5 \pm 110 \, \mathrm{M_\odot \, pc^{-2}}``
 
-	set_theme!(theme_black())
+``R_\mathrm{d, thick} = 3.31 \pm 0.56 \, \mathrm{kpc}``
+"""
 
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"\mu_{0.32} - 10",
-		ylabel=L"12 + \log(\mathrm{O / H})",
-		title=L"\mu - \mathrm{Metallicity \,\, relation}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	lines!(ax, -1..1, Mμ, color=:red)
-
-	f
-end
-
-# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
-md"## Measurements"
-
-# ╔═╡ 34ce6570-6566-4981-908a-81eabcbca7bf
-raw_data = readdlm("./data/clean_table_01.txt", '&')
-
-# ╔═╡ 130c74b6-9e16-443d-a593-ba9542c27dd7
+# ╔═╡ 83ab6b0e-b8a5-40d6-b80f-9e408c258e18
 begin
-	logM = filter(x -> isa(x, AbstractFloat), raw_data[1, :])
-	logSFR = filter(x -> isa(x, AbstractFloat), raw_data[:, 1])
-	metal_full = replace(
-		x -> isa(x, AbstractFloat) ? x : NaN,
-		raw_data[2:end, 2:end],
-	)
-	metal = metal_full[1:3:end, :]
-	metal_error = metal_full[2:3:end, :]
-	galaxy_per_bin = metal_full[3:3:end, :]
+	R = collect(range(0.0, 15.0, 200) .* u"kpc")
 
-	df_metal = DataFrame(hcat(logSFR, metal), ["logSFR", string.(logM)...])
-	df_metal_error = DataFrame(
-		hcat(logSFR, metal_error),
-		["logSFR", string.(logM)...],
-	)
-	df_galaxy_pb = DataFrame(
-		hcat(logSFR, galaxy_per_bin),
-		["logSFR", string.(logM)...],
-	)
-end
+	#################################################################################
+	# Bulge
+	#################################################################################
 
-# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
-let
+	# Constants
+	α   = 1.8
+	r0  = 0.075u"kpc"
+	q   = 0.5
+	rc  = 2.1u"kpc"
+	ρb0 = (95.6 ± 6.9)u"Msun * pc^-3"
+	
+	rp(r, z) = sqrt(r^2 + (z / q)^2)
+	
+	ρb(r, z) = (ρb0 / (1 + (rp(r, z) / r0))^α) * exp(-(rp(r, z) / rc)^2)
 
-	X = Vector{Float64}(undef, length(metal))
-	Y = Vector{Float64}(undef, length(metal))
-	Z = Vector{Float64}(undef, length(metal))
-	for i in 1:size(metal, 1)
-		for j in 1:size(metal, 2)
-			Y[(i - 1) * size(metal, 2) + j] = logSFR[i]
-			X[(i - 1) * size(metal, 2) + j] = logM[j]
-			Z[(i - 1) * size(metal, 2) + j] = metal[i, j]
-		end
+	#################################################################################
+	# Disk
+	#################################################################################
+
+	# Constants
+	zthin = 0.3u"kpc"
+	Σthin = (816.6 ± 123.0)u"Msun * pc^-2"
+	Rthin = (2.9 ± 0.22)u"kpc"
+	
+	zthick = 0.9u"kpc"
+	Σthick = (209.5 ± 110.0)u"Msun * pc^-2"
+	Rthick = (3.31 ± 0.56)u"kpc"
+
+	ρs(Σd, zd, rd, r, z) = (Σd / (2 * zd)) * exp(-(abs(z) / zd) - (r / rd))
+	
+	ρd(r, z) = ρs(Σthin, zthin, Rthin, r, z) + ρs(Σthick, zthick, Rthick, r, z)
+
+	#################################################################################
+	# Integration
+	#################################################################################
+
+	ρ(r, z) = ρb(r, z) + ρd(r, z)
+
+	function int_func(u, p)
+		r = u[1]u"kpc"
+		z = u[2]u"kpc"
+
+		return ustrip(u"Msun * kpc^-2", 2π * r * ρ(r, z))
 	end
 
+	Σs = zeros(typeof((1.0 ± 1.0)u"Msun * kpc^-2"), length(R) - 1)
+	
+	for (i, R2) in enumerate(R[2:end])
+
+		R1 = R[i]
+
+		# Lower bound [r, z]
+		lb = ustrip.(u"kpc", [R1, -2.0 * rc])
+		
+		# Upper bound [r, z]
+		ub = ustrip.(u"kpc", [R2, 2.0 * rc])
+		
+		prob = IntegralProblem(int_func, (lb, ub))
+		sol = solve(prob, HCubatureJL())
+
+		A = π * (R2^2 - R1^2)
+		
+		Σs[i] = sol.u * u"Msun" / A
+
+	end
+
+	midpoints = [(R[i] + R2) / 2 for (i, R2) in enumerate(R[2:end])]
+	
+	# Save the dataframe to a JLD2 file
+	df = DataFrame(r=midpoints, Sigma=Σs)
+	jldsave("mcmillan_2011.jld2"; dataframe=df)
+end
+
+# ╔═╡ cf76d5ea-f8a9-421f-a795-7d58bb858bae
+let
 	set_theme!(theme_black())
-
-	f = Figure(size=(800,600))
-
-	ax = Axis3(
+	
+	f = Figure()
+	
+	ax = Axis(
 		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
-		ylabel=L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})",
-		zlabel=L"12 + \log(\mathrm{O / H})",
-		xlabelsize=26,
-		ylabelsize=26,
-		zlabelsize=26,
+		xlabel=L"R \, / \, \mathrm{kpc}",
+		ylabel=L"\log_{10}(\Sigma_\star \, / \, \mathrm{M_\odot \, kpc^{-2}})",
+		xlabelsize=28,
+		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
-		zticklabelsize=20,
-		aspect=(1,1,1),
+		limits=(0.0, 15.0, nothing, nothing),
 	)
 
-	meshscatter!(ax, X, Y, Z, markersize=0.015, color=X)
+	logΣ  = Measurements.value.(log10.(ustrip.(u"Msun * kpc^-2", Σs)))
+	e_logΣ = Measurements.uncertainty.(log10.(ustrip.(u"Msun * kpc^-2", Σs)))
 
+	x      = ustrip.(u"kpc", midpoints)
+	y_low  = logΣ - e_logΣ
+	y_high = logΣ + e_logΣ
+
+	band!(ax, x, y_low, y_high, alpha=0.8)
+	lines!(ax, x, logΣ, color=:red)
+	
 	f
 end
 
@@ -200,13 +161,22 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Integrals = "de52edbc-65ea-441a-8357-d3a637375a31"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
 CairoMakie = "~0.13.6"
 DataFrames = "~1.7.0"
+Integrals = "~4.5.0"
+JLD2 = "~0.5.13"
 LaTeXStrings = "~1.4.0"
+Measurements = "~2.12.0"
+Unitful = "~1.22.1"
+UnitfulAstro = "~1.2.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -215,7 +185,22 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "7bd9e2fd8a404e4a1436caa05ca998a0c62e3ebe"
+project_hash = "9e4c6943fbd0bbe5edf432b75f0047b7bbdac4e4"
+
+[[deps.ADTypes]]
+git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
+uuid = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
+version = "1.14.0"
+
+    [deps.ADTypes.extensions]
+    ADTypesChainRulesCoreExt = "ChainRulesCore"
+    ADTypesConstructionBaseExt = "ConstructionBase"
+    ADTypesEnzymeCoreExt = "EnzymeCore"
+
+    [deps.ADTypes.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+    EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -232,6 +217,30 @@ weakdeps = ["ChainRulesCore", "Test"]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
 uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 version = "0.4.5"
+
+[[deps.Accessors]]
+deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "MacroTools"]
+git-tree-sha1 = "3b86719127f50670efe356bc11073d84b4ed7a5d"
+uuid = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
+version = "0.1.42"
+
+    [deps.Accessors.extensions]
+    AxisKeysExt = "AxisKeys"
+    IntervalSetsExt = "IntervalSets"
+    LinearAlgebraExt = "LinearAlgebra"
+    StaticArraysExt = "StaticArrays"
+    StructArraysExt = "StructArrays"
+    TestExt = "Test"
+    UnitfulExt = "Unitful"
+
+    [deps.Accessors.weakdeps]
+    AxisKeys = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
+    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
+    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+    StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -264,6 +273,38 @@ version = "0.4.2"
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 version = "1.1.2"
+
+[[deps.ArrayInterface]]
+deps = ["Adapt", "LinearAlgebra"]
+git-tree-sha1 = "9606d7832795cbef89e06a550475be300364a8aa"
+uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
+version = "7.19.0"
+
+    [deps.ArrayInterface.extensions]
+    ArrayInterfaceBandedMatricesExt = "BandedMatrices"
+    ArrayInterfaceBlockBandedMatricesExt = "BlockBandedMatrices"
+    ArrayInterfaceCUDAExt = "CUDA"
+    ArrayInterfaceCUDSSExt = "CUDSS"
+    ArrayInterfaceChainRulesCoreExt = "ChainRulesCore"
+    ArrayInterfaceChainRulesExt = "ChainRules"
+    ArrayInterfaceGPUArraysCoreExt = "GPUArraysCore"
+    ArrayInterfaceReverseDiffExt = "ReverseDiff"
+    ArrayInterfaceSparseArraysExt = "SparseArrays"
+    ArrayInterfaceStaticArraysCoreExt = "StaticArraysCore"
+    ArrayInterfaceTrackerExt = "Tracker"
+
+    [deps.ArrayInterface.weakdeps]
+    BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
+    BlockBandedMatrices = "ffab5731-97b5-5995-9138-79e8c1846df0"
+    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+    CUDSS = "45b445bb-4962-46a0-9369-b4df9d0f772e"
+    ChainRules = "082447d4-558c-5d27-93f4-14fc19e9eca2"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+    StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+    Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -336,6 +377,12 @@ git-tree-sha1 = "2ac646d71d0d24b44f3f8c84da8c9f4d70fb67df"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.4+0"
 
+[[deps.Calculus]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "9cb23bbb1127eefb022b022481466c0f1127d430"
+uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+version = "0.5.2"
+
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
 git-tree-sha1 = "1713c74e00545bfe14605d2a2be1712de8fbcb58"
@@ -384,6 +431,16 @@ git-tree-sha1 = "64e15186f0aa277e174aa81798f7eb8598e0157e"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.13.0"
 
+[[deps.Combinatorics]]
+git-tree-sha1 = "8010b6bb3388abe68d95743dcbea77650bb2eddf"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.3"
+
+[[deps.CommonSolve]]
+git-tree-sha1 = "0eee5eb66b1cf62cd6ad1b460238e60e4b09400c"
+uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+version = "0.2.4"
+
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
 git-tree-sha1 = "8ae8d32e09f0dcf42a36b90d4e17f5dd2e4c4215"
@@ -398,6 +455,20 @@ weakdeps = ["Dates", "LinearAlgebra"]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "1.1.1+0"
+
+[[deps.CompositionsBase]]
+git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
+uuid = "a33af91c-f02d-484b-be07-31d278c5ca2b"
+version = "0.1.2"
+weakdeps = ["InverseFunctions"]
+
+    [deps.CompositionsBase.extensions]
+    CompositionsBaseInverseFunctionsExt = "InverseFunctions"
+
+[[deps.ConcreteStructs]]
+git-tree-sha1 = "f749037478283d372048690eb3b5f92a79432b34"
+uuid = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
+version = "0.2.3"
 
 [[deps.ConstructionBase]]
 git-tree-sha1 = "76219f1ed5771adbb096743bff43fb5fdd4c1157"
@@ -513,6 +584,16 @@ git-tree-sha1 = "d55dffd9ae73ff72f1c0482454dcf2ec6c6c4a63"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.6.5+0"
 
+[[deps.ExprTools]]
+git-tree-sha1 = "27415f162e6028e81c72b82ef756bf321213b6ec"
+uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
+version = "0.1.10"
+
+[[deps.ExproniconLite]]
+git-tree-sha1 = "c13f0b150373771b0fdc1713c97860f8df12e6c2"
+uuid = "55351af7-c7e9-48d6-89ff-24e801d99491"
+version = "0.10.14"
+
 [[deps.Extents]]
 git-tree-sha1 = "b309b36a9e02fe7be71270dd8c0fd873625332b4"
 uuid = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
@@ -622,10 +703,27 @@ git-tree-sha1 = "7a214fdac5ed5f59a22c2d9a885a16da1c74bbc7"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.17+0"
 
+[[deps.FunctionWrappers]]
+git-tree-sha1 = "d62485945ce5ae9c0c48f124a84998d755bae00e"
+uuid = "069b7b12-0de2-55c6-9aab-29f3d0a68a2e"
+version = "1.1.3"
+
+[[deps.FunctionWrappersWrappers]]
+deps = ["FunctionWrappers"]
+git-tree-sha1 = "b104d487b34566608f8b4e1c39fb0b10aa279ff8"
+uuid = "77dc65aa-8811-40c2-897b-53d922fa7daf"
+version = "0.1.3"
+
 [[deps.Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 version = "1.11.0"
+
+[[deps.GPUArraysCore]]
+deps = ["Adapt"]
+git-tree-sha1 = "83cf05ab16a73219e5f6bd1bdfa9848fa24ac627"
+uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
+version = "0.2.0"
 
 [[deps.GeoFormatTypes]]
 git-tree-sha1 = "8e233d5167e63d708d41f87597433f59a0f213fe"
@@ -684,6 +782,12 @@ version = "0.11.1"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
+
+[[deps.HCubature]]
+deps = ["Combinatorics", "DataStructures", "LinearAlgebra", "QuadGK", "StaticArrays"]
+git-tree-sha1 = "19ef9f0cb324eed957b7fe7257ac84e8ed8a48ec"
+uuid = "19dc6840-f33b-545b-b366-655c7e3ffd49"
+version = "1.7.0"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll"]
@@ -756,6 +860,36 @@ version = "1.4.3"
     ArrowTypes = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
     Parsers = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 
+[[deps.IntegerMathUtils]]
+git-tree-sha1 = "b8ffb903da9f7b8cf695a8bead8e01814aa24b30"
+uuid = "18e54dd8-cb9d-406c-a71d-865a43cbb235"
+version = "0.1.2"
+
+[[deps.Integrals]]
+deps = ["CommonSolve", "HCubature", "LinearAlgebra", "MonteCarloIntegration", "QuadGK", "Random", "Reexport", "SciMLBase"]
+git-tree-sha1 = "cfdc4fb8d21c8f596572a59912ae863774123622"
+uuid = "de52edbc-65ea-441a-8357-d3a637375a31"
+version = "4.5.0"
+
+    [deps.Integrals.extensions]
+    IntegralsArblibExt = "Arblib"
+    IntegralsCubaExt = "Cuba"
+    IntegralsCubatureExt = "Cubature"
+    IntegralsFastGaussQuadratureExt = "FastGaussQuadrature"
+    IntegralsForwardDiffExt = "ForwardDiff"
+    IntegralsMCIntegrationExt = "MCIntegration"
+    IntegralsZygoteExt = ["Zygote", "ChainRulesCore"]
+
+    [deps.Integrals.weakdeps]
+    Arblib = "fb37089c-8514-4489-9461-98f9c8763369"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Cuba = "8a292aeb-7a57-582c-b821-06e4c11590b1"
+    Cubature = "667455a9-e2ce-5579-9412-b964f529a492"
+    FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    MCIntegration = "ea1e2de9-7db7-4b42-91ee-0cd1bf6df167"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
+
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
 git-tree-sha1 = "0f14a5456bdc6b9731a5682f439a672750a09e48"
@@ -803,16 +937,12 @@ version = "0.22.35"
 git-tree-sha1 = "5fbb102dcb8b1a858111ae81d56682376130517d"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
 version = "0.7.11"
+weakdeps = ["Random", "RecipesBase", "Statistics"]
 
     [deps.IntervalSets.extensions]
     IntervalSetsRandomExt = "Random"
     IntervalSetsRecipesBaseExt = "RecipesBase"
     IntervalSetsStatisticsExt = "Statistics"
-
-    [deps.IntervalSets.weakdeps]
-    Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-    Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.InverseFunctions]]
 git-tree-sha1 = "a779299d77cd080bf77b97535acecd73e1c5e5cb"
@@ -850,6 +980,18 @@ git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
 
+[[deps.JLD2]]
+deps = ["FileIO", "MacroTools", "Mmap", "OrderedCollections", "PrecompileTools", "TranscodingStreams"]
+git-tree-sha1 = "8e071648610caa2d3a5351aba03a936a0c37ec61"
+uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+version = "0.5.13"
+
+    [deps.JLD2.extensions]
+    UnPackExt = "UnPack"
+
+    [deps.JLD2.weakdeps]
+    UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
 git-tree-sha1 = "a007feb38b422fbdab534406aeca1b86823cb4d6"
@@ -861,6 +1003,12 @@ deps = ["Dates", "Mmap", "Parsers", "Unicode"]
 git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.4"
+
+[[deps.Jieko]]
+deps = ["ExproniconLite"]
+git-tree-sha1 = "2f05ed29618da60c06a87e9c033982d4f71d0b6c"
+uuid = "ae98c720-c025-4a4a-838c-29b094483192"
+version = "0.2.1"
 
 [[deps.JpegTurbo]]
 deps = ["CEnum", "FileIO", "ImageCore", "JpegTurbo_jll", "TOML"]
@@ -908,6 +1056,12 @@ version = "2.10.3+0"
 git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.4.0"
+
+[[deps.LatticeRules]]
+deps = ["Random"]
+git-tree-sha1 = "7f5b02258a3ca0221a6a9710b0a0a2e8fb4957fe"
+uuid = "73f95e8e-ec14-4e6a-8b18-0d2e271c4e55"
+version = "0.0.1"
 
 [[deps.LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
@@ -1053,6 +1207,28 @@ deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.6+0"
 
+[[deps.Measurements]]
+deps = ["Calculus", "LinearAlgebra", "Printf"]
+git-tree-sha1 = "3019b28107f63ee881f5883da916dd9b6aa294c1"
+uuid = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+version = "2.12.0"
+
+    [deps.Measurements.extensions]
+    MeasurementsBaseTypeExt = "BaseType"
+    MeasurementsJunoExt = "Juno"
+    MeasurementsMakieExt = "Makie"
+    MeasurementsRecipesBaseExt = "RecipesBase"
+    MeasurementsSpecialFunctionsExt = "SpecialFunctions"
+    MeasurementsUnitfulExt = "Unitful"
+
+    [deps.Measurements.weakdeps]
+    BaseType = "7fbed51b-1ef5-4d67-9085-a4a9b26f478c"
+    Juno = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
 [[deps.Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "ec4f7fbeab05d7747bdf98eb74d130a2a2ed298d"
@@ -1063,11 +1239,23 @@ version = "1.2.0"
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 version = "1.11.0"
 
+[[deps.MonteCarloIntegration]]
+deps = ["Distributions", "QuasiMonteCarlo", "Random"]
+git-tree-sha1 = "722ad522068d31954b4a976b66a26aeccbf509ed"
+uuid = "4886b29c-78c9-11e9-0a6e-41e1f4161f7b"
+version = "0.2.0"
+
 [[deps.MosaicViews]]
 deps = ["MappedArrays", "OffsetArrays", "PaddedViews", "StackViews"]
 git-tree-sha1 = "7b86a5d4d70a9f5cdf2dacb3cbe6d251d1a61dbe"
 uuid = "e94cdb99-869f-56ef-bcf0-1ae2bcbe0389"
 version = "0.3.4"
+
+[[deps.Moshi]]
+deps = ["ExproniconLite", "Jieko"]
+git-tree-sha1 = "453de0fc2be3d11b9b93ca4d0fddd91196dcf1ed"
+uuid = "2e0e35c7-a2e4-4343-998d-7ef72827ed2d"
+version = "0.3.5"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
@@ -1257,6 +1445,12 @@ git-tree-sha1 = "1101cd475833706e4d0e7b122218257178f48f34"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 version = "2.4.0"
 
+[[deps.Primes]]
+deps = ["IntegerMathUtils"]
+git-tree-sha1 = "25cdd1d20cd005b52fc12cb6be3f75faaf59bb9b"
+uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+version = "0.5.7"
+
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -1291,6 +1485,16 @@ version = "2.11.2"
     [deps.QuadGK.weakdeps]
     Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 
+[[deps.QuasiMonteCarlo]]
+deps = ["Accessors", "ConcreteStructs", "LatticeRules", "LinearAlgebra", "Primes", "Random", "Requires", "Sobol", "StatsBase"]
+git-tree-sha1 = "cc086f8485bce77b6187141e1413c3b55f9a4341"
+uuid = "8a4e6c94-4038-4cdc-81c3-7e6ffdb2a71b"
+version = "0.3.3"
+weakdeps = ["Distributions"]
+
+    [deps.QuasiMonteCarlo.extensions]
+    QuasiMonteCarloDistributionsExt = "Distributions"
+
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
@@ -1315,6 +1519,40 @@ weakdeps = ["FixedPointNumbers"]
 
     [deps.Ratios.extensions]
     RatiosFixedPointNumbersExt = "FixedPointNumbers"
+
+[[deps.RecipesBase]]
+deps = ["PrecompileTools"]
+git-tree-sha1 = "5c3d09cc4f31f5fc6af001c250bf1278733100ff"
+uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+version = "1.3.4"
+
+[[deps.RecursiveArrayTools]]
+deps = ["Adapt", "ArrayInterface", "DocStringExtensions", "GPUArraysCore", "IteratorInterfaceExtensions", "LinearAlgebra", "RecipesBase", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables"]
+git-tree-sha1 = "2e154f7d7e38db1af0a14ec751aba33360c3bef9"
+uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
+version = "3.33.0"
+
+    [deps.RecursiveArrayTools.extensions]
+    RecursiveArrayToolsFastBroadcastExt = "FastBroadcast"
+    RecursiveArrayToolsForwardDiffExt = "ForwardDiff"
+    RecursiveArrayToolsMeasurementsExt = "Measurements"
+    RecursiveArrayToolsMonteCarloMeasurementsExt = "MonteCarloMeasurements"
+    RecursiveArrayToolsReverseDiffExt = ["ReverseDiff", "Zygote"]
+    RecursiveArrayToolsSparseArraysExt = ["SparseArrays"]
+    RecursiveArrayToolsStructArraysExt = "StructArrays"
+    RecursiveArrayToolsTrackerExt = "Tracker"
+    RecursiveArrayToolsZygoteExt = "Zygote"
+
+    [deps.RecursiveArrayTools.weakdeps]
+    FastBroadcast = "7034ab61-46d4-4ed7-9d0f-46aef9175898"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+    MonteCarloMeasurements = "0987c9cc-fe09-11e8-30f0-b96dd679fdca"
+    ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
+    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+    StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
+    Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [[deps.Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
@@ -1350,6 +1588,12 @@ git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
 uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
 version = "0.2.1"
 
+[[deps.RuntimeGeneratedFunctions]]
+deps = ["ExprTools", "SHA", "Serialization"]
+git-tree-sha1 = "7cb9d10026d630ce2dd2a1fc6006a3d5041b34c0"
+uuid = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
+version = "0.5.14"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -1359,6 +1603,50 @@ deps = ["PrecompileTools"]
 git-tree-sha1 = "fea870727142270bdf7624ad675901a1ee3b4c87"
 uuid = "fdea26ae-647d-5447-a871-4b548cad5224"
 version = "3.7.1"
+
+[[deps.SciMLBase]]
+deps = ["ADTypes", "Accessors", "Adapt", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Moshi", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "SciMLStructures", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface"]
+git-tree-sha1 = "6d3c00e72dce943e4430e443bd0c531974618176"
+uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
+version = "2.93.0"
+
+    [deps.SciMLBase.extensions]
+    SciMLBaseChainRulesCoreExt = "ChainRulesCore"
+    SciMLBaseMLStyleExt = "MLStyle"
+    SciMLBaseMakieExt = "Makie"
+    SciMLBasePartialFunctionsExt = "PartialFunctions"
+    SciMLBasePyCallExt = "PyCall"
+    SciMLBasePythonCallExt = "PythonCall"
+    SciMLBaseRCallExt = "RCall"
+    SciMLBaseZygoteExt = ["Zygote", "ChainRulesCore"]
+
+    [deps.SciMLBase.weakdeps]
+    ChainRules = "082447d4-558c-5d27-93f4-14fc19e9eca2"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    MLStyle = "d8e11817-5142-5d16-987a-aa16d5891078"
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    PartialFunctions = "570af359-4316-4cb7-8c74-252c00c2016b"
+    PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+    PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+    RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
+
+[[deps.SciMLOperators]]
+deps = ["Accessors", "ArrayInterface", "DocStringExtensions", "LinearAlgebra", "MacroTools"]
+git-tree-sha1 = "6467d4e3eb86d9d7e31f43d01f9184409c0ea2be"
+uuid = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
+version = "1.2.1"
+weakdeps = ["SparseArrays", "StaticArraysCore"]
+
+    [deps.SciMLOperators.extensions]
+    SciMLOperatorsSparseArraysExt = "SparseArrays"
+    SciMLOperatorsStaticArraysCoreExt = "StaticArraysCore"
+
+[[deps.SciMLStructures]]
+deps = ["ArrayInterface"]
+git-tree-sha1 = "566c4ed301ccb2a44cbd5a27da5f885e0ed1d5df"
+uuid = "53ae85a6-f571-4167-b2af-e1d143709226"
+version = "1.7.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -1410,6 +1698,12 @@ deps = ["Dates", "FileIO", "ImageCore", "IndirectArrays", "OffsetArrays", "REPL"
 git-tree-sha1 = "2da10356e31327c7096832eb9cd86307a50b1eb6"
 uuid = "45858cf5-a6b0-47a3-bbea-62219f50df47"
 version = "0.1.3"
+
+[[deps.Sobol]]
+deps = ["DelimitedFiles", "Random"]
+git-tree-sha1 = "5a74ac22a9daef23705f010f72c81d6925b19df8"
+uuid = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
+version = "1.5.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -1537,6 +1831,12 @@ deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
 version = "7.7.0+0"
 
+[[deps.SymbolicIndexingInterface]]
+deps = ["Accessors", "ArrayInterface", "PrettyTables", "RuntimeGeneratedFunctions", "StaticArraysCore"]
+git-tree-sha1 = "b6a641e38efa01355aa721246dd246e10c7dcd4d"
+uuid = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
+version = "0.3.40"
+
 [[deps.TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
@@ -1611,6 +1911,18 @@ weakdeps = ["ConstructionBase", "InverseFunctions"]
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
     InverseFunctionsUnitfulExt = "InverseFunctions"
+
+[[deps.UnitfulAngles]]
+deps = ["Dates", "Unitful"]
+git-tree-sha1 = "79875b1f2e4bf918f0702a5980816955066d9ae2"
+uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
+version = "0.7.2"
+
+[[deps.UnitfulAstro]]
+deps = ["Unitful", "UnitfulAngles"]
+git-tree-sha1 = "fbe44a0ade62ae5ed0240ad314dfdd5482b90b40"
+uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
+version = "1.2.2"
 
 [[deps.WebP]]
 deps = ["CEnum", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "libwebp_jll"]
@@ -1773,15 +2085,9 @@ version = "3.6.0+0"
 
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─e5c8a798-83a0-4be6-8606-cdbbc47141b2
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-# ╟─e1980dd7-549d-4770-8205-afe2a2120d9a
-# ╟─92ee56f1-4ffc-4880-b654-2af1803a7ecc
-# ╟─d5d72028-0074-4a85-844b-22039058de69
-# ╟─072bddde-dece-4d9f-990b-e374038ba7e6
-# ╠═34ce6570-6566-4981-908a-81eabcbca7bf
-# ╟─130c74b6-9e16-443d-a593-ba9542c27dd7
-# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
+# ╟─63568597-d6ce-4a8d-b8a4-d0cee44b280c
+# ╠═83ab6b0e-b8a5-40d6-b80f-9e408c258e18
+# ╟─cf76d5ea-f8a9-421f-a795-7d58bb858bae
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

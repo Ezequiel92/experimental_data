@@ -4,209 +4,55 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using DelimitedFiles, CairoMakie, LaTeXStrings, DataFrames
+# ╔═╡ b8d1eb50-c7f6-11ec-1efc-c117e459045d
+using CairoMakie, CSV, DataFrames, DelimitedFiles, Unitful, UnitfulAstro
 
-# ╔═╡ e5c8a798-83a0-4be6-8606-cdbbc47141b2
+# ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# [Mannucci et al. (2010)](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
+# [Rahmati et al. (2013)](https://doi.org/10.1093/mnras/stt066)
 
-### [Data](https://academic.oup.com/view-large/21366667)
+### [Data](https://academic.oup.com/view-large/26111067)
 """
 
-# ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
-md"""
-# Fits
-
-## M-Z relation:
-
-``12 + \log(O / H) = a + b \, x + c \, x^2 + d \, x^3 + e \, x^4``
-
-where ``x = \log(M_\star / M_\odot) - 10``.
-
-## M-Z-SFR relation:
-
-``12 + \log(O / H) = a + b \, x + c \, y + d \, x^2 + e \, x \, y + f \, y^2``
-
-where ``y = \log(SFR / M_\odot \, yr^{-1})``.
-
-## Z-μ relation:
-
-``12 + \log(O / H) = a + b \, z + c \, z^2 + d \, z^3 + e \, z^4``
-
-where ``z = \mu_{0.32} - 10`` and ``\mu_\alpha = \log(M_\star / M_\odot) - \alpha \, \log(SFR / M_\odot \, yr^{-1})``.
-"""
-
-# ╔═╡ fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-fit = DataFrame(
-	Relation = ["M-Z", "M-Z-SFR", "Z-mu"],
-	a = [8.96, 8.9, 8.9],
-	b = [0.31, 0.37, 0.39],
-	c = [-0.23, -0.14, -0.2],
-	d = [-0.017, -0.19, -0.077],
-	e = [0.046, 0.12, 0.064],
-	f = [missing, -0.054, missing],
-)
-
-# ╔═╡ e1980dd7-549d-4770-8205-afe2a2120d9a
-let
-	MZ = x -> fit[1, :a] + fit[1, :b] * x + fit[1, :c] * x^2 + fit[1, :d] * x^3 + fit[1, :e] * x^4
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 10",
-		ylabel=L"12 + \log(\mathrm{O / H})",
-		title=L"\mathrm{Mass - Metallicity \,\, relation}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	lines!(ax, -1..1, MZ, color=:red)
-
-	f
-end
-
-# ╔═╡ 92ee56f1-4ffc-4880-b654-2af1803a7ecc
-let
-	xs = ys = LinRange(-1, 1, 100)
-
-	MZSFR = (x, y) -> fit[2, :a] + fit[2, :b] * x + fit[2, :c] * y + fit[2, :d] * x^2 + fit[2, :e] * x * y + fit[2, :f] * y^2
-
-	set_theme!(theme_black())
-
-	f = Figure(size=(800,600))
-
-	ax = Axis3(
-		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot}) - 10",
-		ylabel=L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})",
-		zlabel=L"12 + \log(\mathrm{O / H})",
-		title=L"\mathrm{Mass - Metallicity - SFR \,\, relation}",
-		titlesize=30,
-		xlabelsize=26,
-		ylabelsize=26,
-		zlabelsize=26,
-		xticklabelsize=20,
-		yticklabelsize=20,
-		zticklabelsize=20,
-		aspect=(1,1,1),
-	)
-
-	surface!(ax, xs, ys, MZSFR)
-
-	f
-end
-
-# ╔═╡ d5d72028-0074-4a85-844b-22039058de69
-let
-	Mμ = x -> fit[3, :a] + fit[3, :b] * x + fit[3, :c] * x^2 + fit[3, :d] * x^3 + fit[3, :e] * x^4
-
-	set_theme!(theme_black())
-
-	f = Figure()
-
-	ax = Axis(
-		f[1,1],
-		xlabel=L"\mu_{0.32} - 10",
-		ylabel=L"12 + \log(\mathrm{O / H})",
-		title=L"\mu - \mathrm{Metallicity \,\, relation}",
-		titlesize=30,
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	lines!(ax, -1..1, Mμ, color=:red)
-
-	f
-end
-
-# ╔═╡ 072bddde-dece-4d9f-990b-e374038ba7e6
-md"## Measurements"
-
-# ╔═╡ 34ce6570-6566-4981-908a-81eabcbca7bf
-raw_data = readdlm("./data/clean_table_01.txt", '&')
-
-# ╔═╡ 130c74b6-9e16-443d-a593-ba9542c27dd7
+# ╔═╡ b509f706-11a8-437f-ae99-42f259edea73
 begin
-	logM = filter(x -> isa(x, AbstractFloat), raw_data[1, :])
-	logSFR = filter(x -> isa(x, AbstractFloat), raw_data[:, 1])
-	metal_full = replace(
-		x -> isa(x, AbstractFloat) ? x : NaN,
-		raw_data[2:end, 2:end],
-	)
-	metal = metal_full[1:3:end, :]
-	metal_error = metal_full[2:3:end, :]
-	galaxy_per_bin = metal_full[3:3:end, :]
+	raw_data = CSV.read("./data/table_02.csv", DataFrame)
 
-	df_metal = DataFrame(hcat(logSFR, metal), ["logSFR", string.(logM)...])
-	df_metal_error = DataFrame(
-		hcat(logSFR, metal_error),
-		["logSFR", string.(logM)...],
-	)
-	df_galaxy_pb = DataFrame(
-		hcat(logSFR, galaxy_per_bin),
-		["logSFR", string.(logM)...],
+	data = transform(
+		raw_data, 
+		:rate => ByRow(x -> ustrip(u"Myr"^-1, x * u"s^-1")) => :rate,
 	)
 end
 
-# ╔═╡ 118c5e5e-9845-44f2-b37b-45b39898198a
+# ╔═╡ 3f0b4a53-e763-407a-8203-9473958490dd
 let
+	HM01 = filter(:UVB => ==("HM01"), data)[!, ["Redshift", "rate"]]
+	HM12 = filter(:UVB => ==("HM12"), data)[!, ["Redshift", "rate"]]
+	FG09 = filter(:UVB => ==("FG09"), data)[!, ["Redshift", "rate"]]
 
-	X = Vector{Float64}(undef, length(metal))
-	Y = Vector{Float64}(undef, length(metal))
-	Z = Vector{Float64}(undef, length(metal))
-	for i in 1:size(metal, 1)
-		for j in 1:size(metal, 2)
-			Y[(i - 1) * size(metal, 2) + j] = logSFR[i]
-			X[(i - 1) * size(metal, 2) + j] = logM[j]
-			Z[(i - 1) * size(metal, 2) + j] = metal[i, j]
-		end
-	end
+	dir = mkpath("./output_tables")
 
-	set_theme!(theme_black())
-
-	f = Figure(size=(800,600))
-
-	ax = Axis3(
-		f[1,1],
-		xlabel=L"\log(\mathrm{M_\star / M_\odot})",
-		ylabel=L"\log(\mathrm{SFR / M_\odot \, yr^{-1}})",
-		zlabel=L"12 + \log(\mathrm{O / H})",
-		xlabelsize=26,
-		ylabelsize=26,
-		zlabelsize=26,
-		xticklabelsize=20,
-		yticklabelsize=20,
-		zticklabelsize=20,
-		aspect=(1,1,1),
-	)
-
-	meshscatter!(ax, X, Y, Z, markersize=0.015, color=X)
-
-	f
+	writedlm(joinpath(dir, "hm01.txt"), eachrow(HM01), ' ')
+	writedlm(joinpath(dir, "hm12.txt"), eachrow(HM12), ' ')
+	writedlm(joinpath(dir, "fg09.txt"), eachrow(FG09), ' ')
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
+Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
+CSV = "~0.10.15"
 CairoMakie = "~0.13.6"
 DataFrames = "~1.7.0"
-LaTeXStrings = "~1.4.0"
+Unitful = "~1.22.1"
+UnitfulAstro = "~1.2.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -215,7 +61,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "7bd9e2fd8a404e4a1436caa05ca998a0c62e3ebe"
+project_hash = "edec1cda807417b758da79f263b489f2edd50eba"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -318,6 +164,12 @@ git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
 uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
 version = "1.0.1+0"
 
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
+git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.15"
+
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
 git-tree-sha1 = "71aa551c5c33f1a4415867fe06b7844faadb0ae9"
@@ -345,6 +197,12 @@ weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
     ChainRulesCoreSparseArraysExt = "SparseArrays"
+
+[[deps.CodecZlib]]
+deps = ["TranscodingStreams", "Zlib_jll"]
+git-tree-sha1 = "962834c22b66e32aa10f7611c08c8ca4e20749a9"
+uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
+version = "0.7.8"
 
 [[deps.ColorBrewer]]
 deps = ["Colors", "JSON"]
@@ -1612,6 +1470,24 @@ weakdeps = ["ConstructionBase", "InverseFunctions"]
     ConstructionBaseUnitfulExt = "ConstructionBase"
     InverseFunctionsUnitfulExt = "InverseFunctions"
 
+[[deps.UnitfulAngles]]
+deps = ["Dates", "Unitful"]
+git-tree-sha1 = "79875b1f2e4bf918f0702a5980816955066d9ae2"
+uuid = "6fb2a4bd-7999-5318-a3b2-8ad61056cd98"
+version = "0.7.2"
+
+[[deps.UnitfulAstro]]
+deps = ["Unitful", "UnitfulAngles"]
+git-tree-sha1 = "fbe44a0ade62ae5ed0240ad314dfdd5482b90b40"
+uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
+version = "1.2.2"
+
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
 [[deps.WebP]]
 deps = ["CEnum", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "libwebp_jll"]
 git-tree-sha1 = "aa1ca3c47f119fbdae8770c29820e5e6119b83f2"
@@ -1623,6 +1499,11 @@ deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "1.0.0"
+
+[[deps.WorkerUtilities]]
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
+uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
+version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
@@ -1772,16 +1653,9 @@ version = "3.6.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
-# ╟─e5c8a798-83a0-4be6-8606-cdbbc47141b2
-# ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╟─fd58dcc1-092d-455e-9aa5-e9ce61e8416a
-# ╟─e1980dd7-549d-4770-8205-afe2a2120d9a
-# ╟─92ee56f1-4ffc-4880-b654-2af1803a7ecc
-# ╟─d5d72028-0074-4a85-844b-22039058de69
-# ╟─072bddde-dece-4d9f-990b-e374038ba7e6
-# ╠═34ce6570-6566-4981-908a-81eabcbca7bf
-# ╟─130c74b6-9e16-443d-a593-ba9542c27dd7
-# ╟─118c5e5e-9845-44f2-b37b-45b39898198a
+# ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
+# ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
+# ╠═b509f706-11a8-437f-ae99-42f259edea73
+# ╠═3f0b4a53-e763-407a-8203-9473958490dd
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
