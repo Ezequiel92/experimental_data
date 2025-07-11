@@ -136,7 +136,23 @@ R. Feldmann, The link between star formation and gas in nearby galaxies, _Commun
 
 #### Reference
 
-F. Haardt, P. Madau, RADIATIVE TRANSFER IN A CLUMPY UNIVERSE. IV. NEW SYNTHESIS MODELS OF THE COSMIC UV/X-RAY BACKGROUND, _The Astrophysical Journal_, Volume 746, Issue 2, February 2012, Pages 125, doi: [10.1088/0004-637x/746/2/125] (https://doi.org/10.1088/0004-637x/746/2/125)
+F. Haardt, P. Madau, RADIATIVE TRANSFER IN A CLUMPY UNIVERSE. IV. NEW SYNTHESIS MODELS OF THE COSMIC UV/X-RAY BACKGROUND, _The Astrophysical Journal_, Volume 746, Issue 2, February 2012, Pages 125, doi: [10.1088/0004-637x/746/2/125](https://doi.org/10.1088/0004-637x/746/2/125)
+
+
+
+### [Incatasciato et al. (2023)](https://doi.org/10.1093/mnras/stad1008)
+
+#### Data products
+
+- Model for the J21 (radiation intensity of the photodissociation LW background).
+
+#### Reference
+
+A. Incatasciato, S. Khochfar, J. Oñorbe, Modelling the cosmological Lyman–Werner background radiation field in the early Universe, _Monthly Notices of the Royal Astronomical Society_, Volume 522, Issue 1, June 2023, Pages 330–349, doi: [10.1093/mnras/stad1008](https://doi.org/10.1093/mnras/stad1008)
+
+K. Ahn, P. R. Shapiro, I. T. Iliev, G. Mellema, U.-L. Pen, THE INHOMOGENEOUS BACKGROUND OF H2-DISSOCIATING RADIATION DURING COSMIC REIONIZATION, _The Astrophysical Journal_, Volume 695, Issue 2, April 2009, Pages 1430, doi: [10.1088/0004-637X/695/2/1430](https://doi.org/10.1088/0004-637X/695/2/1430)
+
+E. Visbal, Z. Haiman, B. Terrazas, G. L. Bryan, R. Barkana, High-redshift star formation in a time-dependent Lyman–Werner background, _Monthly Notices of the Royal Astronomical Society_, Volume 445, Issue 1, November 2014, Pages 107–114, doi: [10.1093/mnras/stu1710](https://doi.org/10.1093/mnras/stu1710)
 
 
 
