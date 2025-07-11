@@ -187,6 +187,18 @@ D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarl
 
 
 
+### [Leroy et al. (2008)](https://doi.org/10.1088/0004-6256/136/6/2782)
+
+#### Data products
+
+- Profiles for the surface density of HI, H2, and stars.
+
+#### Reference
+
+A. K. Leroy, F. Walter, E. Brinks, F. Bigiel, W. J. G. de Blok, B. Madore, M. D. Thornley, THE STAR FORMATION EFFICIENCY IN NEARBY GALAXIES: MEASURING WHERE GAS FORMS STARS EFFECTIVELY, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2782, doi: [10.1088/0004-6256/136/6/2782](https://doi.org/10.1088/0004-6256/136/6/2782)
+
+
+
 ### [Leroy et al. (2019)](https://doi.org/10.3847/1538-4365/ab3925)
 
 #### Data products
@@ -227,6 +239,18 @@ U. Lisenfeld, P. M. Ogle, P. N. Appleton, T. H. Jarrett and B. M. Moncada-Cuadri
 #### Reference
 
 F. Mannucci, G. Cresci, R. Maiolino, A. Marconi, A. Gnerucci, A fundamental relation between mass, star formation rate and metallicity in local and high-redshift galaxies, _Monthly Notices of the Royal Astronomical Society_, Volume 408, Issue 4, November 2010, Pages 2115–2127, doi: [10.1111/j.1365-2966.2010.17291.x](https://doi.org/10.1111/j.1365-2966.2010.17291.x)
+
+
+
+### [McMillan (2011)](https://doi.org/10.1111/j.1365-2966.2011.18564.x)
+
+#### Data products
+
+- Fits for the stellar density profile of the MW.
+
+#### Reference
+
+Paul J. McMillan, Mass models of the Milky Way, Monthly Notices of the Royal Astronomical Society, Volume 414, Issue 3, July 2011, Pages 2446–2457, doi: [10.1111/j.1365-2966.2011.18564.x](https://doi.org/10.1111/j.1365-2966.2011.18564.x)
 
 
 
