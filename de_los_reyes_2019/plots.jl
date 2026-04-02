@@ -9,55 +9,96 @@ using CairoMakie, CSV, LaTeXStrings, DataFrames, Measurements, Unitful, UnitfulA
 
 # ╔═╡ 5a95fa6c-6380-43ff-85bb-ead10e51c482
 md"""
-# [Sun et al. (2023)](https://doi.org/10.3847/2041-8213/acbd9c)
+# [de los Reyes et al. (2019)](https://doi.org/10.3847/1538-4357/aafa82)
 
-### [Data](https://content.cld.iop.org/journals/2041-8205/945/2/L19/revision1/apjlacbd9ct3_mrt.txt)
+### [Table 4 (corrected)](https://content.cld.iop.org/journals/0004-637X/878/1/74/revision1/apjab22aft4_mrt.txt)
+
+### [Table 5](https://content.cld.iop.org/journals/0004-637X/872/1/16/revision1/apjaafa82t5_mrt.txt)
 """
 
-# ╔═╡ 3f54c370-7faa-4ec1-a3d2-ca4fb53ea993
-raw_data = CSV.read(
-	"./data/apjlacbd9ct3_mrt.txt", 
-	DataFrame; 
-	delim=' ', 
-	skipto=58, 
-	header=false, 
-	ignorerepeated=true, 
-	silencewarnings=true,
-);
+# ╔═╡ 8edb5cd2-fe1a-4d25-8339-82ef8f8df69f
+function parse_table_04(filepath::String)::DataFrame
+	
+    # Safely parse float or return missing
+    parse_or_missing(s) = isempty(strip(s)) ? missing : tryparse(Float64, strip(s))
 
-# ╔═╡ 33a24186-41b9-44d1-b854-5ae7b586fd5b
-begin
-	sfr_methods = Dict(
-		:Hα22μm        => 0,
-		:FUV22μm       => 2,
-		:AᵥcorrectedHα => 4,
-	)
+    # Byte ranges
+    ranges = (
+        logSigSFRcorr = 54:58, # [log10(M⊙ * yr⁻¹ * kpc⁻²)]
+        logSigHI      = 60:64, # [log10(M⊙ * pc⁻²)]
+        logSigH2      = 80:84, # [log10(M⊙ * pc⁻²)]
+    )
 
-	h2_methods = Dict(
-		:S20      => 0,
-		:Galactic => 2,
-		:B13      => 4,
-		:G20      => 6,
-	)
+    logSigSFRcorr = Union{Missing, Float64}[]
+    logSigHI      = Union{Missing, Float64}[]
+    logSigH2      = Union{Missing, Float64}[]
 
-	galaxies = unique(raw_data[:, 1])
+    open(filepath, "r") do io
+        for (i, line) in enumerate(eachline(io))
+            if i < 152
+                continue
+            end
 
-	clean_data = ifelse.(raw_data .=== missing, Inf, raw_data)
+            # Ensure line is long enough (pad if needed)
+            line = rpad(line, 84)
 
-	sfr_method = :Hα22μm
-	h2_method  = :S20
+            push!(logSigSFRcorr, parse_or_missing(line[ranges.logSigSFRcorr]))
+            push!(logSigHI,      parse_or_missing(line[ranges.logSigHI]))
+            push!(logSigH2,      parse_or_missing(line[ranges.logSigH2]))
+        end
+    end
+
+    return DataFrame(; logSigSFRcorr, logSigHI, logSigH2)
+	
 end;
+
+# ╔═╡ 8ac2cdb8-a3e5-4c2e-9ccd-6a0da23711c8
+data_04 = parse_table_04("./data/apjab22aft4_mrt.txt")
+
+# ╔═╡ 701d6037-9e2d-4d52-9936-10a02367c551
+function parse_table_05(filepath::String)::DataFrame
+	
+    # Safely parse float or return missing
+    parse_or_missing(s) = isempty(strip(s)) ? missing : tryparse(Float64, strip(s))
+
+    # Byte ranges
+    ranges = (
+        logMass = 28:32, # [log10(M⊙)]
+        Z       = 36:39, # 12 + log[O/H]
+        tdyn    = 48:52, # [10⁸ yr]
+    )
+
+    logMass = Union{Missing, Float64}[]
+    Z       = Union{Missing, Float64}[]
+    tdyn    = Union{Missing, Float64}[]
+
+    open(filepath, "r") do io
+        for (i, line) in enumerate(eachline(io))
+            if i < 37
+                continue
+            end
+
+            # Ensure line is long enough (pad if needed)
+            line = rpad(line, 52)
+
+            push!(logMass, parse_or_missing(line[ranges.logMass]))
+            push!(Z,       parse_or_missing(line[ranges.Z]))
+            push!(tdyn,    parse_or_missing(line[ranges.tdyn]))
+        end
+    end
+
+    return DataFrame(; logMass, Z, tdyn)
+	
+end;
+
+# ╔═╡ d6f231b2-07e0-41aa-8a9e-8a3397789fa7
+parse_table_05("./data/apjaafa82t5_mrt.txt")
 
 # ╔═╡ fc49983e-fa24-4c50-b91b-75661f43f04c
 md"""
 # KS relation: 
 
-``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{H_2}}{\mathrm{M_\odot\,pc^{-2}}} \right)^N``
-"""
-
-# ╔═╡ 25ec6300-5e24-4355-a839-20da3a3bed45
-md"""
-## For all 80 galaxies:
+``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{H_2} + \Sigma_\mathrm{HI}}{\mathrm{M_\odot \, pc^{-2}}} \right)^N``
 """
 
 # ╔═╡ 0d1b1619-7595-4be2-bc97-e61dd7714fae
@@ -68,56 +109,100 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
+		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} + \Sigma_\mathrm{H_I} \, / \, \mathrm{M_\odot \, pc^{-2}})", 
+		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}})", 
 		xlabelsize=30,
 		ylabelsize=30,
 		xticklabelsize=25,
 		yticklabelsize=25,
+		limits=(-1.0, 3.0, -5.0, 1.0),
 	)
 
-	for galaxy_idx in 1:80
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxies[galaxy_idx])
-		
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
+	logΣsfr = data_04[:, :logSigSFRcorr]
 	
-		Σh2     = data[:, 10 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-		Σh2_err = data[:, 11 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-	
-		x_data = log10.(ustrip.(u"Msun * pc^-2", Σh2 .± Σh2_err))
-		y_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", Σsfr .± Σsfr_err))
+	logΣH2 = data_04[:, :logSigH2]
+	logΣHI = data_04[:, :logSigHI]
 
-		filter = x -> isnan(x) || isinf(x)
-    	idxs   = findall(filter, x_data) ∪ findall(filter, y_data)
+	logΣgas = log10.(exp10.(logΣH2) .+ exp10.(logΣHI))
 
-		deleteat!(x_data, sort(idxs))
-    	deleteat!(y_data, sort(idxs))
-
-		x_axis = Measurements.value.(x_data)
-		x_err  = Measurements.uncertainty.(x_data)
-		
-		y_axis = Measurements.value.(y_data)
-		y_err  = Measurements.uncertainty.(y_data)
-		
-		scatter!(ax, x_axis, y_axis; markersize=5)
-
-	end
+	scatter!(ax, logΣgas, logΣsfr; markersize=8)
 
 	f
 end
 
-# ╔═╡ 54d5809f-11b7-4fed-ba62-de278455e6ba
+# ╔═╡ 3c060af5-c1d5-47e3-8e67-e42b34cb1c17
 md"""
-## For galaxies with:
+## Best fit
 
-``-2.0 < \log_{10}(t_\mathrm{dep} \, / \, \mathrm{Gyr}) < 2.0``
+``\log_{10} \, \Sigma_\mathrm{SFR} \, [\mathrm{M_\odot \, yr^{-1} \, kpc^{-2}}] = (1.41^{+0.07}_{-0.07}) \log_{10} (\Sigma_\mathrm{gas} [\mathrm{M_\odot \, pc^{-2}}]) - 3.84^{+0.08}_{-0.09}``
 """
 
-# ╔═╡ c1a643c6-2ff0-4bfc-8cea-29319e7622d9
+# ╔═╡ 3282b532-41b1-4a9a-94af-f7a83dc92b83
+let
+	set_theme!(theme_black())
+
+	f = Figure(size=(880, 880))
+	
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} + \Sigma_\mathrm{H_I} \, / \, \mathrm{M_\odot \, pc^{-2}})", 
+		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}})", 
+		xlabelsize=30,
+		ylabelsize=30,
+		xticklabelsize=25,
+		yticklabelsize=25,
+		limits=(-1.0, 3.0, -5.0, 1.0),
+	)
+
+	logΣsfr = data_04[:, :logSigSFRcorr]
+	
+	logΣH2 = data_04[:, :logSigH2]
+	logΣHI = data_04[:, :logSigHI]
+
+	logΣgas = log10.(exp10.(logΣH2) .+ exp10.(logΣHI))
+
+	##########################
+	# Fit
+	##########################
+
+	A = 1.41 ± 0.07
+	b = -3.84 ± 0.09
+
+	logΣgas_fit = range(extrema(filter(!ismissing, logΣgas))..., 100)
+
+	logΣSFR_fit = [b + A * x for x in logΣgas_fit]
+
+	values        = Measurements.value.(logΣSFR_fit)
+	uncertainties = Measurements.uncertainty.(logΣSFR_fit)
+
+	band!(
+		ax, 
+		logΣgas_fit, 
+		values .- uncertainties, 
+		values .+ uncertainties, 
+		color=(:red, 0.3),
+	)
+	lines!(ax, logΣgas_fit, values, color=:red, label=L"\mathrm{Best \,\, fit}")
+
+	##########################
+	# Measurements
+	##########################
+	
+	scatter!(ax, logΣgas, logΣsfr; markersize=8)
+	
+	axislegend(ax, position=:lt, labelsize=35)
+
+	f
+end
+
+# ╔═╡ 1cc1509d-387e-42f6-91b0-c4a5344cdb29
+md"""
+# KS relation: 
+
+``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{H_2}}{\mathrm{M_\odot\,pc^{-2}}} \right)^N``
+"""
+
+# ╔═╡ dc58f769-0b64-4bde-a2f8-44fe0337eb59
 let
 	set_theme!(theme_black())
 	
@@ -125,190 +210,177 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
+		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \mathrm{M_\odot \, pc^{-2}})", 
+		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}})", 
 		xlabelsize=30,
 		ylabelsize=30,
 		xticklabelsize=25,
 		yticklabelsize=25,
+		limits=(-2.0, 3.0, -5.0, 1.0),
 	)
 
-	for galaxy_idx in 1:80
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxies[galaxy_idx])
-		
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
+	logΣsfr = data_04[:, :logSigSFRcorr]
 	
-		Σh2     = data[:, 10 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-		Σh2_err = data[:, 11 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-	
-		h2_data  = Σh2 .± Σh2_err
-		sfr_data = Σsfr .± Σsfr_err
+	logΣH2 = data_04[:, :logSigH2]
 
-		tdep = log10.(Measurements.value.(ustrip.(u"Gyr", h2_data ./ sfr_data)))
-
-		x_data = log10.(ustrip.(u"Msun * pc^-2", h2_data))
-		y_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", sfr_data))
-
-		tdep_filter = x -> isnan(x) || isinf(x) || x < -2.0 || x > 2.0
-		filter = x -> isnan(x) || isinf(x)
-
-    	idxs = findall(filter, x_data) ∪ findall(filter, y_data) ∪ findall(tdep_filter, tdep)
-
-		deleteat!(x_data, sort(idxs))
-    	deleteat!(y_data, sort(idxs))
-
-		x_axis = Measurements.value.(x_data)
-		x_err  = Measurements.uncertainty.(x_data)
-		
-		y_axis = Measurements.value.(y_data)
-		y_err  = Measurements.uncertainty.(y_data)
-		
-		scatter!(ax, x_axis, y_axis; markersize=5)
-
-	end
+	scatter!(ax, logΣH2, logΣsfr; markersize=8)
 
 	f
 end
 
-# ╔═╡ e509ea88-0015-446a-9f5b-dc1c54576b51
+# ╔═╡ 39ee0e48-7ca3-4cad-870d-4e29c3131dd9
 md"""
-## For galaxies with:
+## Best fit
 
-``\mathrm{Au6\_MOL \,\, mass} - 0.1 < \log_{10}(M_\star \, / \, \mathrm{M_\odot}) < \mathrm{Au6\_MOL \,\, mass} + 0.1``
-
-and
-
-``-2.0 < \log_{10}(t_\mathrm{dep} \, / \, \mathrm{Gyr}) < 2.0``
+``\log_{10} \, \Sigma_\mathrm{SFR} \, [\mathrm{M_\odot \, yr^{-1} \, kpc^{-2}}] = (0.67 \pm 0.05) \log_{10} (\Sigma_\mathrm{H_2} [\mathrm{M_\odot \, pc^{-2}}]) - 2.71``
 """
 
-# ╔═╡ 4413bb26-3c73-4112-b9dd-851445491698
+# ╔═╡ 633812a4-1f24-491e-ac83-fb87893bb63d
 let
-	#################################################################################
-	# Data from PHANGS–ALMA
-	# Leroy et al. (2021): https://doi.org/10.3847/1538-4365/ac17f3
-	# Data: https://almascience.eso.org/alma-data/lp/PHANGS
-	#################################################################################
+	set_theme!(theme_black())
 
-	table_lines = readlines("../phangs–alma/data/table4.txt")
+	f = Figure(size=(880, 880))
 	
-	col_range = [
-		1:11,
-		12:13,
-		14:19,
-		20:21,
-		22:26,
-		27:30,
-		31:35,
-		36:41,
-		42:49,
-		50:55,
-		56:60,
-		61:67,
-	]
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \mathrm{M_\odot \, pc^{-2}})", 
+		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}})", 
+		xlabelsize=30,
+		ylabelsize=30,
+		xticklabelsize=25,
+		yticklabelsize=25,
+		limits=(-2.0, 3.0, -5.0, 1.0),
+	)
+
+	logΣsfr = data_04[:, :logSigSFRcorr]
 	
-	data  = Matrix{String}(undef, length(table_lines), length(col_range))
+	logΣH2 = data_04[:, :logSigH2]
+
+	##########################
+	# Fit
+	##########################
+
+	A = 0.67 ± 0.05
+	b = -2.71
+
+	logΣH2_fit = range(extrema(filter(!ismissing, logΣH2))..., 100)
+
+	logΣSFR_fit = [b + A * x for x in logΣH2_fit]
+
+	values        = Measurements.value.(logΣSFR_fit)
+	uncertainties = Measurements.uncertainty.(logΣSFR_fit)
+
+	band!(
+		ax, 
+		logΣH2_fit, 
+		values .- uncertainties, 
+		values .+ uncertainties, 
+		color=(:red, 0.3),
+	)
+	lines!(ax, logΣH2_fit, values, color=:red, label=L"\mathrm{Best \,\, fit}")
+
+	##########################
+	# Measurements
+	##########################
 	
-	for (i_row, line) in enumerate(table_lines)
-		for (i_col, crange) in enumerate(col_range)
-			data[i_row, i_col] = strip(string(line[crange]))
-		end
-	end
-
-	logMs  = parse.(Float64, data[:, 3])
-	phangs_alma_galaxies = replace.(data[:, 1], " " => "")
-
-	#################################################################################
-	# Match Sun et al. (2023) galaxies with PHANGS–ALMA
-	#################################################################################
+	scatter!(ax, logΣH2, logΣsfr; markersize=8)
 	
-	Au6_MOL_mass = log10(6.5e10)
-	mass_range = (Au6_MOL_mass - 0.1, Au6_MOL_mass + 0.1)
+	axislegend(ax, position=:lt, labelsize=35)
 
-	# List of galaxies within range
-	gals_range = []
-	
-	for galaxy in galaxies
-		
-		# Find the index in the PHANGS–ALMA datset of the Sun et al. (2023) galaxy
-		idx = findfirst(isequal(galaxy), phangs_alma_galaxies)
-		
-		idx == nothing && continue
+	f
+end
 
-		# PHANGS–ALMA mass
-		phangs_alma_mass = logMs[idx]
+# ╔═╡ 17c7a89e-2d72-4bd7-916a-bf058b6237e6
+md"""
+# KS relation: 
 
-		if mass_range[1] <= phangs_alma_mass <= mass_range[2]
-			push!(gals_range, galaxy)
-		end
-		
-	end
+``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{HI}}{\mathrm{M_\odot\,pc^{-2}}} \right)^N``
+"""
 
-	#################################################################################
-	# Plot the mKS relation only for the galaxies within the mass range
-	#################################################################################
-
+# ╔═╡ 4827d1bd-5bef-4868-8f9e-78c968b39a79
+let
 	set_theme!(theme_black())
 	
 	f = Figure(size=(880, 880))
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \mathrm{M_\odot\,pc^{-2}})", 
-		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
+		xlabel=L"\log_{10}(\Sigma_\mathrm{HI} \, / \, \mathrm{M_\odot \, pc^{-2}})", 
+		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}})", 
 		xlabelsize=30,
 		ylabelsize=30,
 		xticklabelsize=25,
 		yticklabelsize=25,
-		limits=(4.5, 9.5, -4.5, 1.5),
-        xticks=5:1:9,
-        yticks=-4:1:1,
+		limits=(-2.0, 3.0, -5.0, 1.0),
 	)
 
-	for galaxy in gals_range 
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxy)
-		
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
+	logΣsfr = data_04[:, :logSigSFRcorr]
 	
-		Σh2     = data[:, 10 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-		Σh2_err = data[:, 11 + h2_methods[h2_method]] .* u"Msun * pc^-2"
+	logΣHI = data_04[:, :logSigHI]
+
+	scatter!(ax, logΣHI, logΣsfr; markersize=8)
+
+	f
+end
+
+# ╔═╡ 95d3fc34-c725-4d78-9fdc-298010bd63b4
+md"""
+## Best fit
+
+``\log_{10} \, \Sigma_\mathrm{SFR} \, [\mathrm{M_\odot \, yr^{-1} \, kpc^{-2}}] = (0.94^{+0.18}_{-0.17}) \log_{10} (\Sigma_\mathrm{HI} [\mathrm{M_\odot \, pc^{-2}}]) - 2.96``
+"""
+
+# ╔═╡ 5d53bfff-b818-4aaf-8c87-816a8d99de93
+let
+	set_theme!(theme_black())
+
+	f = Figure(size=(880, 880))
 	
-		h2_data  = Σh2 .± Σh2_err
-		sfr_data = Σsfr .± Σsfr_err
+	ax = Axis(
+		f[1,1], 
+		xlabel=L"\log_{10}(\Sigma_\mathrm{HI} \, / \, \mathrm{M_\odot \, pc^{-2}})", 
+		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}})", 
+		xlabelsize=30,
+		ylabelsize=30,
+		xticklabelsize=25,
+		yticklabelsize=25,
+		limits=(-2.0, 3.0, -5.0, 1.0),
+	)
 
-		tdep = log10.(Measurements.value.(ustrip.(u"Gyr", h2_data ./ sfr_data)))
+	logΣsfr = data_04[:, :logSigSFRcorr]
+	
+	logΣHI = data_04[:, :logSigHI]
 
-		x_data = log10.(ustrip.(u"Msun * kpc^-2", h2_data))
-		y_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", sfr_data))
+	##########################
+	# Fit
+	##########################
 
-		tdep_filter = x -> isnan(x) || isinf(x) || x < -2.0 || x > 2.0
-		filter = x -> isnan(x) || isinf(x)
+	A = 0.94 ± 0.18
+	b = -2.96
 
-    	idxs = (
-			findall(filter, x_data) ∪ 
-			findall(filter, y_data) ∪ 
-			findall(tdep_filter, tdep)
-		)
+	logΣHI_fit = range(extrema(filter(!ismissing, logΣHI))..., 100)
 
-		deleteat!(x_data, sort(idxs))
-    	deleteat!(y_data, sort(idxs))
+	logΣSFR_fit = [b + A * x for x in logΣHI_fit]
 
-		x_axis = Measurements.value.(x_data)
-		x_err  = Measurements.uncertainty.(x_data)
-		
-		y_axis = Measurements.value.(y_data)
-		y_err  = Measurements.uncertainty.(y_data)
-		
-		scatter!(ax, x_axis, y_axis; markersize=5)
+	values        = Measurements.value.(logΣSFR_fit)
+	uncertainties = Measurements.uncertainty.(logΣSFR_fit)
 
-	end
+	band!(
+		ax, 
+		logΣHI_fit, 
+		values .- uncertainties, 
+		values .+ uncertainties, 
+		color=(:red, 0.3),
+	)
+	lines!(ax, logΣHI_fit, values, color=:red, label=L"\mathrm{Best \,\, fit}")
+
+	##########################
+	# Measurements
+	##########################
+	
+	scatter!(ax, logΣHI, logΣsfr; markersize=8)
+	
+	axislegend(ax, position=:lt, labelsize=35)
 
 	f
 end
@@ -317,7 +389,7 @@ end
 md"""
 # Depletion time: 
 
-``t_\mathrm{dep} \, [\mathrm{Gyr}] = \dfrac{\Sigma_\mathrm{H_2}}{\Sigma_\mathrm{SFR}}``
+``t_\mathrm{dep} \, [\mathrm{Myr}] = \dfrac{\Sigma_\mathrm{H_2} \, [\mathrm{M_\odot\,pc^{-2}}]}{\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}]}``
 """
 
 # ╔═╡ 73b3fb9f-c7a6-44a0-8aae-4e6cd4ced2cc
@@ -328,221 +400,21 @@ let
 	
 	ax = Axis(
 		f[1,1], 
-		xlabel=L"\log_{10}(t_\mathrm{dep}\, / \, \mathrm{Gyr})", 
+		xlabel=L"\log_{10}(t_\mathrm{dep}\, / \, \mathrm{Myr})", 
 		ylabel=L"\mathrm{Counts}", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
 		xlabelsize=30,
 		ylabelsize=30,
 		xticklabelsize=25,
 		yticklabelsize=25,
 	)
 
-	log10_tdep = Float64[]
-
-	for galaxy_idx in 1:80
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxies[galaxy_idx])
-		
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
+	logΣsfr = data_04[:, :logSigSFRcorr]
 	
-		Σh2     = data[:, 10 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-		Σh2_err = data[:, 11 + h2_methods[h2_method]] .* u"Msun * pc^-2"
-	
-		h2_data  = Σh2 .± Σh2_err
-		sfr_data = Σsfr .± Σsfr_err
+	logΣH2 = data_04[:, :logSigH2]
 
-		tdep = log10.(Measurements.value.(ustrip.(u"Gyr", h2_data ./ sfr_data)))
+	logtd = filter!(!ismissing, logΣH2 .- logΣsfr)
 
-		filter!(!isnan, tdep)
-		filter!(!isinf, tdep)
-
-		append!(log10_tdep, tdep)
-
-	end
-
-	hist!(ax, log10_tdep, bins=100, color=:red, strokewidth=1, strokecolor=:black)
-
-	f
-end
-
-# ╔═╡ fedc1f1c-b89e-45e4-8072-629dea7a05fa
-md"""
-# Free-fall Time-regulated SF Relation: 
-
-``\Sigma_\mathrm{SFR} \, [\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}] = a \left( \dfrac{\Sigma_\mathrm{H_2} \, / \, \bar{t}_{ff}}{\mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}} \right)^N``
-"""
-
-# ╔═╡ 8913b958-f1b7-4e26-9a01-b3867d2e5c70
-md"""
-## For all 80 galaxies:
-"""
-
-# ╔═╡ 020b09d6-5dd3-4086-9ed3-4bbbec07d7f5
-let
-	set_theme!(theme_black())
-	
-	f = Figure(size=(880, 880))
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \bar{t}_{ff} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
-		xlabelsize=30,
-		ylabelsize=30,
-		xticklabelsize=25,
-		yticklabelsize=25,
-	)
-
-	for galaxy_idx in 1:80
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxies[galaxy_idx])
-		
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-	
-		Σh2     = data[:, 26 + h2_methods[h2_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σh2_err = data[:, 27 + h2_methods[h2_method]] .* u"Msun * yr^-1 * kpc^-2"
-	
-		x_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", Σh2 .± Σh2_err))
-		y_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", Σsfr .± Σsfr_err))
-
-		filter = x -> isnan(x) || isinf(x)
-    	idxs   = findall(filter, x_data) ∪ findall(filter, y_data)
-
-		deleteat!(x_data, sort(idxs))
-    	deleteat!(y_data, sort(idxs))
-
-		x_axis = Measurements.value.(x_data)
-		x_err  = Measurements.uncertainty.(x_data)
-		
-		y_axis = Measurements.value.(y_data)
-		y_err  = Measurements.uncertainty.(y_data)
-		
-		scatter!(ax, x_axis, y_axis; markersize=5)
-
-	end
-
-	f
-end
-
-# ╔═╡ d938057e-b1c0-40a4-a770-aae727a3b77e
-md"""
-## For galaxies with:
-
-``-5.0 < \log_{10}(\epsilon_{ff}) < 0.0\,\,`` and ``\,\,\log_{10}(\Sigma_\mathrm{H_2} \, / \, \bar{t}_{ff} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}}) < 2.0``
-"""
-
-# ╔═╡ f63dac25-aa08-4cbd-9263-5ce4c2173524
-let
-	set_theme!(theme_black())
-	
-	f = Figure(size=(880, 880))
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log_{10}(\Sigma_\mathrm{H_2} \, / \, \bar{t}_{ff} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		ylabel=L"\log_{10}(\Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot\,yr^{-1}\,kpc^{-2}})", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
-		xlabelsize=30,
-		ylabelsize=30,
-		xticklabelsize=25,
-		yticklabelsize=25,
-	)
-
-	for galaxy_idx in 1:80
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxies[galaxy_idx])
-		
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-	
-		Σh2     = data[:, 26 + h2_methods[h2_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σh2_err = data[:, 27 + h2_methods[h2_method]] .* u"Msun * yr^-1 * kpc^-2"
-	
-		h2_data  = Σh2 .± Σh2_err
-		sfr_data = Σsfr .± Σsfr_err
-
-		ϵff = log10.(Measurements.value.(sfr_data ./ h2_data))
-
-		x_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", h2_data))
-		y_data = log10.(ustrip.(u"Msun * yr^-1 * kpc^-2", sfr_data))
-
-		ϵff_filter = x -> isnan(x) || isinf(x) || x < -5.0 || x > 0.0
-		filter = x -> isnan(x) || isinf(x) || x > 2.0
-
-    	idxs = findall(filter, x_data) ∪ findall(filter, y_data) ∪ findall(ϵff_filter, ϵff)
-
-		deleteat!(x_data, sort(idxs))
-    	deleteat!(y_data, sort(idxs))
-
-		x_axis = Measurements.value.(x_data)
-		x_err  = Measurements.uncertainty.(x_data)
-		
-		y_axis = Measurements.value.(y_data)
-		y_err  = Measurements.uncertainty.(y_data)
-		
-		scatter!(ax, x_axis, y_axis; markersize=5)
-
-	end
-
-	f
-end
-
-# ╔═╡ e53bc51c-5d6d-48b4-82c9-9ed67424e32c
-md"""
-# SF efficiency per free fall time: 
-
-``\epsilon_\mathrm{ff} = \dfrac{\Sigma_\mathrm{SFR}}{\Sigma_\mathrm{H_2}} \, \bar{t}_{ff}``
-"""
-
-# ╔═╡ 8383b892-0425-40d2-9fe9-4416b9e4a405
-let
-	set_theme!(theme_black())
-	
-	f = Figure(size=(880, 880))
-	
-	ax = Axis(
-		f[1,1], 
-		xlabel=L"\log_{10}(\epsilon_\mathrm{ff})", 
-		ylabel=L"\mathrm{Counts}", 
-		title=L"\mathrm{SFR: \, %$(sfr_method) - H_2: \, %$(h2_method)}",
-		titlesize=35,
-		xlabelsize=30,
-		ylabelsize=30,
-		xticklabelsize=25,
-		yticklabelsize=25,
-	)
-
-	log10_ϵff = Float64[]
-
-	for galaxy_idx in 1:80
-
-		data = subset(clean_data, :Column1 => gn -> gn .== galaxies[galaxy_idx])
-	
-		Σsfr     = data[:, 4 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σsfr_err = data[:, 5 + sfr_methods[sfr_method]] .* u"Msun * yr^-1 * kpc^-2"
-	
-		Σh2     = data[:, 26 + h2_methods[h2_method]] .* u"Msun * yr^-1 * kpc^-2"
-		Σh2_err = data[:, 27 + h2_methods[h2_method]] .* u"Msun * yr^-1 * kpc^-2"
-	
-		h2_data  = Σh2 .± Σh2_err
-		sfr_data = Σsfr .± Σsfr_err
-
-		ϵff = log10.(Measurements.value.(sfr_data ./ h2_data))
-
-		filter!(!isnan, ϵff)
-		filter!(!isinf, ϵff)
-
-		append!(log10_ϵff, ϵff)
-
-	end
-
-	hist!(ax, log10_ϵff, bins=100, color=:red, strokewidth=1, strokecolor=:black)
+	hist!(ax, logtd, bins=50, color=:red, strokewidth=1, strokecolor=:black)
 
 	f
 end
@@ -2261,23 +2133,23 @@ version = "4.1.0+0"
 # ╔═╡ Cell order:
 # ╠═b8d1eb50-c7f6-11ec-1efc-c117e459045d
 # ╟─5a95fa6c-6380-43ff-85bb-ead10e51c482
-# ╠═3f54c370-7faa-4ec1-a3d2-ca4fb53ea993
-# ╠═33a24186-41b9-44d1-b854-5ae7b586fd5b
+# ╟─8edb5cd2-fe1a-4d25-8339-82ef8f8df69f
+# ╠═8ac2cdb8-a3e5-4c2e-9ccd-6a0da23711c8
+# ╟─701d6037-9e2d-4d52-9936-10a02367c551
+# ╠═d6f231b2-07e0-41aa-8a9e-8a3397789fa7
 # ╟─fc49983e-fa24-4c50-b91b-75661f43f04c
-# ╟─25ec6300-5e24-4355-a839-20da3a3bed45
 # ╟─0d1b1619-7595-4be2-bc97-e61dd7714fae
-# ╟─54d5809f-11b7-4fed-ba62-de278455e6ba
-# ╟─c1a643c6-2ff0-4bfc-8cea-29319e7622d9
-# ╟─e509ea88-0015-446a-9f5b-dc1c54576b51
-# ╟─4413bb26-3c73-4112-b9dd-851445491698
+# ╟─3c060af5-c1d5-47e3-8e67-e42b34cb1c17
+# ╟─3282b532-41b1-4a9a-94af-f7a83dc92b83
+# ╟─1cc1509d-387e-42f6-91b0-c4a5344cdb29
+# ╟─dc58f769-0b64-4bde-a2f8-44fe0337eb59
+# ╟─39ee0e48-7ca3-4cad-870d-4e29c3131dd9
+# ╟─633812a4-1f24-491e-ac83-fb87893bb63d
+# ╟─17c7a89e-2d72-4bd7-916a-bf058b6237e6
+# ╟─4827d1bd-5bef-4868-8f9e-78c968b39a79
+# ╟─95d3fc34-c725-4d78-9fdc-298010bd63b4
+# ╟─5d53bfff-b818-4aaf-8c87-816a8d99de93
 # ╟─95ced941-a818-472c-a071-5b12e64e0a3c
 # ╟─73b3fb9f-c7a6-44a0-8aae-4e6cd4ced2cc
-# ╟─fedc1f1c-b89e-45e4-8072-629dea7a05fa
-# ╟─8913b958-f1b7-4e26-9a01-b3867d2e5c70
-# ╟─020b09d6-5dd3-4086-9ed3-4bbbec07d7f5
-# ╟─d938057e-b1c0-40a4-a770-aae727a3b77e
-# ╟─f63dac25-aa08-4cbd-9263-5ce4c2173524
-# ╟─e53bc51c-5d6d-48b4-82c9-9ed67424e32c
-# ╟─8383b892-0425-40d2-9fe9-4416b9e4a405
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

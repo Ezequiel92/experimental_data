@@ -112,6 +112,18 @@ E. J. Chung, M.-H. Rhee, H. Kim, Min S. Yun, M. Heyer, and J. S. Young, 12CO(J =
 
 
 
+### [de los Reyes et al. (2019)](https://doi.org/10.3847/1538-4357/aafa82)
+
+#### Data products
+
+- Fits for the Kennicutt–Schmidt law.
+
+#### Reference
+
+M. A. C. de los Reyes and R. C. Kennicutt Jr., Revisiting the Integrated Star Formation Law. I. Non-starbursting Galaxies, _The Astrophysical Journal_, Volume 872, Issue 1, February 2019, Pages 16, doi: [10.3847/1538-4357/aafa82](https://doi.org/10.3847/1538-4357/aafa82)
+
+
+
 ### [Feldmann (2020)](https://doi.org/10.1038/s42005-020-00493-0)
 
 #### Data products
@@ -196,6 +208,18 @@ D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarl
 #### Reference
 
 A. K. Leroy, F. Walter, E. Brinks, F. Bigiel, W. J. G. de Blok, B. Madore, M. D. Thornley, THE STAR FORMATION EFFICIENCY IN NEARBY GALAXIES: MEASURING WHERE GAS FORMS STARS EFFECTIVELY, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2782, doi: [10.1088/0004-6256/136/6/2782](https://doi.org/10.1088/0004-6256/136/6/2782)
+
+
+
+### [Lee et al. (2016)](https://doi.org/10.3847/1538-4357/833/2/229)
+
+#### Data products
+
+- Star formation efficiency per free-fall time, for many GMCs.
+
+#### Reference
+
+E. J. Lee, M.-A. Miville-Deschênes, and N. W. Murray, OBSERVATIONAL EVIDENCE OF DYNAMIC STAR FORMATION RATE IN MILKY WAY GIANT MOLECULAR CLOUDS, _The Astrophysical Journal_, Volume 833, Issue 2, December 2016, Pages 229, doi: [10.3847/1538-4357/833/2/229](https://doi.org/10.3847/1538-4357/833/2/229)
 
 
 
