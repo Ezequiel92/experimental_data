@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.24
+# v0.20.25
 
 using Markdown
 using InteractiveUtils
@@ -283,6 +283,25 @@ let
 	axislegend(ax, position=:lb, labelsize=22, framevisible = false)
 	
 	f
+
+	z0=logJ21.(
+		0, 
+		incatasciato23_A, 
+		incatasciato23_B, 
+		incatasciato23_C,
+	)
+
+	z6=logJ21.(
+		6, 
+		incatasciato23_A, 
+		incatasciato23_B, 
+		incatasciato23_C,
+	)
+
+	@show z0
+	@show z6
+
+	z0/z6
 end
 
 # ╔═╡ 0c33c67b-cd99-4fba-a0a0-aff8d8adde7e
@@ -2516,9 +2535,9 @@ version = "4.1.0+0"
 # ╟─56cfc1c2-5017-4002-9dda-4221396218c4
 # ╟─ac29b3b2-51c7-4b6f-802a-4e792806640e
 # ╟─0ab05d3e-981a-4e87-85c7-5d3027cac748
-# ╟─d908aa93-c813-46f4-a8e5-d87e0bd7e648
+# ╠═d908aa93-c813-46f4-a8e5-d87e0bd7e648
 # ╟─8ea766a4-c9fd-48ce-9f57-c14ed85d2264
-# ╟─022ba9ce-4c4a-4ea2-8279-ae885becdf46
+# ╠═022ba9ce-4c4a-4ea2-8279-ae885becdf46
 # ╠═0c33c67b-cd99-4fba-a0a0-aff8d8adde7e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
