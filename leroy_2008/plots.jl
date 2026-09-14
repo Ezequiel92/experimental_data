@@ -7,177 +7,944 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using CairoMakie, DataFrames, DelimitedFiles, JLD2, LaTeXStrings, Measurements, Unitful, UnitfulAstro
+using CairoMakie, DataFrames, DelimitedFiles, FITSIO, JLD2, LaTeXStrings, Measurements, Unitful, UnitfulAstro, Statistics
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
 # [Leroy et al. (2008)](https://doi.org/10.1088/0004-6256/136/6/2782)
 
-## [Data](https://content.cld.iop.org/journals/1538-3881/136/6/2782/revision1/aj275654t7_mrt.txt)
+## [Data](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/AJ/136/2782)
 """
 
-# ╔═╡ 75732f0c-4d1f-4b8f-af27-0acde5bc02f5
+# ╔═╡ c6d3e850-f055-44f2-9bce-8ea9aa44be9d
 begin
-	raw_data      = readlines("./data/aj275654t7_mrt.txt")
-	header_length = 34
-	lines         = raw_data[(header_length+1):end]
+	table_7 = FITS("./data/J_AJ_136_2782_table7.dat.fits")[2]
+
+	safe_quotient(D, N) = [n == 0.0 ? 0.0 : d / n for (d, n) in zip(D, N)]
 	
-	colums = [
-		1:7,    # Galaxy name
-   		9:12,   # Galactocentric radius of ring center [kpc]
-  		14:17,  # Normalized galactocentric radius of ring center
-  		19:23,  # Surface density of HI [M⊙ pc^-2]
-  		25:27,  # RMS uncertainty in ΣHI [M⊙ pc^-2]
-  		29:34,  # Surface density of H2 [M⊙ pc^-2]
-  		36:39,  # RMS uncertainty in ΣH2  [M⊙ pc^-2]
-  		41:47,  # Surface density of stars [M⊙ pc^-2]
-  		49:53,  # RMS uncertainty in Σ* [M⊙ pc^-2]
-  		55:61,  # Total star formation rate surface density [10^-4 M⊙ yr^-1 kpc^-2]
-  		63:67,  # RMS uncertainty in FUV+24 [10^-4 M⊙ yr^-1 kpc^-2]
-  		69:74,  # FUV portion of star formation rate surface density 
-		        # [10^-4 M⊙ yr^-1 kpc^-2]
-  		76:83,  # 24 micron portion of star formation rate surface density
-		        # [10^-4 M⊙ yr^-1 kpc^-2]
-	]
+	df_table_7 = identity.(DataFrame(
+		name       = read(table_7, "Name"),                # Dimensionless
+		r25        = read(table_7, "r.n"),                 # Dimensionless
+		SigmaHI    = read(table_7, "SigmaHI"),             # M⊙ * pc^-2
+		e_SigmaHI  = read(table_7, "e_SigmaHI"),           # M⊙ * pc^-2
+		SigmaH2    = read(table_7, "SigmaH2"),             # M⊙ * pc^-2
+		e_SigmaH2  = read(table_7, "e_SigmaH2"),           # M⊙ * pc^-2
+		SigmaS     = read(table_7, "Sigma*"),              # M⊙ * pc^-2
+		e_SigmaS   = read(table_7, "e_Sigma*"),            # M⊙ * pc^-2
+		SigmaSFR   = read(table_7, "FUV+24") .* 1.0e-10,   # M⊙ * yr^-1 * pc^-2
+		e_SigmaSFR = read(table_7, "e_FUV+24") .* 1.0e-10, # M⊙ * yr^-1 * pc^-2
+
+		# Dimensionless
+		H2Ms = safe_quotient(read(table_7, "SigmaH2"), read(table_7, "Sigma*")),
+		# Dimensionless
+		HIMs = safe_quotient(read(table_7, "SigmaHI"), read(table_7, "Sigma*")),
+		# yr^-1
+		SSFR = safe_quotient(read(table_7, "FUV+24"), read(table_7, "Sigma*")) .* 1.0e-10,
+		# Dimensionless
+		H2HI = safe_quotient(read(table_7, "SigmaH2"), read(table_7, "SigmaHI")),
+	))
+end
+
+# ╔═╡ 28e8e582-a828-46e0-bab9-15a0c293e4fb
+begin
+	lines_table_4 = readlines("./data/table4.dat")
+
+	names_table4 = Vector{String}(undef, length(lines_table_4))
+	Ms_table4     = Vector{Float64}(undef, length(lines_table_4))
 	
-	data_matrix = Matrix{String}(undef, length(lines), length(colums))
-	for (row, line) in enumerate(lines)
-		
-		for (col, width) in enumerate(colums)
-			data_matrix[row, col] = strip(string(line[width]))
-		end
-		
+	for (row, line) in enumerate(lines_table_4)
+		names_table4[row] = strip(string(line[1:8]))
+		Ms_table4[row] = parse(Float64, line[47:50])
 	end
 
-	data_df = DataFrame(
-		data_matrix, 
-		[
-			"Name", 
-			"Rad", 
-			"NormRad", 
-			"SigmaHI", 
-			"e_SigmaHI", 
-			"SigmaH2", 
-			"e_SigmaH2", 
-			"Sigma*", 
-			"e_Sigma*", 
-			"FUV+24", 
-			"e_FUV+24", 
-			"FUV", 
-			"24"
-		],
-	)
+	df_table_4 = identity.(DataFrame(
+		name = names_table4,
+		Ms   = Ms_table4,
+	))
+end
 
-	transform!(
-		data_df, 
-		Cols("Rad") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"kpc", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("NormRad") .=> col -> parse.(Float64, replace(col, "" => "nan")), 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("SigmaHI") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"Msun * pc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("e_SigmaHI") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"Msun * pc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("SigmaH2") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"Msun * pc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("e_SigmaH2") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"Msun * pc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("Sigma*") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"Msun * pc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("e_Sigma*") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* u"Msun * pc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("FUV+24") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* exp10(-4) .* u"Msun * yr^-1 * kpc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("e_FUV+24") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* exp10(-4) .* u"Msun * yr^-1 * kpc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("FUV") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* exp10(-4) .* u"Msun * yr^-1 * kpc^-2", 
-		renamecols=false,
-	)
-
-	transform!(
-		data_df, 
-		Cols("24") .=> col -> parse.(Float64, replace(col, "" => "nan")) .* exp10(-4) .* u"Msun * yr^-1 * kpc^-2", 
-		renamecols=false,
-	)
-	
-	# Save the dataframe to a JLD2 file
-	jldsave("leroy_2008.jld2"; dataframe=data_df)
-end;
-
-# ╔═╡ 6bac95d3-857a-4f6e-aa2c-ef731d0c8a92
-galaxies = unique(data_df[!, "Name"])
-
-# ╔═╡ cf76d5ea-f8a9-421f-a795-7d58bb858bae
+# ╔═╡ 90da80f0-331e-4454-b794-6dae4b8fa55d
 let
-	selected_galaxies = ["NGC2841", "NGC3521", "NGC5194"]
-	gdf = groupby(data_df, :Name)
+	selected_galaxies = ["NGC 2841", "NGC 3521", "NGC 5194"]
 	
 	set_theme!(theme_black())
 	f = Figure()
 	ax = Axis(
 		f[1,1],
-		xlabel=L"R \, / \, \mathrm{kpc}",
-		ylabel=L"\log_{10}(\Sigma_\star \, / \, \mathrm{M_\odot \, kpc^{-2}})",
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{H2} \, / \, \mathrm{M_\odot \, pc^{-2}}",
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
-		limits=(0.0, 15.0, nothing, nothing),
+		limits=(0.0, 0.8, -1.0, 3.0),
 	)
 
 	for g in selected_galaxies
 		
-		plot_df = gdf[(Name=g,)]
+		plot_df = df_table_7[df_table_7.name .== g, :]
 
-		R    = ustrip.(u"kpc", plot_df[!, "Rad"])
-		Σs   = ustrip.(u"Msun * kpc^-2", plot_df[!, "Sigma*"])
-		e_Σs = ustrip.(u"Msun * kpc^-2", plot_df[!, "e_Sigma*"])
+		R25 = plot_df[!, "r25"]
+		Σ   = plot_df[!, "SigmaH2"]
+		e_Σ = plot_df[!, "e_SigmaH2"]
 
-		logΣs   = log10.(Σs .± e_Σs)
-		v_logΣs = Measurements.value.(logΣs)
+		logΣ   = log10.(Σ .± e_Σ)
+		v_logΣ = Measurements.value.(logΣ)
+		e_logΣ = Measurements.uncertainty.(logΣ)
 
-		lines!(ax, R, v_logΣs; label=g)
+		lines!(ax, R25, v_logΣ; label=g)
+		errorbars!(ax, R25, v_logΣ, e_logΣ)
 
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ 845aac51-5535-4eca-87b8-2629feef08ee
+let
+	selected_galaxies = ["NGC 2841", "NGC 3521", "NGC 5194"]
+	
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{HI} \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	for g in selected_galaxies
+		
+		plot_df = df_table_7[df_table_7.name .== g, :]
+
+		R25 = plot_df[!, "r25"]
+		Σ   = plot_df[!, "SigmaHI"]
+		e_Σ = plot_df[!, "e_SigmaHI"]
+
+		logΣ   = log10.(Σ .± e_Σ)
+		v_logΣ = Measurements.value.(logΣ)
+		e_logΣ = Measurements.uncertainty.(logΣ)
+
+		lines!(ax, R25, v_logΣ; label=g)
+		errorbars!(ax, R25, v_logΣ, e_logΣ)
+
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ 39e375ad-3623-4882-91da-19876130e893
+let
+	selected_galaxies = ["NGC 2841", "NGC 3521", "NGC 5194"]
+	
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\star \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	for g in selected_galaxies
+		
+		plot_df = df_table_7[df_table_7.name .== g, :]
+
+		R25 = plot_df[!, "r25"]
+		Σ   = plot_df[!, "SigmaS"]
+		e_Σ = plot_df[!, "e_SigmaS"]
+
+		logΣ   = log10.(Σ .± e_Σ)
+		v_logΣ = Measurements.value.(logΣ)
+		e_logΣ = Measurements.uncertainty.(logΣ)
+
+		lines!(ax, R25, v_logΣ; label=g)
+		errorbars!(ax, R25, v_logΣ, e_logΣ)
+
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ 60df6fb0-8ae1-4d72-9ca1-d73a04581353
+let
+	selected_galaxies = ["NGC 2841", "NGC 3521", "NGC 5194"]
+	
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, pc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	for g in selected_galaxies
+		
+		plot_df = df_table_7[df_table_7.name .== g, :]
+
+		R25 = plot_df[!, "r25"]
+		Σ   = plot_df[!, "SigmaSFR"]
+		e_Σ = plot_df[!, "e_SigmaSFR"]
+
+		logΣ   = log10.(Σ .± e_Σ)
+		v_logΣ = Measurements.value.(logΣ)
+		e_logΣ = Measurements.uncertainty.(logΣ)
+
+		lines!(ax, R25, v_logΣ; label=g)
+		errorbars!(ax, R25, v_logΣ, e_logΣ)
+
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ 3ebf4244-7fb9-447e-b7c8-3cda3c13eb28
+md"""
+## Summarized profiles
+"""
+
+# ╔═╡ 5c8445cf-cbb0-433c-b1c7-aeec3adb19aa
+begin
+	# Missing to NaN helper function
+	to_nan(v) = Float64[ismissing(x) ? NaN : x for x in v]
+
+	const SIM_PATH = "./data/simulations/"
+
+	const sim_files = Dict(
+	    :HI   => [joinpath(
+			SIM_PATH, 
+			"ode_atomic_mass_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+	    :H2   => [joinpath(
+			SIM_PATH, 
+			"ode_molecular_stellar_mass_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+	    :Ms   => [joinpath(
+			SIM_PATH, 
+			"stellar_mass_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+	    :SFR   => [joinpath(
+			SIM_PATH, 
+			"observational_sfr_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+		:H2Ms   => [joinpath(
+			SIM_PATH, 
+			"ode_molecular_stellar_mass_Ms_profile_$(sim)_Leroy2008.jld2"
+		) for sim in ["SFM_01", "SFM_06"]],
+		:HIMs  => [joinpath(
+			SIM_PATH, 
+			"ode_atomic_mass_Ms_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+		:SSFR   => [joinpath(
+			SIM_PATH, 
+			"observational_sfr_Ms_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+		:Rmol   => [joinpath(
+			SIM_PATH, 
+			"Rmol_profile_$(sim)_Leroy2008.jld2",
+		) for sim in ["SFM_01", "SFM_06"]],
+	)
+
+	# Minimum number of galaxies allowed in a bin 
+	const MIN_GALAXIES = 3
+	
+	# Common grid
+	const GRID = range(0.01, 1.2, 30)
+	
+	extrema(df_table_7[:, :r25])
+end
+
+# ╔═╡ 626b1aec-dc29-41a6-bd05-dbde0dc35197
+begin
+	df_Σ = copy(df_table_7)
+
+	quantities = Dict(
+	    :HI   => :SigmaHI,
+	    :H2   => :SigmaH2,
+	    :Ms   => :SigmaS,
+	    :SFR  => :SigmaSFR,
+		:H2Ms => :H2Ms,
+		:HIMs => :HIMs,
+		:SSFR => :SSFR,
+		:Rmol => :H2HI,
+	)
+	
+	# Take 0 values as missing (for the surface densities)
+	for col in values(quantities)
+	    df_Σ[!, col] = [v == 0.0 ? missing : v for v in df_Σ[!, col]]
+	end
+
+	#################################################################################
+	# Interpolate every profile onto the common grid
+	#################################################################################
+
+	function interp_onto_grid(r25::AbstractVector, Σ::AbstractVector)
+	    valid = map(!ismissing, Σ)
+	    r25_valid  = Float64.(r25[valid])
+	    logΣ_valid = log10.(Float64.(Σ[valid]))
+	
+	    common_profile = Vector{Union{Missing,Float64}}(missing, length(GRID))
+		
+		# Needs >=2 points to interpolate
+	    length(r25_valid) < 2 && return common_profile  
+
+		# Make sure radius is increasing
+	    order     = sortperm(r25_valid)          
+	    r25_sort  = r25_valid[order]
+	    logΣ_sort = logΣ_valid[order]
+	
+	    for (i, ri) in enumerate(GRID)
+			
+			# Ignore grid points outside the range of the data
+	        (ri < r25_sort[1] || ri > r25_sort[end]) && continue  
+			
+	        j = searchsortedlast(r25_sort, ri)
+	        if r25_sort[j] == ri
+	            common_profile[i] = logΣ_sort[j]
+	        else
+	            r1, r2 = r25_sort[j], r25_sort[j+1]
+	            Σ1, Σ2 = logΣ_sort[j], logΣ_sort[j+1]
+				# Linear interpolation weight
+	            w = (ri - r1) / (r2 - r1)             
+	            common_profile[i] = Σ1 + w * (Σ2 - Σ1)
+	        end
+			
+	    end
+		
+	    return common_profile
+	end
+
+	function build_matrix(df::DataFrame, col::Symbol)
+	    galaxies = unique(df.name)
+		
+	    profiles = Matrix{Union{Missing,Float64}}(
+			missing, 
+			length(galaxies), 
+			length(GRID),
+		)
+		
+	    for (i, galaxy) in enumerate(galaxies)
+	        r25 = df[df.name .== galaxy, :r25]
+			Σ   = df[df.name .== galaxy, col]
+	        profiles[i, :] = interp_onto_grid(r25, Σ)
+	    end
+			
+	    return profiles
+	end
+
+	function summarize_columns(
+		profiles::Matrix; 
+		replace_missing::Union{Nothing,Float64}=nothing,
+	)
+		# Median
+	    med = Vector{Union{Missing,Float64}}(missing, length(GRID))
+		
+		# Minimu, Maximum, -1σ, and +1σ
+	    mn, mx, p16, p84 = (similar(med) for _ in 1:4)
+	
+	    for j in 1:length(GRID)
+			
+			if isnothing(replace_missing)
+	        	col = collect(skipmissing(profiles[:, j]))
+			else
+				col = replace(profiles[:, j], missing => replace_missing)
+			end
+			
+	        if length(col) >= MIN_GALAXIES
+	            med[j] = median(col)
+	            mn[j]  = minimum(col)
+	            mx[j]  = maximum(col)
+	            p16[j] = quantile(col, 0.159)
+	            p84[j] = quantile(col, 0.841)
+	        end
+			
+	    end
+		
+	    return (; median = med, min = mn, max = mx, p16 = p16, p84 = p84)
+	end
+
+	results = Dict{Symbol, NamedTuple}()
+	for (label, col) in quantities
+		# Interpolate the profile of "col" for every galaxy onto the common grid
+	    profiles = build_matrix(df_Σ, col)
+		# Compute several descriptive statistics along simulations for "col"
+	    results[label] = summarize_columns(profiles)
+	end
+
+	jldsave("./leroy_2008_vac.jld2"; results=results, R25=collect(GRID))
+end;
+
+# ╔═╡ 89f87e60-ed6a-41e9-bceb-6a0dff4532c7
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{H2} \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :H2
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ 95804f43-8352-4d6a-85fe-e8fd602cfe79
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{HI} \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :HI
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax; position=:rb)
+
+	f
+end
+
+# ╔═╡ 3bf2109f-b1d2-4633-8a3d-674322d3b824
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\star \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :Ms
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ 93fcbf1f-23ac-4c8a-ae82-de21edb559e6
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} kpc^{-2}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :SFR
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)  
+	
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)",
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+		lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax)
+
+	f
+end
+
+# ╔═╡ f734a191-1255-4e65-aced-e91cf50f7459
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{H2} \, / \, \Sigma_\star",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :H2Ms
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax; position=:rb)
+
+	f
+end
+
+# ╔═╡ d49e5fdc-49ab-46dd-9e05-0410baec7012
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{HI} \, / \, \Sigma_\star",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :HIMs
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)",
+		color=Makie.wong_colors()[1], 
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax; position=:rb)
+
+	f
+end
+
+# ╔═╡ 1edbb3a4-700e-4f7b-9282-eeb456b14717
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, \mathrm{SSFR} \, / \, \mathrm{yr^{-1}}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :SSFR
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+	end
+
+	axislegend(ax; position=:rb)
+
+	f
+end
+
+# ╔═╡ 1e351e4b-a18d-4042-9634-28b3e4e7b83a
+let
+	set_theme!(theme_black())
+	f = Figure()
+	ax = Axis(
+		f[1,1],
+		xlabel=L"R \, / \, R_{25}",
+		ylabel=L"\log_{10} \, R_\mathrm{mol}",
+		xlabelsize=28,
+		ylabelsize=28,
+		xticklabelsize=20,
+		yticklabelsize=20,
+	)
+
+	quantity = :Rmol
+
+	stats = results[quantity]
+
+	R25      = collect(GRID)
+	Σ_median = to_nan(stats.median)
+	Σ_min    = to_nan(stats.min)
+	Σ_max    = to_nan(stats.max)
+	Σ_p16    = to_nan(stats.p16)
+	Σ_p84    = to_nan(stats.p84)   
+
+	band!(
+		ax, 
+		R25, 
+		Σ_min, 
+		Σ_max; 
+		label="Extrema - Leroy (2008)", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
+	band!(
+		ax, 
+		R25, 
+		Σ_p16, 
+		Σ_p84; 
+		label="1σ - Leroy (2008)", 
+		color=Makie.wong_colors()[3], 
+		alpha=0.3,
+	)
+	lines!(
+		ax, 
+		R25, 
+		Σ_median; 
+		label="Median - Leroy (2008)", 
+		color=Makie.wong_colors()[1],
+		linewidth=3,
+	)
+
+	sfm_01_file = sim_files[quantity][1]
+	sfm_06_file = sim_files[quantity][2]
+
+	jldopen(sfm_01_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_01"]
+		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
+	end
+
+	jldopen(sfm_06_file, "r") do jld2_file
+		x, y = jld2_file["snap_127/SFM_15"]
+		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
 	end
 
 	axislegend(ax)
@@ -191,19 +958,22 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
-CairoMakie = "~0.15.13"
+CairoMakie = "~0.15.14"
 DataFrames = "~1.8.2"
-JLD2 = "~0.6.5"
-LaTeXStrings = "~1.4.0"
+FITSIO = "~0.17.5"
+JLD2 = "~0.6.6"
+LaTeXStrings = "~1.4.1"
 Measurements = "~2.14.1"
-Unitful = "~1.28.0"
+Unitful = "~1.29.0"
 UnitfulAstro = "~1.2.2"
 """
 
@@ -211,9 +981,9 @@ UnitfulAstro = "~1.2.2"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.6"
+julia_version = "1.12.7"
 manifest_format = "2.0"
-project_hash = "fdf657d1d97b8966325af55a2acb9b75eca18c9a"
+project_hash = "d8f02d5d3c6ed30180daefa021336ffd47e87925"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -332,6 +1102,18 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
+[[deps.CFITSIO]]
+deps = ["CFITSIO_jll"]
+git-tree-sha1 = "8c6b984c3928736d455eb53a6adf881457825269"
+uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
+version = "1.7.2"
+
+[[deps.CFITSIO_jll]]
+deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "LibCURL_jll", "Libdl", "Zlib_jll"]
+git-tree-sha1 = "d846411d1d7eb34739105f3d6fbba7c93beded3d"
+uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
+version = "4.6.4+0"
+
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 version = "1.11.0"
@@ -356,9 +1138,9 @@ version = "1.1.1"
 
 [[deps.CairoMakie]]
 deps = ["CRC32c", "Cairo", "Cairo_jll", "Colors", "FileIO", "FreeType", "GeometryBasics", "LinearAlgebra", "Makie", "PrecompileTools"]
-git-tree-sha1 = "47142129b1777e21da58cff265050b10d8560588"
+git-tree-sha1 = "3495bfc164949714579501b825b8e5e2cce7c56f"
 uuid = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-version = "0.15.13"
+version = "0.15.14"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -383,9 +1165,9 @@ weakdeps = ["SparseArrays"]
     ChainRulesCoreSparseArraysExt = "SparseArrays"
 
 [[deps.ChunkCodecCore]]
-git-tree-sha1 = "1a3ad7e16a321667698a19e77362b35a1e94c544"
+git-tree-sha1 = "3496e2b359c27793d12bec54ec94be7983a6ceb2"
 uuid = "0b6fb165-00bc-4d37-ab8b-79f91016dbe1"
-version = "1.0.1"
+version = "1.0.2"
 
 [[deps.ChunkCodecLibZlib]]
 deps = ["ChunkCodecCore", "Zlib_jll"]
@@ -444,9 +1226,10 @@ uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.13.1"
 
 [[deps.CommonSolve]]
-git-tree-sha1 = "f54afab101687a7049833d07636418a83e9a250b"
+deps = ["PrecompileTools"]
+git-tree-sha1 = "6c389fa857f6ca5a95474b52a52023fd77f24cb7"
 uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
-version = "0.2.12"
+version = "0.2.14"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
@@ -461,7 +1244,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.3.0+1"
+version = "1.3.1+2"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
@@ -557,9 +1340,9 @@ version = "1.11.0"
 
 [[deps.Distributions]]
 deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "Roots", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "d2facc77c08c1c2bfb1a77c148edd05b3db5410b"
+git-tree-sha1 = "a958ab3a40c755563f5e1405c0846cb0446bf19d"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.130"
+version = "0.25.131"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -602,9 +1385,9 @@ version = "2.2.9"
 
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e6c4a6407a949e79a9d3f249bf49e6987c80e01f"
+git-tree-sha1 = "2bfb1e047e2ad0a5ca94365340bde8005d637568"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
-version = "2.8.2+0"
+version = "2.8.4+0"
 
 [[deps.FFMPEG_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "PCRE2_jll", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libva_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
@@ -617,6 +1400,12 @@ deps = ["AbstractFFTs", "DocStringExtensions", "LinearAlgebra", "MuladdMacro", "
 git-tree-sha1 = "65e55303b72f4a567a51b174dd2c47496efeb95a"
 uuid = "b86e33f2-c0db-4aa1-a6e0-ab43e668529e"
 version = "0.3.1"
+
+[[deps.FITSIO]]
+deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
+git-tree-sha1 = "f57de3f533590c785210893030736dc11c4a4afb"
+uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+version = "0.17.5"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
@@ -724,15 +1513,16 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 version = "1.11.0"
 
 [[deps.Gamma]]
-git-tree-sha1 = "86f86b6168a016ed88e4ae4e64577b98c3b59e8e"
+deps = ["LogExpFunctions"]
+git-tree-sha1 = "becc397f7cfb06e343496ae6ffb04818a851da51"
 uuid = "a0844989-3bd2-4988-8bea-c9407ab0941b"
-version = "1.1.0"
+version = "1.2.0"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "LinearAlgebra", "PrecompileTools", "Random", "StaticArrays"]
-git-tree-sha1 = "364685f5ffde25deb1bbcfd5bb278a5c6b7a9b37"
+git-tree-sha1 = "592cfb5ed8b02804f6a9c04091571c393081f73a"
 uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
-version = "0.5.11"
+version = "0.5.12"
 
     [deps.GeometryBasics.extensions]
     ExtentsExt = "Extents"
@@ -776,15 +1566,15 @@ version = "1.3.16+0"
 
 [[deps.GridLayoutBase]]
 deps = ["GeometryBasics", "InteractiveUtils", "Observables"]
-git-tree-sha1 = "93d5c27c8de51687a2c70ec0716e6e76f298416f"
+git-tree-sha1 = "ef70da5e123a06a29e2d6ddff0f09985bc226491"
 uuid = "3955a311-db13-416c-9275-1d80ed98e5e9"
-version = "0.11.2"
+version = "0.11.3"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll"]
-git-tree-sha1 = "f923f9a774fcf3f5cb761bfa43aeadd689714813"
+git-tree-sha1 = "9d9531a9cb63a9edc33836414e82a07e81710de2"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
-version = "8.5.1+0"
+version = "100.14004.0+0"
 
 [[deps.HashArrayMappedTries]]
 git-tree-sha1 = "2eaa69a7cab70a52b9687c8bf950a5a93ec895ae"
@@ -817,9 +1607,9 @@ version = "0.10.5"
 
 [[deps.ImageIO]]
 deps = ["FileIO", "IndirectArrays", "JpegTurbo", "LazyModules", "Netpbm", "OpenEXR", "PNGFiles", "QOI", "Sixel", "TiffImages", "UUIDs", "WebP"]
-git-tree-sha1 = "696144904b76e1ca433b886b4e7edd067d76cbf7"
+git-tree-sha1 = "f0f005f997dfb8c5fe23920d99458a9619873893"
 uuid = "82e4d734-157c-48bb-816b-45c225c6df19"
-version = "0.6.9"
+version = "0.6.10"
 
 [[deps.ImageMetadata]]
 deps = ["AxisArrays", "ImageAxes", "ImageBase", "ImageCore"]
@@ -844,9 +1634,9 @@ uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
 
 [[deps.InlineStrings]]
-git-tree-sha1 = "8f3d257792a522b4601c24a577954b0a8cd7334d"
+git-tree-sha1 = "06b65886c7577a3784d616e29f1302c2e36e389d"
 uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
-version = "1.4.5"
+version = "1.4.6"
 
     [deps.InlineStrings.extensions]
     ArrowTypesExt = "ArrowTypes"
@@ -882,9 +1672,9 @@ version = "0.16.3"
 
 [[deps.IntervalArithmetic]]
 deps = ["CRlibm", "CoreMath", "MacroTools", "OpenBLASConsistentFPCSR_jll", "Printf", "Random", "RoundingEmulator"]
-git-tree-sha1 = "c3ee408ae340565f41699e3a3fa1053698c7626e"
+git-tree-sha1 = "ff294afb9a15d31d8d7422da138844641a73135f"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "1.0.10"
+version = "1.0.11"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticArblibExt = "Arblib"
@@ -962,9 +1752,9 @@ version = "1.0.0"
 
 [[deps.JLD2]]
 deps = ["ChunkCodecLibZlib", "ChunkCodecLibZstd", "FileIO", "MacroTools", "Mmap", "OrderedCollections", "PrecompileTools", "ScopedValues"]
-git-tree-sha1 = "9ebadf3f8f0de07031359917549bbdadc23f5dc3"
+git-tree-sha1 = "877edc1d2f51adcef0bfacd19464a19e7cfddddb"
 uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-version = "0.6.5"
+version = "0.6.6"
 
     [deps.JLD2.extensions]
     UnPackExt = "UnPack"
@@ -980,9 +1770,9 @@ version = "1.8.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Logging", "Parsers", "PrecompileTools", "StructUtils", "UUIDs", "Unicode"]
-git-tree-sha1 = "c89d196f5ffb64bfbf80985b699ea913b0d2c211"
+git-tree-sha1 = "88352712893ec50bee3680605891eaf0e9ed6368"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-version = "1.6.1"
+version = "1.8.0"
 
     [deps.JSON.extensions]
     JSONArrowExt = ["ArrowTypes"]
@@ -998,9 +1788,9 @@ version = "0.1.6"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1dae3057da6f2b9c857afef03177bbdc7c4afe92"
+git-tree-sha1 = "037babc10853eeb8e585418922246cb97b8e5b74"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
-version = "3.2.0+0"
+version = "3.2.0+1"
 
 [[deps.JuliaSyntaxHighlighting]]
 deps = ["StyledStrings"]
@@ -1021,9 +1811,9 @@ version = "3.100.3+0"
 
 [[deps.LERC_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "17b94ecafcfa45e8360a4fc9ca6b583b049e4e37"
+git-tree-sha1 = "39bca05343661c347aae0bca57a5994a0bf4f08d"
 uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
-version = "4.1.0+0"
+version = "4.2.0+0"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1032,9 +1822,9 @@ uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
 version = "22.1.7+0"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
+git-tree-sha1 = "f88f3ccef05a6a72a0cf0ed417c8fd68530f4ab2"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.4.0"
+version = "1.4.1"
 
 [[deps.LazyModules]]
 git-tree-sha1 = "a560dd966b386ac9ae60bdd3a3d3a326062d3c3e"
@@ -1138,9 +1928,9 @@ version = "0.5.16"
 
 [[deps.Makie]]
 deps = ["Animations", "Base64", "CRC32c", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "ComputePipeline", "Contour", "Dates", "DelaunayTriangulation", "Distributions", "DocStringExtensions", "Downloads", "FFMPEG_jll", "FileIO", "FilePaths", "FixedPointNumbers", "Format", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageBase", "ImageIO", "InteractiveUtils", "Interpolations", "IntervalSets", "InverseFunctions", "Isoband", "KernelDensity", "LaTeXStrings", "LinearAlgebra", "MacroTools", "Markdown", "MathTeXEngine", "Observables", "OffsetArrays", "PNGFiles", "Packing", "Pkg", "PlotUtils", "PolygonOps", "PrecompileTools", "Printf", "REPL", "Random", "RelocatableFolders", "Scratch", "ShaderAbstractions", "SignedDistanceFields", "SparseArrays", "Statistics", "StatsBase", "StatsFuns", "StructArrays", "TriplotBase", "UnicodeFun", "Unitful"]
-git-tree-sha1 = "f2c8715d05bf10f9d4dc354e69dee30b6be53239"
+git-tree-sha1 = "37b10d17f74f54dc5fa7d3c6c20fd75613c71d80"
 uuid = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
-version = "0.24.13"
+version = "0.24.14"
 
     [deps.Makie.extensions]
     MakieDynamicQuantitiesExt = "DynamicQuantities"
@@ -1267,9 +2057,9 @@ version = "0.3.3"
 
 [[deps.OpenEXR_jll]]
 deps = ["Artifacts", "Imath_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "0d621a4beb5e48d195f907c3c5b0bea285d9ff9d"
+git-tree-sha1 = "1bcebd887dd33f1108210b3954049b1bb8af0e7a"
 uuid = "18a262bb-aa17-5467-a713-aee519bc75cb"
-version = "3.4.13+0"
+version = "3.4.15+0"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1279,7 +2069,7 @@ version = "0.8.7+0"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.4+0"
+version = "3.5.6+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
@@ -1333,15 +2123,15 @@ version = "0.5.12"
 
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "58e5ed5e386e156bd93e86b305ebd21ac63d2d04"
+git-tree-sha1 = "1912a9f1b9ca55005b03ba075f8e19993583e237"
 uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
-version = "1.57.1+0"
+version = "1.58.2+0"
 
 [[deps.Parsers]]
-deps = ["Dates", "PrecompileTools", "UUIDs"]
-git-tree-sha1 = "32a4e09c5f29402573d673901778a0e03b0807b9"
+deps = ["Dates", "PrecompileTools"]
+git-tree-sha1 = "663e8b48b789916221e0765393b289ca6c88f24e"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.8.6"
+version = "3.0.0"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
@@ -1395,9 +2185,9 @@ version = "1.5.2"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "LaTeXStrings", "Markdown", "PrecompileTools", "Printf", "REPL", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "807a56f504aa08838a11e9a0727c3d704f90c44b"
+git-tree-sha1 = "1b8aa19f229b1cea7fc93874a52e49db6a854450"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "3.4.4"
+version = "3.4.8"
 
     [deps.PrettyTables.extensions]
     PrettyTablesExcelExt = "XLSX"
@@ -1503,9 +2293,9 @@ version = "0.5.2+0"
 
 [[deps.Roots]]
 deps = ["Accessors", "CommonSolve", "Printf"]
-git-tree-sha1 = "7fb25a964849d90a0446366cdefca822e0e84900"
+git-tree-sha1 = "4db094d5e079abbda658acfe1c4d098430417717"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "3.0.6"
+version = "3.0.8"
 
     [deps.Roots.extensions]
     RootsChainRulesCoreExt = "ChainRulesCore"
@@ -1606,9 +2396,9 @@ version = "1.12.0"
 
 [[deps.SpecialFunctions]]
 deps = ["IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
-git-tree-sha1 = "97c8329c5f503d2936fb36719fe25b9f94b1ae8a"
+git-tree-sha1 = "429071b23f4c9a13fb6582f807cc2ef454082408"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "2.8.1"
+version = "2.9.0"
 weakdeps = ["ChainRulesCore"]
 
     [deps.SpecialFunctions.extensions]
@@ -1628,9 +2418,9 @@ version = "0.1.2"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "246a8bb2e6667f832eea063c3a56aef96429a3db"
+git-tree-sha1 = "e206cf4850fd7ac4255ffd2b98922f563e18ac53"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.18"
+version = "1.9.20"
 weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]
@@ -1644,9 +2434,9 @@ version = "1.4.4"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "ae3bb1eb3bba077cd276bc5cfc337cc65c3075c0"
+git-tree-sha1 = "e2b53ce13a53367e96601081e33d34746b571bad"
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.11.1"
+version = "1.11.5"
 weakdeps = ["SparseArrays"]
 
     [deps.Statistics.extensions]
@@ -1660,9 +2450,9 @@ version = "1.8.0"
 
 [[deps.StatsBase]]
 deps = ["AliasTables", "DataAPI", "DataStructures", "IrrationalConstants", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "e4d7a1a0edc20af42689ea6f4f3587a2175d50ee"
+git-tree-sha1 = "adb9da019510162e67a4493fc235c23203d8b09e"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.34.12"
+version = "0.34.13"
 
 [[deps.StatsFuns]]
 deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
@@ -1677,9 +2467,9 @@ weakdeps = ["ChainRulesCore", "InverseFunctions"]
 
 [[deps.StringManipulation]]
 deps = ["PrecompileTools"]
-git-tree-sha1 = "8a90c1d77c3277a5d43b83927b3cbe2c70a37484"
+git-tree-sha1 = "773065c6e0e903924a9d838259be74338422aef2"
 uuid = "892a3eda-7b42-436c-8928-eab12a02cf0e"
-version = "0.4.7"
+version = "0.5.0"
 
 [[deps.StructArrays]]
 deps = ["ConstructionBase", "DataAPI", "Tables"]
@@ -1704,9 +2494,9 @@ version = "0.7.3"
 
 [[deps.StructUtils]]
 deps = ["Dates", "UUIDs"]
-git-tree-sha1 = "82bee338d650aa515f31866c460cb7e3bcef90b8"
+git-tree-sha1 = "2d0fc55c61321ba245c47be599570d11bac50303"
 uuid = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
-version = "2.8.2"
+version = "2.8.5"
 weakdeps = ["Measurements", "StaticArraysCore", "Tables"]
 
     [deps.StructUtils.extensions]
@@ -1740,9 +2530,9 @@ version = "1.0.1"
 
 [[deps.Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "OrderedCollections", "TableTraits"]
-git-tree-sha1 = "0f38a06c83f0007bbab3cf911262841c9a0f07e0"
+git-tree-sha1 = "a94d9bdda1b7bed0046cea645639ab3f62196fac"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.13.0"
+version = "1.14.0"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
@@ -1788,9 +2578,9 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "57e1b2c9de4bd6f40ecb9de4ac1797b81970d008"
+git-tree-sha1 = "1f0f9f401753701a7e4113b5056ca38d33875b55"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.28.0"
+version = "1.29.0"
 
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
@@ -1912,15 +2702,15 @@ version = "0.2.3+0"
 
 [[deps.libaom_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "850b06095ee71f0135d644ffd8a52850699581ed"
+git-tree-sha1 = "ef17c47d22224aaecc76e597ab21a072e025cf7b"
 uuid = "a4ae2306-e953-59d6-aa16-d00cac43593b"
-version = "3.13.3+0"
+version = "3.14.1+0"
 
 [[deps.libass_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "125eedcb0a4a0bba65b657251ce1d27c8714e9d6"
+git-tree-sha1 = "cb007192783c56d8249db4cf0e3495001edfe414"
 uuid = "0ac62f75-1d6f-5e53-bd7c-93b484bb37c0"
-version = "0.17.4+0"
+version = "0.17.5+0"
 
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1995,8 +2785,22 @@ version = "4.1.0+0"
 # ╔═╡ Cell order:
 # ╠═8bd4f390-591f-11ec-0b66-6585ca602deb
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
-# ╠═75732f0c-4d1f-4b8f-af27-0acde5bc02f5
-# ╠═6bac95d3-857a-4f6e-aa2c-ef731d0c8a92
-# ╟─cf76d5ea-f8a9-421f-a795-7d58bb858bae
+# ╠═c6d3e850-f055-44f2-9bce-8ea9aa44be9d
+# ╠═28e8e582-a828-46e0-bab9-15a0c293e4fb
+# ╟─90da80f0-331e-4454-b794-6dae4b8fa55d
+# ╟─845aac51-5535-4eca-87b8-2629feef08ee
+# ╟─39e375ad-3623-4882-91da-19876130e893
+# ╟─60df6fb0-8ae1-4d72-9ca1-d73a04581353
+# ╟─3ebf4244-7fb9-447e-b7c8-3cda3c13eb28
+# ╠═5c8445cf-cbb0-433c-b1c7-aeec3adb19aa
+# ╠═626b1aec-dc29-41a6-bd05-dbde0dc35197
+# ╟─89f87e60-ed6a-41e9-bceb-6a0dff4532c7
+# ╟─95804f43-8352-4d6a-85fe-e8fd602cfe79
+# ╟─3bf2109f-b1d2-4633-8a3d-674322d3b824
+# ╟─93fcbf1f-23ac-4c8a-ae82-de21edb559e6
+# ╟─f734a191-1255-4e65-aced-e91cf50f7459
+# ╟─d49e5fdc-49ab-46dd-9e05-0410baec7012
+# ╟─1edbb3a4-700e-4f7b-9282-eeb456b14717
+# ╟─1e351e4b-a18d-4042-9634-28b3e4e7b83a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
