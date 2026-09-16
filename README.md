@@ -100,6 +100,18 @@ F. Bigiel, A. Leroy, F. Walter, L. Blitz, E. Brinks, W. J. G. de Blok and B. Mad
 
 
 
+### [Casey et al. (2026)](https://doi.org/10.48550/arXiv.2606.17270)
+
+#### Data products
+
+- Dust-to-star ratio vs. redshift.
+
+#### Reference
+
+C. M. Casey, H. B. Akins, A. J. Battisti, J. McKinney, E. Treister, J. A. Zavala, H. Algera, M. Aravena, Y. Cheng, N. E. Drakos, A. L. Faisst, M. Franco, S. Fujimoto, G. Gozaliasl, A. Hadi, S. Harish, M. Hirschmann, O. Ilbert, K. Inayoshi, J. S. Kartaltepe, A. M. Koekemoer, C. del P. Lagos, E. Lambrides, R. Laishram, D. Liu, A. S. Long, G. E. Magdis, S. M. Manning, C. L. Martin, F. Martinez III, R. Massey, J. E. McCleary, H. J. McCracken, L. Moscardini, D. Narayanan, L. Paquereau, J. Rhodes, B. E. Robertson, R. M. Samir, C. Scarlata, M. Shuntov, L. Sommovigo, A. P. Vijayan, W. Wang, C. Xu, D. Zimmerman, Dust in the Average Galaxy: Attenuation, Emission, and Opacity from 0 < z < 7, _The Open Journal of Astrophysics_, Volume 9, August 2026, doi: [10.33232/001c.167549](https://doi.org/10.33232/001c.167549)
+
+
+
 ### [Chung et al. (2009)](https://doi.org/10.1088/0067-0049/184/2/199)
 
 #### Data products
@@ -199,18 +211,6 @@ D. Langeroodi, J. Hjorth, W. Chen, P. L. Kelly, H. Williams, Y.-H. Lin, C. Scarl
 
 
 
-### [Leroy et al. (2008)](https://doi.org/10.1088/0004-6256/136/6/2782)
-
-#### Data products
-
-- Profiles for the surface density of HI, H2, and stars.
-
-#### Reference
-
-A. K. Leroy, F. Walter, E. Brinks, F. Bigiel, W. J. G. de Blok, B. Madore, M. D. Thornley, THE STAR FORMATION EFFICIENCY IN NEARBY GALAXIES: MEASURING WHERE GAS FORMS STARS EFFECTIVELY, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2782, doi: [10.1088/0004-6256/136/6/2782](https://doi.org/10.1088/0004-6256/136/6/2782)
-
-
-
 ### [Lee et al. (2016)](https://doi.org/10.3847/1538-4357/833/2/229)
 
 #### Data products
@@ -220,6 +220,18 @@ A. K. Leroy, F. Walter, E. Brinks, F. Bigiel, W. J. G. de Blok, B. Madore, M. D.
 #### Reference
 
 E. J. Lee, M.-A. Miville-Deschênes, and N. W. Murray, OBSERVATIONAL EVIDENCE OF DYNAMIC STAR FORMATION RATE IN MILKY WAY GIANT MOLECULAR CLOUDS, _The Astrophysical Journal_, Volume 833, Issue 2, December 2016, Pages 229, doi: [10.3847/1538-4357/833/2/229](https://doi.org/10.3847/1538-4357/833/2/229)
+
+
+
+### [Leroy et al. (2008)](https://doi.org/10.1088/0004-6256/136/6/2782)
+
+#### Data products
+
+- Profiles for the surface density of HI, H2, and stars.
+
+#### Reference
+
+A. K. Leroy, F. Walter, E. Brinks, F. Bigiel, W. J. G. de Blok, B. Madore, M. D. Thornley, THE STAR FORMATION EFFICIENCY IN NEARBY GALAXIES: MEASURING WHERE GAS FORMS STARS EFFECTIVELY, _The Astronomical Journal_, Volume 136, Issue 6, November 2008, Pages 2782, doi: [10.1088/0004-6256/136/6/2782](https://doi.org/10.1088/0004-6256/136/6/2782)
 
 
 
@@ -294,6 +306,21 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 
 
 
+### [Nakanishi et al. (2016)](https://doi.org/10.1093/pasj/psv108)
+
+#### Data products
+
+- Stellar mass surface density profile for the MW.
+- Molecular mass surface density profile for the MW.
+- Atomic mass surface density profile for the MW.
+- Molecular-to-neutral ratio profile for the MW.
+
+#### Reference
+
+H. Nakanishi, Y. Sofue, Three-dimensional distribution of the ISM in the Milky Way galaxy. III. The total neutral gas disk, _Publications of the Astronomical Society of Japan_, Volume 68, Issue 1, February 2016, Pages 5, doi: [10.1093/pasj/psv108](https://doi.org/10.1093/pasj/psv108)
+
+
+
 ### [PHANGS-ALMA](https://almascience.eso.org/alma-data/lp/PHANGS)
 
 #### Data products
@@ -344,47 +371,6 @@ S. D. Puertas, J. M. Vilchez, J. Iglesias-Páramo, M. Mollá, E. Pérez-Montero,
 #### Reference
 
 A. Rahmati, A. H. Pawlik, M. Raičevic̀, J. Schaye, On the evolution of the H i column density distribution in cosmological simulations, _Monthly Notices of the Royal Astronomical Society_, Volume 430, Issue 3, April 2013, Pages 2427–2445, doi: [10.1093/mnras/stt066](https://doi.org/10.1093/mnras/stt066)
-
-
-
-### [Sánchez et al. (2017)](https://doi.org/10.1093/mnras/stx808)
-
-#### Data products
-
-- Integrated star formation rate.
-- Integrated stellar mass.
-- Integrated metallicity.
-
-#### Reference
-
-S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher, R. A. Marino, L. Galbany, J. Bland-Hawthorn, M. Cano-Díaz, R. García-Benito, C. López-Cobá, S. Zibetti, J. M. Vilchez, J. Iglésias-Páramo, C. Kehrig, A. R. López Sánchez, S. Duarte Puertas, B. Ziegler, The mass–metallicity relation revisited with CALIFA, _Monthly Notices of the Royal Astronomical Society_, Volume 469, Issue 2, August 2017, Pages 2121–2140, doi: [10.1093/mnras/stx808](https://doi.org/10.1093/mnras/stx808)
-
-
-
-### [Sánchez et al. (2019)](https://doi.org/10.1093/mnras/stz019)
-
-#### Data products
-
-- Integrated star formation rate.
-- Integrated stellar mass.
-- Integrated metallicity.
-- Fits for the data.
-
-#### Reference
-
-S. F. Sánchez, J. K. Barrera-Ballesteros, C. López-Cobá, S. Brough, J. J. Bryant, J. Bland-Hawthorn, S. M. Croom, J. van de Sande, L. Cortese, M. Goodwin, J. S. Lawrence, A. R. López-Sánchez, S. M. Sweet, M. S. Owers, S. N. Richards, C. J. Walcher and SAMI Team, The SAMI galaxy survey: exploring the gas-phase mass–metallicity relation, _Monthly Notices of the Royal Astronomical Society_, Volume 484, Issue 3, April 2019, Pages 3042–3070, doi: [10.1093/mnras/stz019](https://doi.org/10.1093/mnras/stz019)
-
-
-
-### [Sánchez et al. (2022)](https://doi.org/10.1017/S1743921322003830)
-
-#### Data products
-
-- Fits for the SFR, stellar mass and gas mass relations.
-
-#### Reference
-
-S. F. Sánchez, D. C. Gómez Medina, J. K. Barrera-Ballesteros, L. Galbany, A. Bolatto, T. Wong, The local and global relations between Σ*, ΣSFR and Σmol that regulate star-formation, _Proceedings of the International Astronomical Union_, Volume 17, Issue S373, June 2023, Pages 3-10, doi: [10.1017/S1743921322003830](https://doi.org/10.1017/S1743921322003830)
 
 
 
@@ -453,6 +439,47 @@ J. Sun, A. K. Leroy, E. Rosolowsky, A. Hughes, E. Schinnerer, A. Schruba, E. W. 
 #### Reference
 
 J. Sun, A. K. Leroy, E. C. Ostriker, S. Meidt, E. Rosolowsky, E. Schinnerer, C. D. Wilson, D. Utomo, F. Belfiore, G. A. Blanc, E. Emsellem, C. Faesi, B. Groves, A. Hughes, E. W. Koch, K. Kreckel, D. Liu, H.-A. Pan, J. Pety, M. Querejeta, A. Razza, T. Saito, A. Sardone, A. Usero, T. G. Williams, F. Bigiel, A. D. Bolatto, M. Chevance, D. A. Dale, J. Gensior, S. C. O. Glover, K. Grasha, J. D. Henshaw, M. J. Jiménez-Donaire, R. S. Klessen, J. M. Diederik Kruijssen, E. J. Murphy, L. Neumann, Y.-H. Teng, D. A. Thilker, Star Formation Laws and Efficiencies across 80 Nearby Galaxies, _The Astrophysical Journal Letters_, Volume 945, Number 2, March 2023, Pages L19, doi: [10.3847/2041-8213/acbd9c](https://doi.org/10.3847/2041-8213/acbd9c)
+
+
+
+### [Sánchez et al. (2017)](https://doi.org/10.1093/mnras/stx808)
+
+#### Data products
+
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated metallicity.
+
+#### Reference
+
+S. F. Sánchez, J. K. Barrera-Ballesteros, L. Sánchez-Menguiano, C. J. Walcher, R. A. Marino, L. Galbany, J. Bland-Hawthorn, M. Cano-Díaz, R. García-Benito, C. López-Cobá, S. Zibetti, J. M. Vilchez, J. Iglésias-Páramo, C. Kehrig, A. R. López Sánchez, S. Duarte Puertas, B. Ziegler, The mass–metallicity relation revisited with CALIFA, _Monthly Notices of the Royal Astronomical Society_, Volume 469, Issue 2, August 2017, Pages 2121–2140, doi: [10.1093/mnras/stx808](https://doi.org/10.1093/mnras/stx808)
+
+
+
+### [Sánchez et al. (2019)](https://doi.org/10.1093/mnras/stz019)
+
+#### Data products
+
+- Integrated star formation rate.
+- Integrated stellar mass.
+- Integrated metallicity.
+- Fits for the data.
+
+#### Reference
+
+S. F. Sánchez, J. K. Barrera-Ballesteros, C. López-Cobá, S. Brough, J. J. Bryant, J. Bland-Hawthorn, S. M. Croom, J. van de Sande, L. Cortese, M. Goodwin, J. S. Lawrence, A. R. López-Sánchez, S. M. Sweet, M. S. Owers, S. N. Richards, C. J. Walcher and SAMI Team, The SAMI galaxy survey: exploring the gas-phase mass–metallicity relation, _Monthly Notices of the Royal Astronomical Society_, Volume 484, Issue 3, April 2019, Pages 3042–3070, doi: [10.1093/mnras/stz019](https://doi.org/10.1093/mnras/stz019)
+
+
+
+### [Sánchez et al. (2022)](https://doi.org/10.1017/S1743921322003830)
+
+#### Data products
+
+- Fits for the SFR, stellar mass and gas mass relations.
+
+#### Reference
+
+S. F. Sánchez, D. C. Gómez Medina, J. K. Barrera-Ballesteros, L. Galbany, A. Bolatto, T. Wong, The local and global relations between Σ*, ΣSFR and Σmol that regulate star-formation, _Proceedings of the International Astronomical Union_, Volume 17, Issue S373, June 2023, Pages 3-10, doi: [10.1017/S1743921322003830](https://doi.org/10.1017/S1743921322003830)
 
 
 
@@ -591,15 +618,3 @@ Y.-Z. Wu and W. Zhang, Estimating the metallicity of star-forming early-type gal
 #### Reference
 
 H. J. Zahid, G. I. Dima, R.-P. Kudritzki, L. J. Kewley, M. J. Geller, H. S. Hwang, J. D. Silverman and D. Kashino, THE UNIVERSAL RELATION OF GALACTIC CHEMICAL EVOLUTION: THE ORIGIN OF THE MASS–METALLICITY RELATION, _The Astrophysical Journal_, Volume 791, Issue 2, August 2014, Pages 130, doi: [10.1088/0004-637x/791/2/130](https://doi.org/10.1088/0004-637x/791/2/130)
-
-
-
-### TODO
-
-[Messias2023](https://arxiv.org/abs/2312.02782)
-
-[Cheng2024](https://academic.oup.com/mnras/article/532/3/3604/7716039?login=false)
-
-[Behroozi2019](https://bitbucket.org/pbehroozi/universemachine/src/main/#markdown-header-cosmic-star-formation-rates)
-
-[Guo2023](https://arxiv.org/abs/2307.07078)

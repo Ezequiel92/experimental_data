@@ -13,6 +13,7 @@ using CairoMakie, DataFrames, DelimitedFiles, CSV, JLD2, LaTeXStrings, Measureme
 md"""
 # [Sun et al. (2022)](https://doi.org/10.3847/1538-3881/ac74bd)
 # [Sun et al. (2023)](https://doi.org/10.3847/2041-8213/acbd9c)
+# [Feigelson et al. (1985)](https://doi.org/10.1086/163225)
 
 [Data - Sun et al. (2022) - Data release](https://www.canfar.net/storage/list/phangs/RELEASES/Sun_etal_2022)
 
@@ -31,7 +32,7 @@ begin
 	data_folder = "./data/CSVs/"
 	pattern     = r"^(.*)\.csv$"
 
-    # Read the paths to the csv files with data for each galaxy
+    # Read the path to each csv file
     galaxy_paths = Dict{String, String}()
     for fname in readdir(data_folder)
         m = match(pattern, fname)
@@ -41,10 +42,10 @@ begin
         end
     end
 
-    # Read the profiles of each galaxy into DataFrames
+    # Write the profiles of each galaxy into DataFrames
     galaxy_profiles = Dict{String, DataFrame}()
-    for (galaxy_name, path) in galaxy_paths
-        galaxy_profiles[galaxy_name] = CSV.read(path, DataFrame)
+    for (galaxy_name, galaxy_path) in galaxy_paths
+        galaxy_profiles[galaxy_name] = CSV.read(galaxy_path, DataFrame)
     end
 
     ##################################################################################
@@ -67,8 +68,8 @@ begin
     ##################################################################################
 
     # Read the R25 of each galaxy in kpc
-    # The name of the same galaxy in "ajac74bdt5_ascii.txt" and in the CSVs are
-    # different. That is corrected below with replacements
+    # The name of a given galaxy in "ajac74bdt5_ascii.txt" and in the CSVs are
+    # different.
     df_r25 = CSV.read(
         "./data/ajac74bdt5_ascii.txt",
         DataFrame;
@@ -85,7 +86,7 @@ begin
         for row in eachrow(df_r25)
     )
 
-    # Add the R/R25 [dimensionless] column
+    # Add the r_25 = R/R25 [dimensionless] column
     for k in keys(galaxy_profiles)
         gal_name = replace(k, "NGC0" => "NGC", "ESO097-013" => "Circinus")
         R25 = galaxy_r25[gal_name]
@@ -104,7 +105,10 @@ let
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
-		xticks=([1, 2, 3], ["Sun et al. (2022)", "SFM_01", "SFM_06"]),
+		xticks=(
+			[1, 2, 3], 
+			[L"\text{Sun et al. (2022)}", L"\text{SFM\_01}", L"\text{SFM\_06}"]
+		),
 		limits=(0.0, 4.0, nothing, nothing),
 	)
 
@@ -183,10 +187,6 @@ let
 	@show r_max
 end;
 
-# ╔═╡ 45916722-d495-4768-b77b-3fd9fa0956ec
-# Common grid
-const GRID = range(0.01, 1.0, 100);
-
 # ╔═╡ b7cc21bf-4ceb-42c5-b5c3-80a90f1f9d8c
 let
 	#############################
@@ -212,104 +212,115 @@ let
 	@show Z_max
 end;
 
+# ╔═╡ cdd2306a-a33e-41fc-85fa-4552b1ea9857
+MIN_LOG = Dict{Symbol,Float64}();
+
 # ╔═╡ cdbef09a-4c08-4cd9-b8b3-9e840a287c12
-let
+begin
 	###########################################
 	  # Molecular gas surface density [M⊙ pc^-2]
 	###########################################
 
-	Σ_min = Inf
-	Σ_max = -Inf
+	ΣH2_min = Inf
+	ΣH2_max = -Inf
 	
 	for v in values(galaxy_profiles)
-		clean_data = filter(!isnan, v[!, :Sigma_mol])
+		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_mol])
 		isempty(clean_data) && continue
 		mn, mx = extrema(clean_data)
-		if mn < Σ_min
-			Σ_min = mn
+		if mn < ΣH2_min
+			global ΣH2_min = mn
 		end
-		if mx > Σ_max
-			Σ_max = mx
+		if mx > ΣH2_max
+			global ΣH2_max = mx
 		end
 	end
 
-	@show Σ_min
-	@show Σ_max
+	MIN_LOG[:H2] = log10(ΣH2_min)
+
+	@show ΣH2_min
+	@show ΣH2_max
 end;
 
 # ╔═╡ 806d2fa1-f39c-48d7-8f82-3a0da55438ea
-let
+begin
 	########################################
 	  # Atomic gas surface density [M⊙ pc^-2]
 	########################################
 	
-	Σ_min = Inf
-	Σ_max = -Inf
+	ΣHI_min = Inf
+	ΣHI_max = -Inf
 	
 	for v in values(galaxy_profiles)
-		clean_data = filter(!isnan, v[!, :Sigma_atom])
+		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_atom])
 		isempty(clean_data) && continue
 		mn, mx = extrema(clean_data)
-		if mn < Σ_min
-			Σ_min = mn
+		if mn < ΣHI_min
+			global ΣHI_min = mn
 		end
-		if mx > Σ_max
-			Σ_max = mx
+		if mx > ΣHI_max
+			global ΣHI_max = mx
 		end
 	end
 
-	@show Σ_min
-	@show Σ_max
+	MIN_LOG[:HI] = log10(ΣHI_min)
+
+	@show ΣHI_min
+	@show ΣHI_max
 end;
 
 # ╔═╡ f483b78f-bfbb-4a76-9230-25d27d1f35a0
-let
+begin
 	##########################################
 	  # Stellar mass surface density [M⊙ pc^-2] 
-	###########################################
+	##########################################
 	
-	Σ_min = Inf
-	Σ_max = -Inf
+	ΣSt_min = Inf
+	ΣSt_max = -Inf
 	
 	for v in values(galaxy_profiles)
-		clean_data = filter(!isnan, v[!, :Sigma_star])
+		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_star])
 		isempty(clean_data) && continue
 		mn, mx = extrema(clean_data)
-		if mn < Σ_min
-			Σ_min = mn
+		if mn < ΣSt_min
+			global ΣSt_min = mn
 		end
-		if mx > Σ_max
-			Σ_max = mx
+		if mx > ΣSt_max
+			global ΣSt_max = mx
 		end
 	end
 
-	@show Σ_min
-	@show Σ_max
+	MIN_LOG[:St] = log10(ΣSt_min)
+
+	@show ΣSt_min
+	@show ΣSt_max
 end;
 
 # ╔═╡ 81076410-1c93-4dc6-ac5c-6cc17ab726b3
-let
+begin
 	########################################
 	  # SFR surface density [M⊙ yr^-1 kpc^-2]
 	########################################
 	
-	Σ_min = Inf
-	Σ_max = -Inf
+	ΣSFR_min = Inf
+	ΣSFR_max = -Inf
 	
 	for v in values(galaxy_profiles)
-		clean_data = filter(!isnan, v[!, :Sigma_SFR_FUVW4recal])
+		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_SFR_FUVW4recal])
 		isempty(clean_data) && continue
 		mn, mx = extrema(clean_data)
-		if mn < Σ_min
-			Σ_min = mn
+		if mn < ΣSFR_min
+			global ΣSFR_min = mn
 		end
-		if mx > Σ_max
-			Σ_max = mx
+		if mx > ΣSFR_max
+			global ΣSFR_max = mx
 		end
 	end
 
-	@show Σ_min
-	@show Σ_max
+	MIN_LOG[:SFR] = log10(ΣSFR_min)
+
+	@show ΣSFR_min
+	@show ΣSFR_max
 end;
 
 # ╔═╡ ccc630b9-9ba1-4718-a56c-f47adb9eaf23
@@ -338,12 +349,12 @@ let
 		plot_df = galaxy_profiles[galaxy]
 
 		R25 = plot_df[!, :r_25]
-		Σ   = plot_df[!, :Zprime]
+		Z   = plot_df[!, :Zprime]
 
-		idxs = findall(x->!isnan(x)&&!iszero(x), Σ)
-		logΣ = log10.(Σ[idxs])
+		idxs = findall(!isnan, Z)
+		logZ = log10.(Z[idxs])
 
-		lines!(ax, R25[idxs], logΣ; label=galaxy)
+		lines!(ax, R25[idxs], logZ; label=galaxy)
 
 	end
 
@@ -519,12 +530,17 @@ md"""
 
 # ╔═╡ 6a40da74-240c-4e48-b0a4-bd66032ff413
 md"""
-### Interpolate every profile onto the common grid
+### Interpolate every profile onto a common grid
 """
 
 # ╔═╡ 626b1aec-dc29-41a6-bd05-dbde0dc35197
 begin
+	# Common grid
+	const GRID = range(0.01, 1.0, 100)
+	
 	function interp_onto_grid(r_25::AbstractVector, profile::AbstractVector)
+
+		# Ignore the NaNs
 	    valid         = map(!isnan, profile)
 	    r25_valid     = Float64.(r_25[valid])
 	    profile_valid = Float64.(profile[valid])
@@ -548,9 +564,9 @@ begin
 	        if r25_sort[j] == ri
 	            common_profile[i] = profile_sort[j]
 	        else
+				# Linear interpolation
 	            r1, r2 = r25_sort[j], r25_sort[j+1]
 	            p1, p2 = profile_sort[j], profile_sort[j+1]
-				# Linear interpolation weight
 	            w = (ri - r1) / (r2 - r1)             
 	            common_profile[i] = p1 + w * (p2 - p1)
 	        end
@@ -558,6 +574,7 @@ begin
 	    end
 		
 	    return common_profile
+		
 	end
 
 	quantities = [
@@ -611,20 +628,31 @@ begin
     
             logval = Vector{Float64}(undef, n)
             status = Vector{Float64}(undef, n)
+
+            # As an upper limit we use the minimum value measured 
+            # for the quantity acroos bins and galaxies.
+            # Another possible criteria is x * the errors, with a chosen x (3, 5, etc)
+            # Feigelson et al. (1985) - doi:10.1086/163225
+            upper_limit = MIN_LOG[newval]
     
-            for i in 1:n
+            for i in eachindex(vals)
                 v = vals[i]
                 e = errs[i]
     
-                if isnan(v)
+                if isnan(v) 
                     logval[i] = NaN
                     status[i] = NaN        # NaN -> no measurement
                 elseif v > 0
                     logval[i] = log10(v)
                     status[i] = 1.0        # true -> detection
                 elseif v == 0.0
-                    logval[i] = log10(3 * e)
-                    status[i] = 0.0        # false -> censored (upper limit)
+                    if isnan(e) 
+                        logval[i] = NaN
+                        status[i] = NaN        # NaN -> no measurement
+                    else
+                        logval[i] = upper_limit
+                        status[i] = 0.0        # false -> censored (upper limit)
+                    end
                 else
                     error("Unexpected negative value in $valcol at row $i: $v")
                 end
@@ -649,7 +677,7 @@ end;
 
 # ╔═╡ 69e0cfa4-b7fe-4deb-a58e-29a7c1604476
 md"""
-### Apply survival analysis (Kaplan-Meier) to each quantity
+### Apply Kaplan-Meier survival analysis to each quantity
 """
 
 # ╔═╡ cf40c9e9-2e30-4c6e-a9fb-0f41ef6f7eee
@@ -663,19 +691,19 @@ begin
 		up2    = 0.9772,
 	)
 
+	# Minimum number of galaxies allowed per bin
 	const MIN_GALAXIES = 5
 
 	"""
-    	km_percentile(times, surv, level)
+    	km_percentile(times::AbstractVector, surv::AbstractVector, level::Real)
 
-	Given the (ascending) event times and the corresponding Kaplan-Meier
-	survival function S(t) = P(X > t), return the smallest t such that
-	S(t) <= level. Returns NaN if the curve never drops that low (e.g. heavy
-	censoring in the tail, so that quantile is not estimable).
+	Given ascending Kaplan-Meier times on the negated scale (times = -X) and the corresponding post-jump survival values surv[i] = Ŝ(times[i]), return the smallest times[i] whose (negated-back) value is the p-th percentile of the original left-censored X.
+	
+	Implements Q_X(p) = inf{t : F_X(t) >= p}, via F_X(t) = Ŝ_Y((-t)⁻) (Feigelson et al (1985) - doi:10.1086/163225, the equation following their Eq. 12-13: F^L(t) = Ŝ(M - t)), evaluated at the left limit so that exact ties resolve correctly.
 	"""
 	function km_percentile(times::AbstractVector, surv::AbstractVector, level::Real)
 		
-	    idx = findfirst(s -> s <= level, surv)
+	    idx = findfirst(s -> s < level, surv)
 		
 		if idx === nothing
 	        # The curve never reaches `level` -> quantile is beyond the data range;
@@ -688,22 +716,23 @@ begin
 	end
 
 	"""
-	    km_bin_stats(values, status; censoring = :left)
+	    km_bin_stats(values::Vector{Float64}, status::Vector{Bool})
 	
 	Fit a Kaplan-Meier survival curve to one bin's pooled data and return
 	`(median, low1, up1, low2, up2)`.
 	"""
 	function km_bin_stats(values::Vector{Float64}, status::Vector{Bool})
-	
+
+		# If for a bin we have less than MIN_GALAXIES
+		# don't compute the statistics and return NaNs
 	    if length(values) < MIN_GALAXIES
 			return (NaN, NaN, NaN, NaN, NaN)
 		end
 		
-	    x  = -values
-		km = fit(KaplanMeier, x, status)
+		km = fit(KaplanMeier, -values, status)
 
 	    # quantile_X(p) = -quantile_Y(1-p) when negated (Y = -X)
-	    q(p) = -km_percentile(km.events.time, km.survival, 1.0 - p)
+	    q(p) = -km_percentile(km.events.time, km.survival, p)
 	
 	    return (
 			q(_PCTS.median), 
@@ -756,6 +785,13 @@ begin
 		
 	end
 
+	"""
+	    profile_stats(galaxies::Dict{String,DataFrame}, quantity::Symbol)
+	
+	Given `galaxies` (name => dataframe) and a target `quantity` (`:HI`, `:H2`, `:St`, or `:SFR`), pool the values across all galaxies bin by bin, and
+	return a named tuple of 5 vectors (one element per radial bin):
+	`median`, `low1`, `up1`, `low2`, `up2`.
+	"""
 	function profile_stats(galaxies::Dict{String,DataFrame}, quantity::Symbol)
 	
 	    dfs = collect(values(galaxies))
@@ -798,25 +834,26 @@ begin
 		df = DataFrame()
 
 		df[!, :median] = stats.median
-		df[!, :low1] = stats.low1
-		df[!, :up1] = stats.up1
-		df[!, :low2] = stats.low2
-		df[!, :up2] = stats.up2
+		df[!, :low1]   = stats.low1
+		df[!, :up1]    = stats.up1
+		df[!, :low2]   = stats.low2
+		df[!, :up2]    = stats.up2
 
 		stats_profiles[qty] = df
 
 	end
 
+	# Zprime has no zeros, so it does not need Kaplan-Meier survival analysis
 	let
 		stats = profile_stats(km_profiles, :Zprime)
 	
 		df = DataFrame()
 	
 		df[!, :median] = stats.median
-		df[!, :low1] = stats.low1
-		df[!, :up1] = stats.up1
-		df[!, :low2] = stats.low2
-		df[!, :up2] = stats.up2
+		df[!, :low1]   = stats.low1
+		df[!, :up1]    = stats.up1
+		df[!, :low2]   = stats.low2
+		df[!, :up2]    = stats.up2
 	
 		stats_profiles[:Zprime] = df
 	end
@@ -850,26 +887,6 @@ begin
 			SIM_PATH, 
 			"observational_sfr_profile_$(sim).jld2",
 		) for sim in ["SFM_01", "SFM_06"]],
-		# :Zprime   => [joinpath(
-		# 	SIM_PATH, 
-		# 	"ode_metals_mass_profile_$(sim).jld2",
-		# ) for sim in ["SFM_01", "SFM_06"]],
-		# :H2Ms   => [joinpath(
-		# 	SIM_PATH, 
-		# 	"ode_molecular_stellar_mass_Ms_profile_$(sim)_Leroy2008.jld2"
-		# ) for sim in ["SFM_01", "SFM_06"]],
-		# :HIMs  => [joinpath(
-		# 	SIM_PATH, 
-		# 	"ode_atomic_mass_Ms_profile_$(sim)_Leroy2008.jld2",
-		# ) for sim in ["SFM_01", "SFM_06"]],
-		# :SSFR   => [joinpath(
-		# 	SIM_PATH, 
-		# 	"observational_sfr_Ms_profile_$(sim)_Leroy2008.jld2",
-		# ) for sim in ["SFM_01", "SFM_06"]],
-		# :Rmol   => [joinpath(
-		# 	SIM_PATH, 
-		# 	"Rmol_profile_$(sim)_Leroy2008.jld2",
-		# ) for sim in ["SFM_01", "SFM_06"]],
 	)
 end;
 
@@ -903,15 +920,15 @@ let
 	Σ_low2   = stats[!, :low2]
 	Σ_up2    = stats[!, :up2]  
 
-	# band!(
-	# 	ax, 
-	# 	R25, 
-	# 	Σ_low2, 
-	# 	Σ_up2; 
-	# 	label=L"2 \, \sigma", 
-	# 	color=Makie.wong_colors()[2], 
-	# 	alpha=0.3,
-	# )
+	band!(
+		ax, 
+		R25, 
+		Σ_low2, 
+		Σ_up2; 
+		label=L"2 \, \sigma", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
 	band!(
 		ax, 
 		R25, 
@@ -973,15 +990,15 @@ let
 	Σ_low2   = stats[!, :low2]
 	Σ_up2    = stats[!, :up2]  
 
-	# band!(
-	# 	ax, 
-	# 	R25, 
-	# 	Σ_low2, 
-	# 	Σ_up2; 
-	# 	label=L"2 \, \sigma", 
-	# 	color=Makie.wong_colors()[2], 
-	# 	alpha=0.3,
-	# )
+	band!(
+		ax, 
+		R25, 
+		Σ_low2, 
+		Σ_up2; 
+		label=L"2 \, \sigma", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
 	band!(
 		ax, 
 		R25, 
@@ -1043,15 +1060,15 @@ let
 	Σ_low2   = stats[!, :low2]
 	Σ_up2    = stats[!, :up2]  
 
-	# band!(
-	# 	ax, 
-	# 	R25, 
-	# 	Σ_low2, 
-	# 	Σ_up2; 
-	# 	label=L"2 \, \sigma", 
-	# 	color=Makie.wong_colors()[2], 
-	# 	alpha=0.3,
-	# )
+	band!(
+		ax, 
+		R25, 
+		Σ_low2, 
+		Σ_up2; 
+		label=L"2 \, \sigma", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
 	band!(
 		ax, 
 		R25, 
@@ -1113,15 +1130,15 @@ let
 	Σ_low2   = stats[!, :low2]
 	Σ_up2    = stats[!, :up2]  
 
-	# band!(
-	# 	ax, 
-	# 	R25, 
-	# 	Σ_low2, 
-	# 	Σ_up2; 
-	# 	label=L"2 \, \sigma", 
-	# 	color=Makie.wong_colors()[2], 
-	# 	alpha=0.3,
-	# )
+	band!(
+		ax, 
+		R25, 
+		Σ_low2, 
+		Σ_up2; 
+		label=L"2 \, \sigma", 
+		color=Makie.wong_colors()[2], 
+		alpha=0.3,
+	)
 	band!(
 		ax, 
 		R25, 
@@ -3198,8 +3215,8 @@ version = "4.1.0+0"
 # ╟─9a538182-2791-4a4a-834e-8cf7a54f3625
 # ╠═2dd73a9f-004d-49f6-a312-de6779540a2c
 # ╠═79dfb17c-e356-4919-b4cd-586a3ef1aae1
-# ╠═45916722-d495-4768-b77b-3fd9fa0956ec
 # ╠═b7cc21bf-4ceb-42c5-b5c3-80a90f1f9d8c
+# ╠═cdd2306a-a33e-41fc-85fa-4552b1ea9857
 # ╠═cdbef09a-4c08-4cd9-b8b3-9e840a287c12
 # ╠═806d2fa1-f39c-48d7-8f82-3a0da55438ea
 # ╠═f483b78f-bfbb-4a76-9230-25d27d1f35a0
@@ -3220,9 +3237,9 @@ version = "4.1.0+0"
 # ╟─2d97cb8e-5559-4368-b8a7-2529ee0fcf8f
 # ╠═5c8445cf-cbb0-433c-b1c7-aeec3adb19aa
 # ╟─07d2b2e5-91e4-41fb-bc3e-22a030da0818
-# ╠═89f87e60-ed6a-41e9-bceb-6a0dff4532c7
+# ╟─89f87e60-ed6a-41e9-bceb-6a0dff4532c7
 # ╟─95804f43-8352-4d6a-85fe-e8fd602cfe79
 # ╟─3bf2109f-b1d2-4633-8a3d-674322d3b824
-# ╠═93fcbf1f-23ac-4c8a-ae82-de21edb559e6
+# ╟─93fcbf1f-23ac-4c8a-ae82-de21edb559e6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
