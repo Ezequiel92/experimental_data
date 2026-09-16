@@ -27,7 +27,7 @@ COLUMNS = [
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python extract_annulus_csv.py <input_folder> <output_folder>")
+        print("Usage: python read_ecsv.py <input_folder> <output_folder>")
         sys.exit(1)
 
     in_dir  = sys.argv[1]
@@ -36,7 +36,7 @@ def main():
 
     # Match any file as long as "annulus_0p5kpc" is in the name
     pattern = os.path.join(in_dir, "*annulus_0p5kpc*")
-    files = sorted(glob.glob(pattern))
+    files   = sorted(glob.glob(pattern))
 
     if not files:
         print(f"No files matching '*annulus_0p5kpc*' found in {in_dir}")
