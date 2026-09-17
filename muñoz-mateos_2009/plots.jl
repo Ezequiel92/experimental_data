@@ -7,19 +7,13 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 8bd4f390-591f-11ec-0b66-6585ca602deb
-using CairoMakie, DataFrames, DelimitedFiles, CSV, JLD2, LaTeXStrings, Measurements, Unitful, UnitfulAstro, Statistics, Survival
+using CairoMakie, DataFrames, FITSIO, JLD2, LaTeXStrings, Measurements, Unitful, UnitfulAstro, Statistics, Survival
 
 # ╔═╡ bc031ef8-6fa2-4feb-a354-000960395686
 md"""
-# [Sun et al. (2022)](https://doi.org/10.3847/1538-3881/ac74bd)
-# [Sun et al. (2023)](https://doi.org/10.3847/2041-8213/acbd9c)
-# [Feigelson et al. (1985)](https://doi.org/10.1086/163225)
+# [Muñoz-Mateos et al. (2009)](https://doi.org/10.1088/0004-637X/701/2/1965)
 
-[Data - Sun et al. (2022) - Data release](https://www.canfar.net/storage/list/phangs/RELEASES/Sun_etal_2022)
-
-[Data - Sun et al. (2022) - Table A1](https://iopscience.iop.org/1538-3881/164/2/43/suppdata/ajac74bdt5_ascii.txt?doi=10.3847/1538-3881/ac74bd)
-
-[Data - Sun et al. (2023)](https://www.canfar.net/storage/list/phangs/RELEASES/Sun_etal_2023)
+[Data](https://cdsarc.cds.unistra.fr/viz-bin/cat/J/ApJ/701/1965#/browse)
 """
 
 # ╔═╡ f4654a59-9bd9-4e28-a12b-e9c3944312f5
@@ -29,116 +23,83 @@ md"""
 
 # ╔═╡ c6d3e850-f055-44f2-9bce-8ea9aa44be9d
 begin
-	data_folder = "./data/CSVs/"
-	pattern     = r"^(.*)\.csv$"
+    table_1 = FITS("./data/J_ApJ_701_1965_table1.dat.fits")[2]
+	table_4 = FITS("./data/J_ApJ_701_1965_table4.dat.fits")[2]
 
-    # Read the path to each csv file
-    galaxy_paths = Dict{String, String}()
-    for fname in readdir(data_folder)
-        m = match(pattern, fname)
-        if m !== nothing
-            galaxy_name = m.captures[1]
-            galaxy_paths[galaxy_name] = joinpath(data_folder, fname)
-        end
-    end
-
-    # Write the profiles of each galaxy into DataFrames
-    galaxy_profiles = Dict{String, DataFrame}()
-    for (galaxy_name, galaxy_path) in galaxy_paths
-        galaxy_profiles[galaxy_name] = CSV.read(galaxy_path, DataFrame)
-    end
-
-    ##################################################################################
+	#################################################################################
     # Columns
     ##################################################################################
-    # r_gal                  Galactocentric radius [kpc]
-    # Zprime                 Gas phase metallicity [Z⊙]
-    # Sigma_mol              Molecular gas surface density [M⊙ pc^-2]
-    # e_Sigma_mol            Stats error for Sigma_mol [M⊙ pc^-2]	
-    # Sigma_atom             Atomic gas surface density [M⊙ pc^-2]	
-    # e_Sigma_atom           Stats error for Sigma_atom [M⊙ pc^-2]	
-    # Sigma_star             Stellar mass surface density [M⊙ pc^-2]
-    # e_Sigma_star           Stats error for Sigma_star [M⊙ pc^-2]
-    # Sigma_SFR_FUVW4recal   SFR surface density [M⊙ yr^-1 kpc^-2]
-    # e_Sigma_SFR_FUVW4recal Stats error for Sigma_SFR_FUVW4recal [M⊙ yr^-1 kpc^-2]
+	# Table 1
+	# 
+	# D25_ang          Apparent major isophotal diameter [arcmin]
+	# 
+	# Table 4
+	# 
+    # r_ang            Angular radius along semi-major axis [arcsec]
+    # logMdust         Log of dust mass surface density     [log10(M⊙ * kpc^-2)]
+    # e_logMdust       Stats error for logMdust             [log10(M⊙ * kpc^-2)]	
+    # logDtot          Log of dust-to-gas ratio             [Dimensionless]
+    # e_logDtot        Stats error for logDtot              [Dimensionless]
+	# 
+	# Dtot = Mdust / (1.36 x (M_HI + M_H2))
     ##################################################################################
 
-    ##################################################################################
+	df_table1 = identity.(
+		DataFrame(
+			name    = read(table_1, "Name"), # Dimensionless
+			D25_ang = read(table_1, "2a"),   # arcmin
+		)
+	)
+
+	df_table4 = identity.(
+		DataFrame(
+			name       = read(table_4, "Name"),    # Dimensionless
+			r_ang      = read(table_4, "Arad"),    # arcsec
+			logMdust   = read(table_4, "Mdust"),   # log10(M⊙ * kpc^-2)
+			e_logMdust = read(table_4, "E_Mdust"), # log10(M⊙ * kpc^-2)
+			logDtot    = read(table_4, "Ratio"),   # Dimensionless
+			e_logDtot  = read(table_4, "E_Ratio"), # Dimensionless
+		)
+	)
+end;
+
+# ╔═╡ ee92d35f-29a5-4d42-a6df-b0cf732e43c4
+begin
+    galaxies = unique(df_table4[!, :name])
+
+    galaxy_profiles = Dict{String, DataFrame}()
+
+    for galaxy in galaxies
+        galaxy_profiles[galaxy] = df_table4[df_table4.name .== galaxy, :]
+    end
+
+	#################################################################################
     # R25
     ##################################################################################
 
-    # Read the R25 of each galaxy in kpc
-    # The name of a given galaxy in "ajac74bdt5_ascii.txt" and in the CSVs are
-    # different.
-    df_r25 = CSV.read(
-        "./data/ajac74bdt5_ascii.txt",
-        DataFrame;
-        delim='\t',
-        ignorerepeated=true,
-        skipto=8,
-        header=5,
-        footerskip=1,
-        silencewarnings=true,
-    )
-
-    galaxy_r25 = Dict(
-        replace(row.Galaxy, " " => "") => row["r _25"] 
-        for row in eachrow(df_r25)
-    )
-
-    # Add the r_25 = R/R25 [dimensionless] column
-    for k in keys(galaxy_profiles)
-        gal_name = replace(k, "NGC0" => "NGC", "ESO097-013" => "Circinus")
-        R25 = galaxy_r25[gal_name]
-        galaxy_profiles[k][!, :r_25] = galaxy_profiles[k][!, :r_gal] ./ R25
+    # Add the r25 = R/R25 [dimensionless] column
+    for galaxy in galaxies
+        
+        # Apparent major isophotal radius [arcsec]
+        R25_ang = df_table1[df_table1.name .== galaxy, :D25_ang] * 30.0
+        
+        galaxy_profiles[galaxy][!, :r25] = galaxy_profiles[galaxy][!, :r_ang] ./ R25_ang
+        
     end
+
+    #################################################################################
+    # For galaxies with no data replace zeros with NaNs
+    ##################################################################################
+	for galaxy in galaxies
+		logDtot = galaxy_profiles[galaxy][!, :logDtot]
+		e_logDtot = galaxy_profiles[galaxy][!, :e_logDtot]
+
+		if all(iszero, logDtot) && all(iszero, e_logDtot)
+			galaxy_profiles[galaxy][!, :logDtot] .= NaN
+			galaxy_profiles[galaxy][!, :e_logDtot] .= NaN
+		end
+	end
 end;
-
-# ╔═╡ 603de0bd-deb5-49c7-be49-ffe58e9cbe00
-# R25 range
-extrema(values(galaxy_r25))
-
-# ╔═╡ 734e198f-1299-4b3c-90f5-3afadfa54d25
-let
-	set_theme!(theme_black())
-	f = Figure()
-	ax = Axis(
-		f[1,1],
-		ylabel=L"R_{25} \, / \, \mathrm{kpc}",
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-		xticks=(
-			[1, 2, 3], 
-			[L"\text{Sun et al. (2022)}", L"\text{SFM\_01}", L"\text{SFM\_06}"]
-		),
-		limits=(0.0, 4.0, nothing, nothing),
-	)
-
-	r25s = values(galaxy_r25)
-	R25_SFM_01 = 19.62
-    R25_SFM_06 = 20.07
-
-	median_sun2022 = median(r25s)
-	low1_sun2022   = quantile(r25s, 0.1587)
-	up1_sun2022    = quantile(r25s, 0.8413)
-
-	scatter!(ax, [1.0], [median_sun2022]; markersize=20)
-	errorbars!(
-		ax, 
-		[1.0], 
-		[median_sun2022], 
-		[low1_sun2022], 
-		[up1_sun2022]; 
-		whiskerwidth=10,
-	)
-
-	scatter!(ax, [2.0], [R25_SFM_01]; markersize=20, marker=:cross)
-	scatter!(ax, [3.0], [R25_SFM_06]; markersize=20, marker=:rect)
-
-	f
-end
 
 # ╔═╡ 9a538182-2791-4a4a-834e-8cf7a54f3625
 md"""
@@ -155,7 +116,7 @@ let
 	b_max = -Inf
 	
 	for v in values(galaxy_profiles)
-		n_bins = length(v[!, :r_25])
+		n_bins = length(v[!, :r25])
 		if n_bins < b_min
 			b_min = n_bins
 		end
@@ -178,7 +139,7 @@ let
 	r_max = -Inf
 	
 	for v in values(galaxy_profiles)
-		mn, mx = extrema(v[!, :r_25])
+		mn, mx = extrema(v[!, :r25])
 		if mn < r_min
 			r_min = mn
 		end
@@ -191,31 +152,6 @@ let
 	@show r_max
 end;
 
-# ╔═╡ b7cc21bf-4ceb-42c5-b5c3-80a90f1f9d8c
-let
-	#############################
-	  # Gas phase metallicity [Z⊙]
-	#############################
-			
-	Z_min = Inf
-	Z_max = -Inf
-	
-	for v in values(galaxy_profiles)
-		clean_data = filter(!isnan, v[!, :Zprime])
-		isempty(clean_data) && continue
-		mn, mx = extrema(clean_data)
-		if mn < Z_min
-			Z_min = mn
-		end
-		if mx > Z_max
-			Z_max = mx
-		end
-	end
-
-	@show Z_min
-	@show Z_max
-end;
-
 # ╔═╡ cdd2306a-a33e-41fc-85fa-4552b1ea9857
 ########################################
 # Minimum measurement for each quantity
@@ -224,111 +160,39 @@ end;
 MIN_LOG = Dict{Symbol,Float64}();
 
 # ╔═╡ cdbef09a-4c08-4cd9-b8b3-9e840a287c12
-begin
-	###########################################
-	  # Molecular gas surface density [M⊙ pc^-2]
-	###########################################
+let
+	########################################################
+	  # Log of dust mass surface density [log10(M⊙ * kpc^-2)]
+	########################################################
 
-	ΣH2_min = Inf
-	ΣH2_max = -Inf
-	
-	for v in values(galaxy_profiles)
-		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_mol])
-		isempty(clean_data) && continue
-		mn, mx = extrema(clean_data)
-		if mn < ΣH2_min
-			global ΣH2_min = mn
-		end
-		if mx > ΣH2_max
-			global ΣH2_max = mx
-		end
-	end
+	m_dust = df_table4[!, :logMdust]
 
-	MIN_LOG[:H2] = log10(ΣH2_min)
+	clean_data = filter(x->!isnan(x)&&!iszero(x), m_dust)
 
-	@show ΣH2_min
-	@show ΣH2_max
+	Σ_min, Σ_max = extrema(clean_data)
+
+	MIN_LOG[:logMdust] = Σ_min
+
+	@show Σ_min
+	@show Σ_max
 end;
 
-# ╔═╡ 806d2fa1-f39c-48d7-8f82-3a0da55438ea
-begin
-	########################################
-	  # Atomic gas surface density [M⊙ pc^-2]
-	########################################
-	
-	ΣHI_min = Inf
-	ΣHI_max = -Inf
-	
-	for v in values(galaxy_profiles)
-		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_atom])
-		isempty(clean_data) && continue
-		mn, mx = extrema(clean_data)
-		if mn < ΣHI_min
-			global ΣHI_min = mn
-		end
-		if mx > ΣHI_max
-			global ΣHI_max = mx
-		end
-	end
+# ╔═╡ e081b3e7-7a4f-4021-8277-42c61997550b
+let
+	########################################################
+	  # Log of dust-to-gas ratio [Dimensionless]
+	########################################################
 
-	MIN_LOG[:HI] = log10(ΣHI_min)
+	dtot = df_table4[!, :logDtot]
 
-	@show ΣHI_min
-	@show ΣHI_max
-end;
+	clean_data = filter(x->!isnan(x)&&!iszero(x), dtot)
 
-# ╔═╡ f483b78f-bfbb-4a76-9230-25d27d1f35a0
-begin
-	##########################################
-	  # Stellar mass surface density [M⊙ pc^-2] 
-	##########################################
-	
-	ΣSt_min = Inf
-	ΣSt_max = -Inf
-	
-	for v in values(galaxy_profiles)
-		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_star])
-		isempty(clean_data) && continue
-		mn, mx = extrema(clean_data)
-		if mn < ΣSt_min
-			global ΣSt_min = mn
-		end
-		if mx > ΣSt_max
-			global ΣSt_max = mx
-		end
-	end
+	Σ_min, Σ_max = extrema(clean_data)
 
-	MIN_LOG[:St] = log10(ΣSt_min)
+	MIN_LOG[:logDtot] = Σ_min
 
-	@show ΣSt_min
-	@show ΣSt_max
-end;
-
-# ╔═╡ 81076410-1c93-4dc6-ac5c-6cc17ab726b3
-begin
-	########################################
-	  # SFR surface density [M⊙ yr^-1 kpc^-2]
-	########################################
-	
-	ΣSFR_min = Inf
-	ΣSFR_max = -Inf
-	
-	for v in values(galaxy_profiles)
-		clean_data = filter(x->!isnan(x)&&!iszero(x), v[!, :Sigma_SFR_FUVW4recal])
-		isempty(clean_data) && continue
-		mn, mx = extrema(clean_data)
-		if mn < ΣSFR_min
-			global ΣSFR_min = mn
-		end
-		if mx > ΣSFR_max
-			global ΣSFR_max = mx
-		end
-	end
-
-	MIN_LOG[:SFR] = log10(ΣSFR_min)
-
-	@show ΣSFR_min
-	@show ΣSFR_max
+	@show Σ_min
+	@show Σ_max
 end;
 
 # ╔═╡ ccc630b9-9ba1-4718-a56c-f47adb9eaf23
@@ -338,14 +202,14 @@ md"""
 
 # ╔═╡ 9e00b855-f121-4d4f-8628-6675a1504423
 let
-	selected_galaxies = ["NGC5068", "NGC4457", "NGC4536"]
+	selected_galaxies = ["NGC 0925", "NGC 7793", "NGC 3031"]
 	
 	set_theme!(theme_black())
 	f = Figure()
 	ax = Axis(
 		f[1,1],
 		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, Z \, / \, \mathrm{Z_\odot}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{dust} \, / \, \mathrm{M_\odot \, kpc^{-2}}",
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
@@ -356,13 +220,10 @@ let
 
 		plot_df = galaxy_profiles[galaxy]
 
-		R25 = plot_df[!, :r_25]
-		Z   = plot_df[!, :Zprime]
+		R25      = plot_df[!, :r25]
+		logMdust = plot_df[!, :logMdust]
 
-		idxs = findall(!isnan, Z)
-		logZ = log10.(Z[idxs])
-
-		lines!(ax, R25[idxs], logZ; label=galaxy)
+		lines!(ax, R25, logMdust; label=galaxy)
 
 	end
 
@@ -373,54 +234,14 @@ end
 
 # ╔═╡ 90da80f0-331e-4454-b794-6dae4b8fa55d
 let
-	selected_galaxies = ["NGC5068", "NGC4457", "NGC4536"]
+	selected_galaxies = ["NGC 0925", "NGC 7793", "NGC 3031"]
 	
 	set_theme!(theme_black())
 	f = Figure()
 	ax = Axis(
 		f[1,1],
 		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\mathrm{H2} \, / \, \mathrm{M_\odot \, pc^{-2}}",
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	for galaxy in selected_galaxies
-		
-		plot_df = galaxy_profiles[galaxy]
-
-		R25 = plot_df[!, :r_25]
-		Σ   = plot_df[!, :Sigma_mol]
-		e_Σ = plot_df[!, :e_Sigma_mol]
-
-		idxs = findall(x->!isnan(x)&&!iszero(x), Σ)
-
-		logΣ   = log10.(Σ[idxs] .± e_Σ[idxs])
-		v_logΣ = Measurements.value.(logΣ)
-		e_logΣ = Measurements.uncertainty.(logΣ)
-
-		lines!(ax, R25[idxs], v_logΣ; label=galaxy)
-		errorbars!(ax, R25[idxs], v_logΣ, e_logΣ)
-
-	end
-
-	axislegend(ax)
-
-	f
-end
-
-# ╔═╡ 845aac51-5535-4eca-87b8-2629feef08ee
-let
-	selected_galaxies = ["NGC5068", "NGC4457", "NGC4536"]
-	
-	set_theme!(theme_black())
-	f = Figure()
-	ax = Axis(
-		f[1,1],
-		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\mathrm{HI} \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		ylabel=L"\log_{10} \, D_\mathrm{tot}",
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
@@ -431,98 +252,10 @@ let
 
 		plot_df = galaxy_profiles[galaxy]
 
-		R25 = plot_df[!, :r_25]
-		Σ   = plot_df[!, :Sigma_atom]
-		e_Σ = plot_df[!, :e_Sigma_atom]
+		R25      = plot_df[!, :r25]
+		logDtot = plot_df[!, :logDtot]
 
-		idxs = findall(x->!isnan(x)&&!iszero(x), Σ)
-
-		logΣ   = log10.(Σ[idxs] .± e_Σ[idxs])
-		v_logΣ = Measurements.value.(logΣ)
-		e_logΣ = Measurements.uncertainty.(logΣ)
-
-		lines!(ax, R25[idxs], v_logΣ; label=galaxy)
-		errorbars!(ax, R25[idxs], v_logΣ, e_logΣ)
-
-	end
-
-	axislegend(ax)
-
-	f
-end
-
-# ╔═╡ 39e375ad-3623-4882-91da-19876130e893
-let
-	selected_galaxies = ["NGC5068", "NGC4457", "NGC4536"]
-	
-	set_theme!(theme_black())
-	f = Figure()
-	ax = Axis(
-		f[1,1],
-		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\star \, / \, \mathrm{M_\odot \, pc^{-2}}",
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	for galaxy in selected_galaxies
-
-		plot_df = galaxy_profiles[galaxy]
-
-		R25 = plot_df[!, :r_25]
-		Σ   = plot_df[!, :Sigma_star]
-		e_Σ = plot_df[!, :e_Sigma_star]
-
-		idxs = findall(x->!isnan(x)&&!iszero(x), Σ)
-
-		logΣ   = log10.(Σ[idxs] .± e_Σ[idxs])
-		v_logΣ = Measurements.value.(logΣ)
-		e_logΣ = Measurements.uncertainty.(logΣ)
-
-		lines!(ax, R25[idxs], v_logΣ; label=galaxy)
-		errorbars!(ax, R25[idxs], v_logΣ, e_logΣ)
-
-	end
-
-	axislegend(ax)
-
-	f
-end
-
-# ╔═╡ 60df6fb0-8ae1-4d72-9ca1-d73a04581353
-let
-	selected_galaxies = ["NGC5068", "NGC4457", "NGC4536"]
-	
-	set_theme!(theme_black())
-	f = Figure()
-	ax = Axis(
-		f[1,1],
-		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} \, kpc^{-2}}",
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	for galaxy in selected_galaxies
-
-		plot_df = galaxy_profiles[galaxy]
-
-		R25 = plot_df[!, :r_25]
-		Σ   = plot_df[!, :Sigma_SFR_FUVW4recal]
-		e_Σ = plot_df[!, :e_Sigma_SFR_FUVW4recal]
-
-		idxs = findall(x->!isnan(x)&&!iszero(x), Σ)
-
-		logΣ   = log10.(Σ[idxs] .± e_Σ[idxs])
-		v_logΣ = Measurements.value.(logΣ)
-		e_logΣ = Measurements.uncertainty.(logΣ)
-
-		lines!(ax, R25[idxs], v_logΣ; label=galaxy)
-		errorbars!(ax, R25[idxs], v_logΣ, e_logΣ)
+		lines!(ax, R25, logDtot; label=galaxy)
 
 	end
 
@@ -544,7 +277,7 @@ md"""
 # ╔═╡ 626b1aec-dc29-41a6-bd05-dbde0dc35197
 begin
 	# Common grid
-	const GRID = range(0.01, 1.0, 100)
+	const GRID = range(0.01, 1.3, 15)
 	
 	function interp_onto_grid(r_25::AbstractVector, profile::AbstractVector)
 
@@ -586,106 +319,29 @@ begin
 	end
 
 	quantities = [
-		:Zprime,
-		:Sigma_atom,
-		:e_Sigma_atom,
-	    :Sigma_mol,
-		:e_Sigma_mol,
-	    :Sigma_star,
-		:e_Sigma_star,
-	    :Sigma_SFR_FUVW4recal,
-		:e_Sigma_SFR_FUVW4recal,
+		:logMdust     # Log of dust mass surface density     [log10(M⊙ * kpc^-2)]
+		:e_logMdust   # Stats error for logMdust             [log10(M⊙ * kpc^-2)]	
+		:logDtot      # Log of dust-to-gas ratio             [Dimensionless]
+		:e_logDtot    # Stats error for logDtot              [Dimensionless]
 	]
 
 	common_profiles = Dict{String, DataFrame}()
 	for (galaxy_name, table) in galaxy_profiles
 		
-		r_25 = table[!, :r_25]
+		r25 = table[!, :r25]
 
 		common_profiles[galaxy_name] = DataFrame()
 		for qty in quantities
 			profile = table[!, qty]	
-			common_profiles[galaxy_name][!, qty] = interp_onto_grid(r_25, profile)
+			common_profiles[galaxy_name][!, qty] = interp_onto_grid(r25, profile)
 		end
 		
 	end
 end;
 
-# ╔═╡ c2d7d6bd-3e8d-415a-95b0-74a1b606194c
-md"""
-### Build new profiles for survival analysis (Kaplan-Meier)
-"""
-
-# ╔═╡ 469122ba-8d0a-4fd5-a229-19b3fcbbcddf
-begin
-    function make_km_dataframe(df::DataFrame)
-        # (value column, error column, new value name, new status name)
-        mapping = [
-            (:Sigma_atom,            :e_Sigma_atom,            :HI,  :HI_status),
-            (:Sigma_mol,             :e_Sigma_mol,             :H2,  :H2_status),
-            (:Sigma_star,            :e_Sigma_star,            :St,  :St_status),
-            (:Sigma_SFR_FUVW4recal,  :e_Sigma_SFR_FUVW4recal,  :SFR, :SFR_status),
-        ]
-    
-        km_df = DataFrame()
-    
-        for (valcol, errcol, newval, newstat) in mapping
-            vals = df[!, valcol]
-            errs = df[!, errcol]
-            n = length(vals)
-    
-            logval = Vector{Float64}(undef, n)
-            status = Vector{Float64}(undef, n)
-
-            # As an upper limit we use the minimum value measured 
-            # for the quantity across bins and galaxies.
-            # Another possible criteria is x * the errors, with a chosen x (3, 5, etc)
-            # Feigelson et al. (1985) - doi:10.1086/163225
-            upper_limit = MIN_LOG[newval]
-    
-            for i in eachindex(vals)
-                v = vals[i]
-                e = errs[i]
-    
-                if isnan(v) 
-                    logval[i] = NaN
-                    status[i] = NaN        # NaN -> no measurement
-                elseif v > 0
-                    logval[i] = log10(v)
-                    status[i] = 1.0        # true -> detection
-                elseif v == 0.0
-                    if isnan(e) 
-                        logval[i] = NaN
-                        status[i] = NaN        # NaN -> no measurement
-                    else
-                        logval[i] = upper_limit
-                        status[i] = 0.0        # false -> censored (upper limit)
-                    end
-                else
-                    error("Unexpected negative value in $valcol at row $i: $v")
-                end
-            end
-    
-            km_df[!, newval] = logval
-            km_df[!, newstat] = status
-        end
-
-        # Zprime has no zeros, so we only apply log10
-        km_df[!, :Zprime] = log10.(df[!, :Zprime])
-    
-        return km_df
-    end
-
-    km_profiles = Dict{String, DataFrame}()
-
-    for (galaxy_name, table) in common_profiles
-		km_profiles[galaxy_name] = make_km_dataframe(table)
-	end
-end;
-
 # ╔═╡ 69e0cfa4-b7fe-4deb-a58e-29a7c1604476
 md"""
-### Apply Kaplan-Meier survival analysis to each quantity
+### Compute statistics of each quantity
 """
 
 # ╔═╡ cf40c9e9-2e30-4c6e-a9fb-0f41ef6f7eee
@@ -703,102 +359,9 @@ begin
 	const MIN_GALAXIES = 5
 
 	"""
-    	km_percentile(times::AbstractVector, surv::AbstractVector, level::Real)
-
-	Given ascending Kaplan-Meier times on the negated scale (times = -X) and the corresponding post-jump survival values surv[i] = Ŝ(times[i]), return the smallest times[i] whose (negated-back) value is the p-th percentile of the original left-censored X.
-	
-	Implements Q_X(p) = inf{t : F_X(t) >= p}, via F_X(t) = Ŝ_Y((-t)⁻) (Feigelson et al (1985) - doi:10.1086/163225, the equation following their Eq. 12-13: F^L(t) = Ŝ(M - t)), evaluated at the left limit so that exact ties resolve correctly.
-	"""
-	function km_percentile(times::AbstractVector, surv::AbstractVector, level::Real)
-		
-	    idx = findfirst(s -> s < level, surv)
-		
-		if idx === nothing
-	        # The curve never reaches `level` -> quantile is beyond the data range;
-	        # return the most extreme estimable time as a conservative bound
-	        return last(times)
-	    end
-		
-	    return times[idx]
-		
-	end
-
-	"""
-	    km_bin_stats(values::Vector{Float64}, status::Vector{Bool})
-	
-	Fit a Kaplan-Meier survival curve to one bin's pooled data and return
-	`(median, low1, up1, low2, up2)`.
-	"""
-	function km_bin_stats(values::Vector{Float64}, status::Vector{Bool})
-
-		# If for a bin we have less than MIN_GALAXIES
-		# don't compute the statistics and return NaNs
-	    if length(values) < MIN_GALAXIES
-			return (NaN, NaN, NaN, NaN, NaN)
-		end
-		
-		km = fit(KaplanMeier, -values, status)
-
-	    # quantile_X(p) = -quantile_Y(1-p) when negated (Y = -X)
-	    q(p) = -km_percentile(km.events.time, km.survival, p)
-	
-	    return (
-			q(_PCTS.median), 
-			q(_PCTS.low1), 
-			q(_PCTS.up1), 
-			q(_PCTS.low2), 
-			q(_PCTS.up2),
-		)
-		
-	end
-
-	"""
-	    profile_km_stats(galaxies::Dict{String,DataFrame}, quantity::Symbol)
-	
-	Given `galaxies` (name => km_dataframe, as produced by `make_km_dataframe`)
-	and a target `quantity` (`:HI`, `:H2`, `:St`, or `:SFR`), pool the values
-	and status across all galaxies bin by bin, run Kaplan-Meier per bin, and
-	return a named tuple of 5 vectors (one element per radial bin):
-	`median`, `low1`, `up1`, `low2`, `up2`.
-	"""
-	function profile_km_stats(galaxies::Dict{String,DataFrame}, quantity::Symbol)
-	
-	    statuscol = Symbol(quantity, :_status)
-	
-	    dfs = collect(values(galaxies))
-	    nbins = nrow(first(dfs))
-	
-	    median = fill(NaN, nbins)
-	    low1   = fill(NaN, nbins)
-	    up1    = fill(NaN, nbins)
-	    low2   = fill(NaN, nbins)
-	    up2    = fill(NaN, nbins)
-	
-	    for b in 1:nbins
-	        vals  = Float64[]
-	        stats = Bool[]
-	        for df in dfs
-	            v = df[b, quantity]
-	            s = df[b, statuscol]
-	            if !isnan(v) && !isnan(s)
-	                push!(vals, v)
-	                push!(stats, Bool(s))
-	            end
-	        end
-	
-	        median[b], low1[b], up1[b], low2[b], up2[b] = km_bin_stats(vals, stats)
-	    end
-	
-	    return (; median, low1, up1, low2, up2)
-		
-	end
-
-	"""
 	    profile_stats(galaxies::Dict{String,DataFrame}, quantity::Symbol)
 	
-	Given `galaxies` (name => dataframe) and a target `quantity` (`:HI`, `:H2`, `:St`, or `:SFR`), pool the values across all galaxies bin by bin, and
-	return a named tuple of 5 vectors (one element per radial bin):
-	`median`, `low1`, `up1`, `low2`, `up2`.
+	Given `galaxies` (name => dataframe) and a target `quantity` (`:Md` or `:Dtot`), pool the values across all galaxies bin by bin, and return a named tuple of 5 vectors (one element per radial bin): `median`, `low1`, `up1`, `low2`, `up2`.
 	"""
 	function profile_stats(galaxies::Dict{String,DataFrame}, quantity::Symbol)
 	
@@ -835,72 +398,30 @@ begin
 
 	stats_profiles = Dict{Symbol, DataFrame}()
 
-	for qty in [:HI, :H2, :St, :SFR]
-
-		stats = profile_km_stats(km_profiles, qty)
-
+	for qty in [:logMdust, :logDtot]
+		stats = profile_stats(common_profiles, qty)
+	
 		df = DataFrame()
-
+	
 		df[!, :median] = stats.median
 		df[!, :low1]   = stats.low1
 		df[!, :up1]    = stats.up1
 		df[!, :low2]   = stats.low2
 		df[!, :up2]    = stats.up2
-
+	
 		stats_profiles[qty] = df
-
 	end
 
-	# Zprime has no zeros, so it does not need Kaplan-Meier survival analysis
-	let
-		stats = profile_stats(km_profiles, :Zprime)
-	
-		df = DataFrame()
-	
-		df[!, :median] = stats.median
-		df[!, :low1]   = stats.low1
-		df[!, :up1]    = stats.up1
-		df[!, :low2]   = stats.low2
-		df[!, :up2]    = stats.up2
-	
-		stats_profiles[:Zprime] = df
-	end
-
-	jldsave("./sun_2022_vac.jld2"; stats_profiles=stats_profiles, R25=collect(GRID))
-end;
-
-# ╔═╡ 2d97cb8e-5559-4368-b8a7-2529ee0fcf8f
-md"""
-## Simulation data
-"""
-
-# ╔═╡ 5c8445cf-cbb0-433c-b1c7-aeec3adb19aa
-begin
-	const SIM_PATH = "./data/simulations/"
-
-	const sim_files = Dict(
-	    :HI   => [joinpath(
-			SIM_PATH, 
-			"ode_atomic_mass_profile_$(sim)_Leroy2008.jld2",
-		) for sim in ["SFM_01", "SFM_06"]],
-	    :H2   => [joinpath(
-			SIM_PATH, 
-			"ode_molecular_stellar_mass_profile_$(sim)_Leroy2008.jld2",
-		) for sim in ["SFM_01", "SFM_06"]],
-	    :St   => [joinpath(
-			SIM_PATH, 
-			"stellar_mass_profile_$(sim)_Leroy2008.jld2",
-		) for sim in ["SFM_01", "SFM_06"]],
-	    :SFR   => [joinpath(
-			SIM_PATH, 
-			"observational_sfr_profile_$(sim)_Leroy2008.jld2",
-		) for sim in ["SFM_01", "SFM_06"]],
+	jldsave(
+		"./muñoz-mateos_2009_vac.jld2"; 
+		stats_profiles=stats_profiles, 
+		R25=collect(GRID),
 	)
 end;
 
 # ╔═╡ 07d2b2e5-91e4-41fb-bc3e-22a030da0818
 md"""
-## Plots: Simulations + Sun et al. (2022)
+## Plots: Simulations + Muñoz-Mateos et al. (2009)
 """
 
 # ╔═╡ 89f87e60-ed6a-41e9-bceb-6a0dff4532c7
@@ -910,14 +431,14 @@ let
 	ax = Axis(
 		f[1,1],
 		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\mathrm{H2} \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		ylabel=L"\log_{10} \, \Sigma_\mathrm{dust} \, / \, \mathrm{M_\odot \, kpc^{-2}}",
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
 	)
 
-	quantity = :H2
+	quantity = :logMdust
 
 	stats = stats_profiles[quantity]
 
@@ -955,20 +476,14 @@ let
 		linewidth=3,
 	)
 
-	sfm_01_file = sim_files[quantity][1]
-	sfm_06_file = sim_files[quantity][2]
-
-	jldopen(sfm_01_file, "r") do jld2_file
-		x, y = jld2_file["snap_127/SFM_01"]
-		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
-	end
+	sfm_06_file = "./data/ode_dust_mass_profile_SFM_06.jld2"
 
 	jldopen(sfm_06_file, "r") do jld2_file
 		x, y = jld2_file["snap_127/SFM_15"]
 		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
 	end
 
-	axislegend(ax)
+	axislegend(ax; nbanks=2)
 
 	f
 end
@@ -980,84 +495,14 @@ let
 	ax = Axis(
 		f[1,1],
 		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\mathrm{HI} \, / \, \mathrm{M_\odot \, pc^{-2}}",
+		ylabel=L"\log_{10} \, D_\mathrm{tot}",
 		xlabelsize=28,
 		ylabelsize=28,
 		xticklabelsize=20,
 		yticklabelsize=20,
 	)
 
-	quantity = :HI
-
-	stats = stats_profiles[quantity]
-
-	R25      = collect(GRID)
-	Σ_median = stats[!, :median]
-	Σ_low1   = stats[!, :low1]
-	Σ_up1    = stats[!, :up1]
-	Σ_low2   = stats[!, :low2]
-	Σ_up2    = stats[!, :up2]  
-
-	band!(
-		ax, 
-		R25, 
-		Σ_low2, 
-		Σ_up2; 
-		label=L"2 \, \sigma", 
-		color=Makie.wong_colors()[2], 
-		alpha=0.3,
-	)
-	band!(
-		ax, 
-		R25, 
-		Σ_low1, 
-		Σ_up1;  
-		label=L"1 \, \sigma", 
-		color=Makie.wong_colors()[3], 
-		alpha=0.3,
-	)
-	lines!(
-		ax, 
-		R25, 
-		Σ_median; 
-		label="Median", 
-		color=Makie.wong_colors()[1],
-		linewidth=3,
-	)
-	
-	sfm_01_file = sim_files[quantity][1]
-	sfm_06_file = sim_files[quantity][2]
-
-	jldopen(sfm_01_file, "r") do jld2_file
-		x, y = jld2_file["snap_127/SFM_01"]
-		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
-	end
-
-	jldopen(sfm_06_file, "r") do jld2_file
-		x, y = jld2_file["snap_127/SFM_15"]
-		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
-	end
-
-	axislegend(ax; position=:rb)
-
-	f
-end
-
-# ╔═╡ 3bf2109f-b1d2-4633-8a3d-674322d3b824
-let
-	set_theme!(theme_black())
-	f = Figure()
-	ax = Axis(
-		f[1,1],
-		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\star \, / \, \mathrm{M_\odot \, pc^{-2}}",
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	quantity = :St
+	quantity = :logDtot
 
 	stats = stats_profiles[quantity]
 
@@ -1095,103 +540,15 @@ let
 		linewidth=3,
 	)
 
-	sfm_01_file = sim_files[quantity][1]
-	sfm_06_file = sim_files[quantity][2]
-
-	jldopen(sfm_01_file, "r") do jld2_file
-		x, y = jld2_file["snap_127/SFM_01"]
-		lines!(ax, x, y; color=Makie.wong_colors()[4], label="SFM_01", linewidth=3)
-	end
+	sfm_06_file = "./data/Dtot_profile_SFM_06.jld2"
 
 	jldopen(sfm_06_file, "r") do jld2_file
 		x, y = jld2_file["snap_127/SFM_15"]
-		lines!(ax, x, y; color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
+		# Muñoz-Mateos et al. (2009) define gas as Mgas = 1.36 * (MHI + MH2)
+		lines!(ax, x, y .- log10(1.36); color=Makie.wong_colors()[6], label="SFM_06", linewidth=3)
 	end
 
-	axislegend(ax)
-
-	f
-end
-
-# ╔═╡ 93fcbf1f-23ac-4c8a-ae82-de21edb559e6
-let
-	set_theme!(theme_black())
-	f = Figure()
-	ax = Axis(
-		f[1,1],
-		xlabel=L"R \, / \, R_{25}",
-		ylabel=L"\log_{10} \, \Sigma_\mathrm{SFR} \, / \, \mathrm{M_\odot \, yr^{-1} kpc^{-2}}",
-		xlabelsize=28,
-		ylabelsize=28,
-		xticklabelsize=20,
-		yticklabelsize=20,
-	)
-
-	quantity = :SFR
-
-	stats = stats_profiles[quantity]
-
-	R25      = collect(GRID)
-	Σ_median = stats[!, :median]
-	Σ_low1   = stats[!, :low1]
-	Σ_up1    = stats[!, :up1]
-	Σ_low2   = stats[!, :low2]
-	Σ_up2    = stats[!, :up2]  
-
-	band!(
-		ax, 
-		R25, 
-		Σ_low2, 
-		Σ_up2; 
-		label=L"2 \, \sigma", 
-		color=Makie.wong_colors()[2], 
-		alpha=0.3,
-	)
-	band!(
-		ax, 
-		R25, 
-		Σ_low1, 
-		Σ_up1;  
-		label=L"1 \, \sigma", 
-		color=Makie.wong_colors()[3], 
-		alpha=0.3,
-	)
-	lines!(
-		ax, 
-		R25, 
-		Σ_median; 
-		label="Median", 
-		color=Makie.wong_colors()[1],
-		linewidth=3,
-	)
-
-	sfm_01_file = sim_files[quantity][1]
-	sfm_06_file = sim_files[quantity][2]
-
-	jldopen(sfm_01_file, "r") do jld2_file
-		x, y = jld2_file["snap_127/SFM_01"]
-		lines!(
-			ax, 
-			x, 
-			y .+ 6.0; # M⊙ yr^-1 pc^-2 - > M⊙ yr^-1 kpc^-2
-			color=Makie.wong_colors()[4], 
-			label="SFM_01", linewidth=3,
-		)
-	end
-
-	jldopen(sfm_06_file, "r") do jld2_file
-		x, y = jld2_file["snap_127/SFM_15"]
-		lines!(
-			ax, 
-			x, 
-			y .+ 6.0; # M⊙ yr^-1 pc^-2 - > M⊙ yr^-1 kpc^-2 
-			color=Makie.wong_colors()[6], 
-			label="SFM_06", 
-			linewidth=3,
-		)
-	end
-
-	axislegend(ax)
+	axislegend(ax; position=:rt, nbanks=2)
 
 	f
 end
@@ -1199,10 +556,9 @@ end
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
@@ -1212,10 +568,10 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 
 [compat]
-CSV = "~0.10.17"
 CairoMakie = "~0.15.14"
 DataFrames = "~1.8.2"
-JLD2 = "~0.6.6"
+FITSIO = "~0.17.5"
+JLD2 = "~0.6.7"
 LaTeXStrings = "~1.4.1"
 Measurements = "~2.14.1"
 Survival = "~0.3.3"
@@ -1229,7 +585,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.12.7"
 manifest_format = "2.0"
-project_hash = "b552ae9498ede55c2f3b7c4ba1e1d482db970833"
+project_hash = "37a381679b90a711e691079d94a4051567f96bcd"
 
 [[deps.ADTypes]]
 deps = ["PrecompileTools"]
@@ -1292,9 +648,9 @@ version = "0.1.45"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "daa72978cd7a624246e894a4f4f067706d4e17e2"
+git-tree-sha1 = "7c2c19b5a26e601634bf718490b89d59685f122e"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "4.7.0"
+version = "4.7.1"
 weakdeps = ["SparseArrays", "StaticArrays"]
 
     [deps.Adapt.extensions]
@@ -1403,6 +759,18 @@ git-tree-sha1 = "389ad5c84de1ae7cf0e28e381131c98ea87d54fc"
 uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.5.0"
 
+[[deps.CFITSIO]]
+deps = ["CFITSIO_jll"]
+git-tree-sha1 = "8c6b984c3928736d455eb53a6adf881457825269"
+uuid = "3b1b4be9-1499-4b22-8d78-7db3344d1961"
+version = "1.7.2"
+
+[[deps.CFITSIO_jll]]
+deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "LibCURL_jll", "Libdl", "Zlib_jll"]
+git-tree-sha1 = "57ae3edf22a0c6549a239ee798f2eca27cae0754"
+uuid = "b3e40c51-02ae-5482-8a39-3ace5868dcf4"
+version = "4.7.0+0"
+
 [[deps.CRC32c]]
 uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 version = "1.11.0"
@@ -1418,12 +786,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
 uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
 version = "1.0.1+0"
-
-[[deps.CSV]]
-deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "abed1e735dd4152f48c90cf0767e1790e25f332f"
-uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.17"
 
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
@@ -1475,12 +837,6 @@ deps = ["ChunkCodecCore", "Zstd_jll"]
 git-tree-sha1 = "34d9873079e4cb3d0c62926a225136824677073f"
 uuid = "55437552-ac27-4d47-9aa3-63184e8fd398"
 version = "1.0.0"
-
-[[deps.CodecZlib]]
-deps = ["TranscodingStreams", "Zlib_jll"]
-git-tree-sha1 = "970758a3d591a2a5c2a907c53f2e2f8c1b1d3537"
-uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
-version = "0.7.9"
 
 [[deps.CodecZstd]]
 deps = ["TranscodingStreams", "Zstd_jll"]
@@ -1628,12 +984,6 @@ git-tree-sha1 = "4ac548adcad90c1d5d677af13568a748af4c952b"
 uuid = "927a84f5-c5f4-47a5-9785-b46e178433df"
 version = "1.6.7"
 
-[[deps.DelimitedFiles]]
-deps = ["Mmap"]
-git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
-uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-version = "1.9.1"
-
 [[deps.DifferentiationInterface]]
 deps = ["ADTypes", "LinearAlgebra"]
 git-tree-sha1 = "0693d8b0a4608ff289d228ab4c598df5894845cd"
@@ -1754,6 +1104,12 @@ deps = ["AbstractFFTs", "DocStringExtensions", "LinearAlgebra", "MuladdMacro", "
 git-tree-sha1 = "65e55303b72f4a567a51b174dd2c47496efeb95a"
 uuid = "b86e33f2-c0db-4aa1-a6e0-ab43e668529e"
 version = "0.3.1"
+
+[[deps.FITSIO]]
+deps = ["CFITSIO", "Printf", "Reexport", "Tables"]
+git-tree-sha1 = "f57de3f533590c785210893030736dc11c4a4afb"
+uuid = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+version = "0.17.5"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
@@ -2119,10 +1475,10 @@ uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
 
 [[deps.JLD2]]
-deps = ["ChunkCodecLibZlib", "ChunkCodecLibZstd", "FileIO", "MacroTools", "Mmap", "OrderedCollections", "PrecompileTools", "ScopedValues"]
-git-tree-sha1 = "877edc1d2f51adcef0bfacd19464a19e7cfddddb"
+deps = ["ChunkCodecCore", "ChunkCodecLibZlib", "ChunkCodecLibZstd", "FileIO", "MacroTools", "Mmap", "OrderedCollections", "PrecompileTools", "ScopedValues"]
+git-tree-sha1 = "9ce2e7c49ae4a7035b7d60db3a553b1f6c16875d"
 uuid = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
-version = "0.6.6"
+version = "0.6.7"
 
     [deps.JLD2.extensions]
     UnPackExt = "UnPack"
@@ -2138,9 +1494,9 @@ version = "1.8.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Logging", "Parsers", "PrecompileTools", "StructUtils", "UUIDs", "Unicode"]
-git-tree-sha1 = "88352712893ec50bee3680605891eaf0e9ed6368"
+git-tree-sha1 = "cb5b63c11dd08229716a8b41a2325ab941a7b797"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-version = "1.8.0"
+version = "1.8.1"
 
     [deps.JSON.extensions]
     JSONArrowExt = ["ArrowTypes"]
@@ -2266,9 +1622,9 @@ version = "2.42.0+0"
 
 [[deps.LineSearches]]
 deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Printf"]
-git-tree-sha1 = "b4f9762e3ad693626ffd51ae4be359c0a7b08469"
+git-tree-sha1 = "a09a85e94e681def2446752cddaf9401a4d82b6d"
 uuid = "d3d80556-e9d4-5f37-9878-2ab0fcc64255"
-version = "7.8.1"
+version = "7.8.2"
 
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
@@ -2459,9 +1815,9 @@ version = "0.5.6+0"
 
 [[deps.Optim]]
 deps = ["ADTypes", "EnumX", "FillArrays", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "PositiveFactorizations", "Printf", "SparseArrays", "Statistics"]
-git-tree-sha1 = "ece78ffe4fcee487b858ecaf184b8d7c2a79e015"
+git-tree-sha1 = "81f338ad984b25bc82471db4d235e7b8bf21b8d6"
 uuid = "429524aa-4258-5aef-a3af-852621145aeb"
-version = "2.3.1"
+version = "2.3.2"
 
     [deps.Optim.extensions]
     OptimMOIExt = "MathOptInterface"
@@ -2520,10 +1876,10 @@ uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.58.2+0"
 
 [[deps.Parsers]]
-deps = ["Dates", "PrecompileTools", "UUIDs"]
-git-tree-sha1 = "ba0dc8a8a67cacac4842631f960c046e4e563675"
+deps = ["Dates", "PrecompileTools"]
+git-tree-sha1 = "663e8b48b789916221e0765393b289ca6c88f24e"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.8.8"
+version = "3.0.0"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl"]
@@ -2547,10 +1903,10 @@ uuid = "eebad327-c553-4316-9ea0-9fa01ccd7688"
 version = "0.3.3"
 
 [[deps.PlotUtils]]
-deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "StableRNGs", "Statistics"]
-git-tree-sha1 = "26ca162858917496748aad52bb5d3be4d26a228a"
+deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Reexport", "Statistics"]
+git-tree-sha1 = "f20e945b895d2009c6c28d8bbf40a5cd846f7c2f"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.4.4"
+version = "1.5.0"
 
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -2813,12 +2169,6 @@ weakdeps = ["ChainRulesCore"]
     [deps.SpecialFunctions.extensions]
     SpecialFunctionsChainRulesCoreExt = "ChainRulesCore"
 
-[[deps.StableRNGs]]
-deps = ["Random"]
-git-tree-sha1 = "4f96c596b8c8258cc7d3b19797854d368f243ddc"
-uuid = "860ef19b-820b-49d6-a774-d7a799459cd3"
-version = "1.0.4"
-
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
 git-tree-sha1 = "be1cf4eb0ac528d96f5115b4ed80c26a8d8ae621"
@@ -2827,9 +2177,9 @@ version = "0.1.2"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "e206cf4850fd7ac4255ffd2b98922f563e18ac53"
+git-tree-sha1 = "39e70e0ab5d7f89833a62ab7c79df15d4fc417c1"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.20"
+version = "1.9.22"
 weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]
@@ -2909,15 +2259,21 @@ version = "0.7.3"
 
 [[deps.StructUtils]]
 deps = ["Dates", "UUIDs"]
-git-tree-sha1 = "2d0fc55c61321ba245c47be599570d11bac50303"
+git-tree-sha1 = "3bf3b18614b45effa8f8cc6e8f919d4efc1de7f1"
 uuid = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
-version = "2.8.5"
-weakdeps = ["Measurements", "StaticArraysCore", "Tables"]
+version = "2.9.1"
 
     [deps.StructUtils.extensions]
+    StructUtilsLazilyInitializedFieldsExt = ["LazilyInitializedFields"]
     StructUtilsMeasurementsExt = ["Measurements"]
     StructUtilsStaticArraysCoreExt = ["StaticArraysCore"]
     StructUtilsTablesExt = ["Tables"]
+
+    [deps.StructUtils.weakdeps]
+    LazilyInitializedFields = "0e77f7df-68c5-4e49-93ce-4cd80f5598bf"
+    Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+    StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
+    Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 
 [[deps.StyledStrings]]
 uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
@@ -3032,12 +2388,6 @@ git-tree-sha1 = "fbe44a0ade62ae5ed0240ad314dfdd5482b90b40"
 uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 version = "1.2.2"
 
-[[deps.WeakRefStrings]]
-deps = ["DataAPI", "InlineStrings", "Parsers"]
-git-tree-sha1 = "0716e01c3b40413de5dedbc9c5c69f27cddfddfc"
-uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
-version = "1.4.3"
-
 [[deps.WebP]]
 deps = ["CEnum", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "libwebp_jll"]
 git-tree-sha1 = "aa1ca3c47f119fbdae8770c29820e5e6119b83f2"
@@ -3049,11 +2399,6 @@ deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "248a7031b3da79a127f14e5dc5f417e26f9f6db7"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "1.1.0"
-
-[[deps.WorkerUtilities]]
-git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
-uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
-version = "1.6.1"
 
 [[deps.XZ_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -3219,36 +2564,23 @@ version = "4.1.0+0"
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
 # ╟─f4654a59-9bd9-4e28-a12b-e9c3944312f5
 # ╠═c6d3e850-f055-44f2-9bce-8ea9aa44be9d
-# ╠═603de0bd-deb5-49c7-be49-ffe58e9cbe00
-# ╟─734e198f-1299-4b3c-90f5-3afadfa54d25
+# ╠═ee92d35f-29a5-4d42-a6df-b0cf732e43c4
 # ╟─9a538182-2791-4a4a-834e-8cf7a54f3625
 # ╠═2dd73a9f-004d-49f6-a312-de6779540a2c
 # ╠═79dfb17c-e356-4919-b4cd-586a3ef1aae1
-# ╠═b7cc21bf-4ceb-42c5-b5c3-80a90f1f9d8c
 # ╠═cdd2306a-a33e-41fc-85fa-4552b1ea9857
 # ╠═cdbef09a-4c08-4cd9-b8b3-9e840a287c12
-# ╠═806d2fa1-f39c-48d7-8f82-3a0da55438ea
-# ╠═f483b78f-bfbb-4a76-9230-25d27d1f35a0
-# ╠═81076410-1c93-4dc6-ac5c-6cc17ab726b3
+# ╠═e081b3e7-7a4f-4021-8277-42c61997550b
 # ╟─ccc630b9-9ba1-4718-a56c-f47adb9eaf23
 # ╟─9e00b855-f121-4d4f-8628-6675a1504423
 # ╟─90da80f0-331e-4454-b794-6dae4b8fa55d
-# ╟─845aac51-5535-4eca-87b8-2629feef08ee
-# ╟─39e375ad-3623-4882-91da-19876130e893
-# ╟─60df6fb0-8ae1-4d72-9ca1-d73a04581353
 # ╟─3ebf4244-7fb9-447e-b7c8-3cda3c13eb28
 # ╟─6a40da74-240c-4e48-b0a4-bd66032ff413
 # ╠═626b1aec-dc29-41a6-bd05-dbde0dc35197
-# ╟─c2d7d6bd-3e8d-415a-95b0-74a1b606194c
-# ╠═469122ba-8d0a-4fd5-a229-19b3fcbbcddf
 # ╟─69e0cfa4-b7fe-4deb-a58e-29a7c1604476
 # ╠═cf40c9e9-2e30-4c6e-a9fb-0f41ef6f7eee
-# ╟─2d97cb8e-5559-4368-b8a7-2529ee0fcf8f
-# ╠═5c8445cf-cbb0-433c-b1c7-aeec3adb19aa
 # ╟─07d2b2e5-91e4-41fb-bc3e-22a030da0818
 # ╟─89f87e60-ed6a-41e9-bceb-6a0dff4532c7
 # ╟─95804f43-8352-4d6a-85fe-e8fd602cfe79
-# ╟─3bf2109f-b1d2-4633-8a3d-674322d3b824
-# ╟─93fcbf1f-23ac-4c8a-ae82-de21edb559e6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
