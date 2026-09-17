@@ -306,6 +306,19 @@ M. Mollá, O. Cavichia, M. Gavilán and B. K. Gibson, Galactic chemical evolutio
 
 
 
+### [Muñoz-Mateos et al. (2009)](https://doi.org/10.1088/0004-637X/701/2/1965)
+
+#### Data products
+
+- Dusto mass surface density profiles.
+- Dust-to-gas ratio profiles.
+
+#### Reference
+
+J. C. Muñoz-Mateos, A. Gil de Paz, S. Boissier, J. Zamorano, D. A. Dale, P. G. Pérez-González, J. Gallego, B. F. Madore, G. Bendo, M. D. Thornley, B. T. Draine, A. Boselli, V. Buat, D. Calzetti, J. Moustakas and R. C. Kennicutt Jr., RADIAL DISTRIBUTION OF STARS, GAS, AND DUST IN SINGS GALAXIES. II. DERIVED DUST PROPERTIES, _The Astrophysical Journal_, Volume 701, Issue 2, August 2009, Pages 1965-1991, doi: [10.1088/0004-637X/701/2/1965](https://doi.org/10.1088/0004-637X/701/2/1965)
+
+
+
 ### [Nakanishi et al. (2016)](https://doi.org/10.1093/pasj/psv108)
 
 #### Data products

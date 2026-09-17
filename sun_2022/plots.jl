@@ -94,6 +94,10 @@ begin
     end
 end;
 
+# ╔═╡ 603de0bd-deb5-49c7-be49-ffe58e9cbe00
+# R25 range
+extrema(values(galaxy_r25))
+
 # ╔═╡ 734e198f-1299-4b3c-90f5-3afadfa54d25
 let
 	set_theme!(theme_black())
@@ -213,6 +217,10 @@ let
 end;
 
 # ╔═╡ cdd2306a-a33e-41fc-85fa-4552b1ea9857
+########################################
+# Minimum measurement for each quantity
+########################################
+
 MIN_LOG = Dict{Symbol,Float64}();
 
 # ╔═╡ cdbef09a-4c08-4cd9-b8b3-9e840a287c12
@@ -630,7 +638,7 @@ begin
             status = Vector{Float64}(undef, n)
 
             # As an upper limit we use the minimum value measured 
-            # for the quantity acroos bins and galaxies.
+            # for the quantity across bins and galaxies.
             # Another possible criteria is x * the errors, with a chosen x (3, 5, etc)
             # Feigelson et al. (1985) - doi:10.1086/163225
             upper_limit = MIN_LOG[newval]
@@ -868,24 +876,24 @@ md"""
 
 # ╔═╡ 5c8445cf-cbb0-433c-b1c7-aeec3adb19aa
 begin
-	const SIM_PATH = "/run/media/system/disk_02/documents/phd/plots/lozano_2026/extra/sun2022_jld2/"
+	const SIM_PATH = "./data/simulations/"
 
 	const sim_files = Dict(
 	    :HI   => [joinpath(
 			SIM_PATH, 
-			"ode_atomic_mass_profile_$(sim).jld2",
+			"ode_atomic_mass_profile_$(sim)_Leroy2008.jld2",
 		) for sim in ["SFM_01", "SFM_06"]],
 	    :H2   => [joinpath(
 			SIM_PATH, 
-			"ode_molecular_stellar_mass_profile_$(sim).jld2",
+			"ode_molecular_stellar_mass_profile_$(sim)_Leroy2008.jld2",
 		) for sim in ["SFM_01", "SFM_06"]],
 	    :St   => [joinpath(
 			SIM_PATH, 
-			"stellar_mass_profile_$(sim).jld2",
+			"stellar_mass_profile_$(sim)_Leroy2008.jld2",
 		) for sim in ["SFM_01", "SFM_06"]],
 	    :SFR   => [joinpath(
 			SIM_PATH, 
-			"observational_sfr_profile_$(sim).jld2",
+			"observational_sfr_profile_$(sim)_Leroy2008.jld2",
 		) for sim in ["SFM_01", "SFM_06"]],
 	)
 end;
@@ -3211,6 +3219,7 @@ version = "4.1.0+0"
 # ╟─bc031ef8-6fa2-4feb-a354-000960395686
 # ╟─f4654a59-9bd9-4e28-a12b-e9c3944312f5
 # ╠═c6d3e850-f055-44f2-9bce-8ea9aa44be9d
+# ╠═603de0bd-deb5-49c7-be49-ffe58e9cbe00
 # ╟─734e198f-1299-4b3c-90f5-3afadfa54d25
 # ╟─9a538182-2791-4a4a-834e-8cf7a54f3625
 # ╠═2dd73a9f-004d-49f6-a312-de6779540a2c
