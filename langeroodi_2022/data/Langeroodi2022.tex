@@ -1,0 +1,859 @@
+%% Beginning of file 'sample631.tex'
+%%
+%% Modified 2022 May  
+%%
+%% This is a sample manuscript marked up using the
+%% AASTeX v6.31 LaTeX 2e macros.
+%%
+%% AASTeX is now based on Alexey Vikhlinin's emulateapj.cls 
+%% (Copyright 2000-2015).  See the classfile for details.
+
+%% AASTeX requires revtex4-1.cls and other external packages such as
+%% latexsym, graphicx, amssymb, longtable, and epsf.  Note that as of 
+%% Oct 2020, APS now uses revtex4.2e for its journals but remember that 
+%% AASTeX v6+ still uses v4.1. All of these external packages should 
+%% already be present in the modern TeX distributions but not always.
+%% For example, revtex4.1 seems to be missing in the linux version of
+%% TexLive 2020. One should be able to get all packages from www.ctan.org.
+%% In particular, revtex v4.1 can be found at 
+%% https://www.ctan.org/pkg/revtex4-1.
+
+%% The first piece of markup in an AASTeX v6.x document is the \documentclass
+%% command. LaTeX will ignore any data that comes before this command. The 
+%% documentclass can take an optional argument to modify the output style.
+%% The command below calls the preprint style which will produce a tightly 
+%% typeset, one-column, single-spaced document.  It is the default and thus
+%% does not need to be explicitly stated.
+%%
+%% using aastex version 6.3
+% \documentclass[linenumbers]{aastex631}
+\documentclass[twocolumn]{aastex631}
+\usepackage{amsmath}
+
+%% The default is a single spaced, 10 point font, single spaced article.
+%% There are 5 other style options available via an optional argument. They
+%% can be invoked like this:
+%%
+%% \documentclass[arguments]{aastex631}
+%% 
+%% where the layout options are:
+%%
+%%  twocolumn   : two text columns, 10 point font, single spaced article.
+%%                This is the most compact and represent the final published
+%%                derived PDF copy of the accepted manuscript from the publisher
+%%  manuscript  : one text column, 12 point font, double spaced article.
+%%  preprint    : one text column, 12 point font, single spaced article.  
+%%  preprint2   : two text columns, 12 point font, single spaced article.
+%%  modern      : a stylish, single text column, 12 point font, article with
+%% 		  wider left and right margins. This uses the Daniel
+%% 		  Foreman-Mackey and David Hogg design.
+%%  RNAAS       : Supresses an abstract. Originally for RNAAS manuscripts 
+%%                but now that abstracts are required this is obsolete for
+%%                AAS Journals. Authors might need it for other reasons. DO NOT
+%%                use \begin{abstract} and \end{abstract} with this style.
+%%
+%% Note that you can submit to the AAS Journals in any of these 6 styles.
+%%
+%% There are other optional arguments one can invoke to allow other stylistic
+%% actions. The available options are:
+%%
+%%   astrosymb    : Loads Astrosymb font and define \astrocommands. 
+%%   tighten      : Makes baselineskip slightly smaller, only works with 
+%%                  the twocolumn substyle.
+%%   times        : uses times font instead of the default
+%%   linenumbers  : turn on lineno package.
+%%   trackchanges : required to see the revision mark up and print its output
+%%   longauthor   : Do not use the more compressed footnote style (default) for 
+%%                  the author/collaboration/affiliations. Instead print all
+%%                  affiliation information after each name. Creates a much 
+%%                  longer author list but may be desirable for short 
+%%                  author papers.
+%% twocolappendix : make 2 column appendix.
+%%   anonymous    : Do not show the authors, affiliations and acknowledgments 
+%%                  for dual anonymous review.
+%%
+%% these can be used in any combination, e.g.
+%%
+%% \documentclass[twocolumn,linenumbers,trackchanges]{aastex631}
+%%
+%% AASTeX v6.* now includes \hyperref support. While we have built in specific
+%% defaults into the classfile you can manually override them with the
+%% \hypersetup command. For example,
+%%
+%% \hypersetup{linkcolor=red,citecolor=green,filecolor=cyan,urlcolor=magenta}
+%%
+%% will change the color of the internal links to red, the links to the
+%% bibliography to green, the file links to cyan, and the external links to
+%% magenta. Additional information on \hyperref options can be found here:
+%% https://www.tug.org/applications/hyperref/manual.html#x1-40003
+%%
+%% Note that in v6.3 "bookmarks" has been changed to "true" in hyperref
+%% to improve the accessibility of the compiled pdf file.
+%%
+%% If you want to create your own macros, you can do so
+%% using \newcommand. Your macros should appear before
+%% the \begin{document} command.
+%%
+\newcommand{\vdag}{(v)^\dagger}
+\newcommand\aastex{AAS\TeX}
+\newcommand\latex{La\TeX}
+\newcommand{\jwst}{{\em JWST}}
+\newcommand\titlelowercase[1]{\texorpdfstring{\lowercase{#1}}{#1}}
+\newcommand{\jh}[1]{{\textcolor{cyan} {#1}}}
+
+\makeatletter
+\newcommand\footnoteref[1]{\protected@xdef\@thefnmark{\ref{#1}}\@footnotemark}
+\makeatother
+
+%% Reintroduced the \received and \accepted commands from AASTeX v5.2
+%\received{March 1, 2021}
+%\revised{April 1, 2021}
+%\accepted{\today}
+
+%% Command to document which AAS Journal the manuscript was submitted to.
+%% Adds "Submitted to " the argument.
+%\submitjournal{PSJ}
+
+%% For manuscript that include authors in collaborations, AASTeX v6.31
+%% builds on the \collaboration command to allow greater freedom to 
+%% keep the traditional author+affiliation information but only show
+%% subsets. The \collaboration command now must appear AFTER the group
+%% of authors in the collaboration and it takes TWO arguments. The last
+%% is still the collaboration identifier. The text given in this
+%% argument is what will be shown in the manuscript. The first argument
+%% is the number of author above the \collaboration command to show with
+%% the collaboration text. If there are authors that are not part of any
+%% collaboration the \nocollaboration command is used. This command takes
+%% one argument which is also the number of authors above to show. A
+%% dashed line is shown to indicate no collaboration. This example manuscript
+%% shows how these commands work to display specific set of authors 
+%% on the front page.
+%%
+%% For manuscript without any need to use \collaboration the 
+%% \AuthorCollaborationLimit command from v6.2 can still be used to 
+%% show a subset of authors.
+%
+%\AuthorCollaborationLimit=2
+%
+%% will only show Schwarz & Muench on the front page of the manuscript
+%% (assuming the \collaboration and \nocollaboration commands are
+%% commented out).
+%%
+%% Note that all of the author will be shown in the published article.
+%% This feature is meant to be used prior to acceptance to make the
+%% front end of a long author article more manageable. Please do not use
+%% this functionality for manuscripts with less than 20 authors. Conversely,
+%% please do use this when the number of authors exceeds 40.
+%%
+%% Use \allauthors at the manuscript end to show the full author list.
+%% This command should only be used with \AuthorCollaborationLimit is used.
+
+%% The following command can be used to set the latex table counters.  It
+%% is needed in this document because it uses a mix of latex tabular and
+%% AASTeX deluxetables.  In general it should not be needed.
+%\setcounter{table}{1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% The following section outlines numerous optional output that
+%% can be displayed in the front matter or as running meta-data.
+%%
+%% If you wish, you may supply running head information, although
+%% this information may be modified by the editorial offices.
+%\shorttitle{AASTeX v6.3.1 Sample article}
+%\shortauthors{Schwarz et al.}
+%%
+%% You can add a light gray and diagonal water-mark to the first page 
+%% with this command:
+%% \watermark{text}
+%% where "text", e.g. DRAFT, is the text to appear.  If the text is 
+%% long you can control the water-mark size with:
+%% \setwatermarkfontsize{dimension}
+%% where dimension is any recognized LaTeX dimension, e.g. pt, in, etc.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\graphicspath{{./}{figures/}}
+%% This is the end of the preamble.  Indicate the beginning of the
+%% manuscript itself with \begin{document}.
+
+\begin{document}
+
+%\title{JWST NIRCam masses, star-formation rates, UV spectral slopes and NIRSpec metallicities of galaxies at $z \approx 8$}
+%\title{Paper II in the series, on the $M$--$Z$ relation: Strong line analysis of NIRSpec spectra of $z\approx8$ galaxies and comparison to low-$z$ EELGs}
+% \title{RX2129 Paper II: The mass--metallicity relation at $z\approx 8$}
+% \title{The JWST and ALMA mass--metallicity relation at $z\approx 8$}
+\title{Evolution of the Mass--Metallicity Relation from Redshift $z\approx8$ to the Local Universe}
+
+%% LaTeX will automatically break titles if they run longer than
+%% one line. However, you may use \\ to force a line break if
+%% you desire. In v6.31 you can include a footnote in the title.
+
+%% A significant change from earlier AASTEX versions is in the structure for 
+%% calling author and affiliations. The change was necessary to implement 
+%% auto-indexing of affiliations which prior was a manual process that could 
+%% easily be tedious in large author manuscripts.
+%%
+%% The \author command is the same as before except it now takes an optional
+%% argument which is the 16 digit ORCID. The syntax is:
+%% \author[xxxx-xxxx-xxxx-xxxx]{Author Name}
+%%
+%% This will hyperlink the author name to the author's ORCID page. Note that
+%% during compilation, LaTeX will do some limited checking of the format of
+%% the ID to make sure it is valid. If the "orcid-ID.png" image file is 
+%% present or in the LaTeX pathway, the OrcID icon will appear next to
+%% the authors name.
+%%
+%% Use \affiliation for affiliation information. The old \affil is now aliased
+%% to \affiliation. AASTeX v6.31 will automatically index these in the header.
+%% When a duplicate is found its index will be the same as its previous entry.
+%%
+%% Note that \altaffilmark and \altaffiltext have been removed and thus 
+%% can not be used to document secondary affiliations. If they are used latex
+%% will issue a specific error message and quit. Please use multiple 
+%% \affiliation calls for to document more than one affiliation.
+%%
+%% The new \altaffiliation can be used to indicate some secondary information
+%% such as fellowships. This command produces a non-numeric footnote that is
+%% set away from the numeric \affiliation footnotes.  NOTE that if an
+%% \altaffiliation command is used it must come BEFORE the \affiliation call,
+%% right after the \author command, in order to place the footnotes in
+%% the proper location.
+%%
+%% Use \email to set provide email addresses. Each \email will appear on its
+%% own line so you can put multiple email address in one \email call. A new
+%% \correspondingauthor command is available in V6.31 to identify the
+%% corresponding author of the manuscript. It is the author's responsibility
+%% to make sure this name is also in the author list.
+%%
+%% While authors can be grouped inside the same \author and \affiliation
+%% commands it is better to have a single author for each. This allows for
+%% one to exploit all the new benefits and should make book-keeping easier.
+%%
+%% If done correctly the peer review system will be able to
+%% automatically put the author and affiliation information from the manuscript
+%% and save the corresponding author the trouble of entering it by hand.
+
+\correspondingauthor{Danial Langeroodi}
+\email{danial.langeroodi@nbi.ku.dk}
+
+\author[0000-0001-5710-8395]{Danial Langeroodi}
+\affil{DARK, Niels Bohr Institute, University of Copenhagen, Jagtvej 155, 2200 Copenhagen, Denmark}
+
+\author[0000-0002-4571-2306]{Jens Hjorth}
+\affil{DARK, Niels Bohr Institute, University of Copenhagen, Jagtvej 155, 2200 Copenhagen, Denmark}
+\author[0000-0003-1060-0723]{Wenlei Chen}
+\affil{Minnesota Institute for Astrophysics, University of Minnesota, 116 Church Street SE, Minneapolis, MN 55455, USA}
+\author[0000-0002-0786-7307]{Patrick L. Kelly}
+\affil{Minnesota Institute for Astrophysics, University of Minnesota, 116 Church Street SE, Minneapolis, MN 55455, USA}
+\author[0000-0002-1681-0767]{Hayley Williams}
+\affil{Minnesota Institute for Astrophysics, University of Minnesota, 116 Church Street SE, Minneapolis, MN 55455, USA}
+%\author{Gabriel Brammer}
+%\affil{Cosmic Dawn Center (DAWN) Niels Bohr Institute, University of Copenhagen, Jagtvej 128, Copenhagen, Denmark}
+\author[0000-0001-8792-3091]{Yu-Heng Lin}
+\affil{Minnesota Institute for Astrophysics, University of Minnesota, 116 Church Street SE, Minneapolis, MN 55455, USA}
+\author[0000-0002-9136-8876]{Claudia Scarlata}
+\affil{Minnesota Institute for Astrophysics, University of Minnesota, 116 Church Street SE, Minneapolis, MN 55455, USA}
+\author[0000-0002-0350-4488]{Adi Zitrin}
+\affil{Physics Department, Ben-Gurion University of the Negev, P.O. Box 653, Beer-Sheva 8410501, Israel}
+\author[0000-0002-8785-8979]{Tom Broadhurst}
+\affiliation{Department of Physics, University of the Basque Country UPV/EHU, E-48080 Bilbao, Spain}
+\affiliation{DIPC, Basque Country UPV/EHU, E-48080 San Sebastian, Spain}
+\affiliation{Ikerbasque, Basque Foundation for Science, E-48011 Bilbao, Spain}
+\author[0000-0001-9065-3926]{Jose M. Diego}
+\affil{IFCA, Instituto de F\'isica de Cantabria (UC-CSIC), Av. de Los Castros s/n, 39005 Santander, Spain}
+\author[0000-0001-8156-0330]{Xiaosheng Huang}
+\affil{Department of Physics \& Astronomy, University of San Francisco, San Francisco, CA 94117, USA}
+\affil{Physics Division, Lawrence Berkeley National Laboratory, 1 Cyclotron Road, Berkeley, CA 94720, USA}
+\author[0000-0003-3460-0103]{Alexei V. Filippenko}
+\affil{Department of Astronomy, University of California, Berkeley, CA 94720-3411, USA}
+\author[0000-0002-2445-5275]{Ryan J. Foley}
+\affil{Department of Astronomy and Astrophysics, UCO/Lick Observatory, University of California, 1156 High Street, Santa Cruz, CA 95064, USA}
+\author[0000-0001-8738-6011]{Saurabh Jha}
+\affil{Department of Physics and Astronomy, Rutgers, The State University of New Jersey, Piscataway, NJ 08854, USA}
+\author[0000-0002-6610-2048]{Anton M. Koekemoer}
+\affil{Space Telescope Science Institute, 3700 San Martin Dr., Baltimore, MD 21218, USA}
+\author[0000-0003-3484-399X]{Masamune Oguri}
+\affil{Center for Frontier Science, Chiba University, 1-33 Yayoi-cho, Inage-ku, Chiba 263-8522, Japan}
+\affil{Department of Physics, Chiba University, 1-33 Yayoi-Cho, Inage-Ku, Chiba 263-8522, Japan}
+%\author{Mario Nonino}
+%\affil{INAF, Osservatorio Astronomico di Trieste, via Bazzoni 2, 34124 Trieste, Italy}
+%\author{Noah Rogers}
+%\affil{Minnesota Institute for Astrophysics, University of Minnesota, 116 Church Street SE, Minneapolis, MN 55455, USA}
+\author[0000-0002-2807-6459]{Ismael Perez-Fournon}
+\affil{Instituto de Astrofisica de Canarias (IAC), E-38205 La Laguna, Tenerife, Spain}
+\affil{Departamento de Astrof\'{\i}sica, Universidad de La Laguna (ULL), 38206 La Laguna, Tenerife, Spain}
+\author[0000-0002-2361-7201]{Justin Pierel}
+\affil{Space Telescope Science Institute, 3700 San Martin Dr., Baltimore, MD 21218, USA}
+\author[0000-0002-5391-5568]{Frederick Poidevin}
+\affil{Instituto de Astrofisica de Canarias (IAC), E-38205 La Laguna, Tenerife, Spain}
+\affil{Departamento de Astrof\'{\i}sica, Universidad de La Laguna (ULL), 38206 La Laguna, Tenerife, Spain}
+\author[0000-0002-7756-4440]{Lou Strolger}
+\affil{Space Telescope Science Institute, 3700 San Martin Dr., Baltimore, MD 21218, USA}
+% \author[0000-0001-5568-6052]{Sherry H. Suyu}
+% \affil{Max-Planck-Institut f{\"u}r Astrophysik, Karl-Schwarzschild Stra{\ss}e 1, 85748 Garching, Germany}
+% \affil{Technische Universit{\"a}t M{\"u}nchen, TUM School of Natural Sciences, Physik-Department, James-Franck-Stra{\ss}e 1, 85748 Garching, Germany}
+% \affil{Academia Sinica Institute of Astronomy and Astrophysics (ASIAA), 11F of ASMAB, No.1, Section 4, Roosevelt Road, Taipei 10617, Taiwan}
+%\author[0000-0002-8460-0390]{Tommaso Treu}
+%\affiliation{Department of Physics and Astronomy, University of California, Los Angeles, 430 Portola Plaza, Los Angeles, CA 90095, USA}
+%\author{Lilan Yang}
+%\affil{Kavli Institute for the Physics and Mathematics of the Universe, The University of Tokyo, Kashiwa, Japan 277-8583}
+
+
+
+
+% \affiliation{American Astronomical Society \\
+% 1667 K Street NW, Suite 800 \\
+% Washington, DC 20006, USA}
+
+% \collaboration{20}{(AAS Journals Data Editors)}
+
+% \author{F.X Timmes}
+% \affiliation{Arizona State University}
+% \affiliation{AAS Journals Associate Editor-in-Chief}
+
+% \author{Amy Hendrickson}
+% \altaffiliation{AASTeX v6+ programmer}
+% \affiliation{TeXnology Inc.}
+
+% \author{Julie Steffen}
+% \affiliation{AAS Director of Publishing}
+% \affiliation{American Astronomical Society \\
+% 1667 K Street NW, Suite 800 \\
+% Washington, DC 20006, USA}
+
+%% Note that the \and command from previous versions of AASTeX is now
+%% depreciated in this version as it is no longer necessary. AASTeX 
+%% automatically takes care of all commas and "and"s between authors names.
+
+%% AASTeX 6.31 has the new \collaboration and \nocollaboration commands to
+%% provide the collaboration status of a group of authors. These commands 
+%% can be used either before or after the list of corresponding authors. The
+%% argument for \collaboration is the collaboration identifier. Authors are
+%% encouraged to surround collaboration identifiers with ()s. The 
+%% \nocollaboration command takes no argument and exists to indicate that
+%% the nearby authors are not part of surrounding collaborations.
+
+%% Mark off the abstract in the ``abstract'' environment. 
+\begin{abstract}
+
+A tight positive correlation between the stellar mass and the gas-phase metallicity of galaxies has been observed at low redshifts, with only $\sim 0.1$ dex scatter in metallicity. The shape and normalization of this correlation can set strong constraints on theories of galaxy evolution. In particular, its redshift evolution is thought to be determined by stellar and active galactic nucleus feedback-driven outflows, the redshift evolution of the stellar initial mass function or stellar yields, and broadly the star-formation histories of galaxies. 
+The advent of \jwst\ allows probing the mass--metallicity relation at redshifts far beyond what was previously accessible. Here we report the discovery of two emission-line galaxies at redshift $z_{\textnormal{spec}} = 8.15$ and $z_{\textnormal{spec}} = 8.16$ in \jwst\ NIRCam imaging and NIRSpec spectroscopy of galaxies gravitationally lensed by the cluster RX\,J2129.4$+$0009.
+We measure their metallicities using the strong-line method and their stellar masses through spectral-energy-distribution fitting with a nonparametric star-formation history. We combine these with nine similarly re-analysed galaxies at $7.2 < z_{\textnormal{spec}} < 9.5$ to compile a sample of eleven galaxies at $z \approx 8$ (six with \jwst\ metallicities and five with ALMA metallicities). Based on this sample, we report the first quantitative statistical inference of the mass--metallicity relation at $z\approx8$ (median $z = 8.15$). 
+We measure a $\sim 1.0$ dex redshift evolution in the normalization of the mass--metallicity relation from $z \approx 8$ to the local Universe; at fixed stellar mass, galaxies are 10 times less metal enriched at $z \approx 8$ compared to the present day. Our inferred normalization is in agreement with the predictions of the FIRE simulations. The inferred slope of the mass--metallicity relation is similar to or slightly shallower than the slope predicted by FIRE or observed at lower redshifts.
+Furthermore, based on emission-line diagnostic diagrams we compare the $z \approx 8$ galaxies to extremely low metallicity analog candidates in the local Universe, finding that they are generally distinct from extreme emission-line galaxies or ``green peas" but are similar in their strong emission-line ratios and metallicities to ``blueberry galaxies." Despite this similarity, at fixed stellar mass, the $z \approx 8$ galaxies have systematically lower metallicities compared to blueberry galaxies and therefore stand out in the mass--metallicity diagram.
+\end{abstract}
+
+% The tight relation between stellar mass and gas-phase metallicity of galaxies observed at low redshifts ($\sim 0.1$ dex scatter in metallicity) sets important constraints on theories of galaxy evolution. The evolution of the mass--metallicity relation with redshift can shed further light on the underlying physical mechanisms, such as stellar or AGN feedback, the star-formation history, or the stellar initial mass function. The advent of \jwst\ allows us to probe much higher redshifts than has been possible. Here we report the discovery of two emission line galaxies at $z = 8.15$ and $z=8.16$ in \jwst\ NIRCam imaging and NIRSpec spectroscopy of galaxies gravitationally lensed by the cluster RX\,J2129.4$+$0009. We derive metallicities (based on the strong-line method) and stellar masses (based on SED fits with a non-parametric star-formation history) and combine the results with a similar analysis of another nine galaxies at $7.2<z<9.5$ (four from \jwst, five from ALMA). In diagnostic emission line diagrams \jwst\ $z\approx8$ galaxies occupy a different region from extreme emission line galaxies or green peas in the local universe, but overlap with blueberry galaxies. However, this degeneracy is broken when the metallicity is plotted against stellar mass. We report the first quantitative statistical study of the mass--metallicity relation at $z\approx8$ (median $z=8.15$). We find that the metallicity at fixed stellar mass is $\sim1.0$ dex lower than in the local Universe, with a similar or slightly shallower slope, largely consistent with predictions of the FIRE simulations. 
+
+
+%% Keywords should appear after the \end{abstract} command. 
+%% The AAS Journals now uses Unified Astronomy Thesaurus concepts:
+%% https://astrothesaurus.org
+%% You will be asked to selected these concepts during the submission process
+%% but this old "keyword" functionality is maintained in case authors want
+%% to include these concepts in their preprints.
+\keywords{Galaxy evolution (594), Galaxy chemical evolution (580), High-redshift galaxies (734), Chemical abundances (224), Metallicity (1031)}
+
+%% From the front matter, we move on to the body of the paper.
+%% Sections are demarcated by \section and \subsection, respectively.
+%% Observe the use of the LaTeX \label
+%% command after the \subsection to give a symbolic KEY to the
+%% subsection for cross-referencing in a \ref command.
+%% You can use LaTeX's \ref and \label commands to keep track of
+%% cross-references to sections, equations, tables, and figures.
+%% That way, if you change the order of any elements, LaTeX will
+%% automatically renumber them.
+%%
+%% We recommend that authors also use the natbib \citep
+%% and \citet commands to identify citations.  The citations are
+%% tied to the reference list via symbolic KEYs. The KEY corresponds
+%% to the KEY in the \bibitem in the reference list below. 
+
+\section{Introduction} \label{sec:intro}
+
+The gas-phase metallicity of a galaxy measures its current state of chemical enrichment, holding a record of its star-formation history (SFH), gas infall, feedback, and merger history. 
+These mechanisms are not identical for galaxies of different stellar mass at a given redshift, as evidenced by the positive empirical correlation between the gas-phase metallicity and stellar mass: the mass--metallicity relation \citep{1968JRASC..62..145V, 1970A&A.....7..311P, 1979A&A....80..155L}.
+This correlation has been extensively studied in the local Universe with numerous works deriving a tight mass--metallicity relation that spans five decades of stellar mass from $10^7\, M_{\odot}$ to $10^{12}\, M_{\odot}$ and only starts to saturate in metallicity at $M_{\star} > 10^{10}\, M_{\odot}$ \citep{2004ApJ...613..898T, 2006ApJ...647..970L, 2006ApJ...636..214V, 2008ApJ...681.1183K, 2010MNRAS.408.2115M, 2012ApJ...754...98B, 2013A&A...549A..25P, 2013MNRAS.432.1217P, 2013ApJ...765..140A, 2013ApJ...765...66H, 2015ApJ...800..121H, 2015MNRAS.446.1449L, 2016ApJ...828...67L, 2019ApJ...877....6B, maiolino+2019, curti+2020b, sanders+2021}. 
+
+Beyond the local Universe the mass--metallicity relation has been inferred out to $z \approx 3.5$, showing the same general trends as seen in the local Universe but with a lower normalization; galaxies of the same stellar mass at higher redshifts seem to be less chemically enriched \citep{2005ApJ...635..260S, 2006ApJ...644..813E, 2008A&A...488..463M, 2009MNRAS.398.1915M, 2011ApJ...730..137Z, 2014ApJ...791..130Z, 2014ApJ...792...75Z, 2012ApJ...755...73W, 2016ApJ...827...74W, 2013ApJ...772..141B, 2013ApJ...776L..27H, 2013ApJ...774..130K, 2014MNRAS.440.2300C, 2014MNRAS.437.3647Y, 2014ApJ...792....3M, 2014ApJ...795..165S, 2014A&A...563A..58T, 2016ApJ...826L..11K, 2015ApJ...802L..26K, 2015ApJ...805...45L, 2016ApJ...828...67L, 2015ApJ...799..138S, 2018ApJ...858...99S, 2020ApJ...888L..11S, sanders+2021, 2016MNRAS.463.2002H, 2016ApJ...822...42O, 2017ApJ...849...39S}.
+The inference of a mass--metallicity relation beyond $z = 3.5$ has been stalled thus far because the primary rest-optical metallicity indicators get redshifted beyond near-infrared wavelengths where the bright sky background and the reduced atmospheric transmission prohibits emission-line measurements \citep[see][and references therein]{maiolino+2019, sanders+2021}. 
+
+Despite these challenges, several groups have attempted to measure gas-phase metallicities at redshifts beyond 3.5 through alternative methods. 
+\cite{2016ApJ...822...29F} used a calibration of the rest-ultraviolet (UV) absorption lines to estimate the metallicity in three mass bins at $z \approx 5$ from stacked spectra of a sample of $3.5 < z < 6.0$ galaxies, detected in the cosmic evolution survey \citep[COSMOS;][]{COSMOS} and spectroscopically confirmed with the Deep Imaging Multi-object Spectrograph \citep[DEIMOS;][]{2003SPIE.4841.1657F}. 
+\cite{jones+2020} presented a calibration of the ALMA-accessible (the Atacama Large Millimeter/submillimeter Array) [\ion{O}{3}]$\lambda88\mu$m emission-line intensity as a direct-method metallicity estimator, and used it to measure the metallicities of a sample of six galaxies (five with mass measurements) at $z \approx 8$. 
+However, these studies could not significantly constrain the mass--metallicity relation at high redshifts because of the small sample size and large statistical and/or systematic uncertainties \citep[see][for a discussion on systematic uncertainties]{maiolino+2019}.
+
+Tuned to reproduce the mass--metallicity relation at $z < 3.5$, theoretical models and simulations of galaxy evolution have predicted the shape and normalization of the mass--metallicity relation at higher redshifts. 
+\cite{ma+2016} inferred the mass--metallicity relation and its evolution up to
+$z = 6 $ from the FIRE simulations and demonstrated reasonable agreement with the observed relation and its evolution up to $z = 3$ for a broad range in stellar mass.
+\cite{ma+2016} concluded that the redshift evolution of the mass--metallicity relation coincides with the redshift evolution of the stellar mass fraction \citep[see, e.g.,][]{UM1, UM2, UM3}, potentially pointing toward a universal relation between the stellar mass, gas mass, and metallicities. 
+Although pending empirical confirmation, their results can be extrapolated to redshifts beyond the current observational limits.  
+Similar conclusions have been made based on the Illustris TNG simulations \citep{2019MNRAS.484.5587T} and EAGLE simulations \citep{2015MNRAS.446..521S, 2016MNRAS.459.2632L, 2017MNRAS.472.3354D}.
+
+% ----> update the Lian+2018 with more references on every mechanism discussed 
+
+Furthermore, theoretical models and simulations have identified the stellar and active galactic nucleus (AGN) feedback-driven outflows, the metal content of the outflows in comparison to the interstellar medium (ISM), the shape and evolution of the stellar initial mass function (IMF), and the dependency of stellar yields on redshift and galaxy stellar mass as the primary drivers of shape and normalization of the mass--metallicity relation \citep[see, e.g.,][and references therein]{2018MNRAS.474.1143L}. 
+Probing the mass--metallicity relation at $z \approx 8$ and beyond is of critical importance in characterizing the mechanisms deriving the shape and redshift evolution of the mass--metallicity relation, because this is the epoch when galaxies are expected to have much simpler star-formation histories (SFHs), feedback histories, and merger histories which allow for a more robust comparison with galaxy evolution theoretical models and simulations.
+
+The NIRSpec instrument onboard \jwst\ has already demonstrated tremendous capability in spectroscopically confirming the high-redshift NIRCam-selected candidates with relative ease \citep[see, e.g.,][]{carnall+2022, williams+2022, 2022arXiv221015639R, 2022arXiv221109097M}.
+For the first time, NIRSpec enables high signal-to-noise ratio (S/N) detections of the rest-frame optical metallicity diagnostic emission lines with high spectral resolution; this has resulted in direct metallicity measurements of a growing sample of galaxies at $z \approx 8$ and beyond \citep[see, e.g.,][]{curti+2022, schaerer+2022, williams+2022}. 
+
+Young, low-metallicity galaxies in the nearby universe have been proposed as analogs of high-redshift galaxies. In particular, the so-called ``extreme emission-line galaxies" (EELGs), ``green peas," and ``blueberry galaxies" are interesting candidates for having properties similar to those that are being revealed at high redshift. EELGs \citep{eelgs} were identified in zCOSMOS as $z < 1$ galaxies with strong emission lines; higher redshift EELGs ($z\approx3$) were proposed to be analogs of very high redshift galaxies \citep{2017NatAs...1E..52A}. Green peas \citep{2009MNRAS.399.1191C, yang+2017g} are compact SDSS galaxies with strong [\ion{O}{3}] in the range $0.14<z<0.36$. Their properties are very similar to those of EELGs. Blueberry galaxies are similar to green peas, but are selected to be at low redshift ($z<0.05$) and hence have been identified with lower masses \citep{yang+2017b}.
+The first three \jwst\ NIRSpec-identified galaxies at $z\approx 8$ have been discussed in this context and have been likened individually to green peas or blueberry galaxies \citep{schaerer+2022,2022ApJ...939L...3T,2022arXiv220713020R,2023MNRAS.518..592K}.
+
+In this work, we present the discovery of two galaxies detected in the field of the foreground lensing cluster RX\,J2129.4$+$0009 in imaging and spectroscopy acquired to as part of a Director's Discretionary program (DD-2767; PI P. Kelly) to observe a strongly lensed background supernova. They have spectroscopic redshifts of 
+$z =  8.16$ (RX2129--ID11002) and 8.15 (RX2129--ID11022), based on emission lines detected
+with NIRSpec prism observations. We obtain gas-phase metallicity measurements for the galaxies
+using rest-frame optical emission-line metallicity indicators. 
+We combine these new measurements with literature \jwst\ and Atacama Large Millimeter Array (ALMA) metallicity measurements of galaxies at $z \approx 8$ to construct a sample of eleven galaxies with direct metallicity measurements at this redshift. 
+For the six \jwst\ detected galaxies at $z\approx8$, we find that their emission-line properties are very similar to those of blueberry galaxies as a population.
+We measure the stellar masses of the entire sample of eleven galaxies, and for the first time significantly constrain both the slope and the normalization of the mass--metallicity relation at $z \approx 8$ as well as the evolution of its normalization from $z \approx 8$ to the present day. We discuss the implications of this measurement for the processes thought to be responsible for the chemical enrichment of galaxies.
+We also find that the $z \approx 8$ galaxies stand out from the blueberry galaxies in the mass--metallicity diagram. At a given metallicity, $z\approx8$ galaxies have higher stellar masses than blueberry galaxies or green peas. 
+
+Throughout this work we adopt a standard $\Lambda$CDM cosmology with H$_{0} = 70$ km s$^{-1}$ Mpc$^{-1}$, $\Omega_\textnormal{m}$ = 0.3, and $\Omega_{\Lambda}$ = 0.7. Furthermore, we adopt a \cite{chabrier+2003} stellar IMF, and magnitudes are in the AB system \citep{1983ApJ...266..713O}. 
+
+%***\alex\You should cite Oke & Gunn (1983) for the AB system, above.
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/z8_gals_v2.pdf}
+    \caption{NIRCam color-composite image of the RX\,J2129 lensing cluster (R: F356W+F444W, G: F200W+F277W, B: F115W+F150W). The two $z \approx 8.15$ galaxies are indicated by red circles; insets show the positions of the NIRSpec MSA slits. The upper inset shows the photometry of RX2129--ID11002 at $z_{\textnormal{spec}} = 8.16$ (RA(J2000.0) = 21:29:39.904, Dec(J2000.0) = 00:05:58.83) and the lower inset shows RX2129--ID11022 at $z_{\textnormal{spec}} = 8.15$ (RA(J2000.0) = 21:29:36.080, Dec(J2000.0) = 00:04:56.53). We do not expect these galaxies to be multiply lensed; the lensing magnifications are presented in Table \ref{table: line fluxes}.}
+    \label{fig: photometry}
+\end{figure*}
+
+\section{Sample \titlelowercase{of $z \approx 8$} galaxies} \label{sec: sample}
+
+With the addition of the direct metallicity\footnote{Unless otherwise specified, throughout this work metallicity refers to the gas-phase metallicity of galaxy.} measurements of the RX2129--ID11002 and RX2129--ID11022 galaxies presented in this work (Section \ref{sec: metallicity}), we can construct a sample of eleven $z \approx 8$ galaxies with direct metallicity measurements and available multi-band photometry. This includes the RX2129--ID11027 galaxy presented in \cite{williams+2022}, the three galaxies detected in the field towards the SMACS0723 galaxy cluster, and the sample compiled by \cite{jones+2020}. In this Section we provide an overview of this sample. 
+
+% a summary of the spectroscopic redshifts, available photometry, magnification factors, and original literature references is available in Table \ref{}.
+
+\subsection{RX2129 galaxies}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/s11002_full_spec_werror_new.pdf}
+    \caption{NIRSpec 2D (top panel) and 1D (bottom panel) spectra of the RX2129--ID11002 galaxy at $z_{\textnormal{spec}} = 8.16$. The red dashed lines show the identified emission lines, and the thin grey lines show the $1\sigma$ uncertainties. The emission line flux measurements are presented in Table \ref{table: line fluxes}. The spectrum is not corrected for lensing magnification.}
+    \label{fig: spectra 11002}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/s11022_full_spec_werror_new.pdf}
+    \caption{NIRSpec 2D (top panel) and 1D spectra (bottom panel) of the RX2129--ID11022 galaxy at $z_{\textnormal{spec}} = 8.15$. The red dashed lines show the identified emission lines, and the thin grey lines show the $1\sigma$ uncertainties. The emission line flux measurements are presented in Table \ref{table: line fluxes}. The spectrum is not corrected for lensing magnification.}
+    \label{fig: spectra 11022}
+\end{figure*}
+
+The imaging of the RX\,J2129.4$+$0009 galaxy cluster (RX2129 for short) was obtained with the \jwst\ NIRCam instrument in the F115W, F150W, F200W, F277W, F356W, and F444W filters; we present a color-composite image in Figure \ref{fig: photometry}. The details of the NIRCam observations of the DD-2767 program (PI: Kelly) and data reduction are presented in \cite{williams+2022}. Spectra for a sample of high redshift galaxy candidates identified using the EAZY \citep{brammervandokkumcoppi08} photometric redshift code were subsequently obtained as part of the same DD program with the \jwst\ NIRSpec instrument in multi-object spectroscopy mode using the prism disperser, which provides wavelength coverage from 0.6 $\mu$m to 5.3 $\mu$m. The spectral resolution ranges from $R\approx 50$ at the blue end to $R \approx 400$ at the red end. At least three candidates were confirmed at $z_{\textnormal{\scriptsize spec}} > 8$: RX2129--ID11002, RX2129--ID11022, and RX2129--ID11027. 
+
+The photometry of the RX2129--ID11002 and RX2129--ID11022 galaxies are presented in Table \ref{table: photometry}; their color-composite images are presented in the smaller panels of Figure \ref{fig: photometry}. We measure the lensing magnification of these galaxies based on the model presented in \cite{williams+2022} \citep[see also][]{caminha+2019, 2021MNRAS.508.1206J}; the magnifications are reported in Table \ref{table: line fluxes}. Based on these models we do not expect any of the RX2129--ID11002 and RX2129--ID11022 to be multiply imaged.  
+
+We also present the NIRSpec spectra of RX2129--ID11002 and RX2129--ID11022 and establish their spectroscopic redshifts. The NIRSpec data of RX2129--ID11002 and RX2129--ID11022 were reduced following the method described in \cite{williams+2022}; we measure $z_{\textnormal{\scriptsize spec}} = 8.16 \pm 0.01$ and $z_{\textnormal{\scriptsize spec}} = 8.15 \pm 0.01$, respectively. The reduced spectra of these galaxies are presented in Figures \ref{fig: spectra 11002} and \ref{fig: spectra 11022}. We present the strong line analysis and metallicity measurements of these galaxies in Section \ref{sec: strong line}.
+
+The NIRCam photometry and NIRSpec data of the RX2129--ID11027 galaxy were reduced and presented in \cite{williams+2022}, measuring $z_{\textnormal{\scriptsize spec}} = 9.51 \pm 0.01$. \cite{williams+2022} also reported the strong line analysis and metallicity measurement of this galaxy. 
+
+\begin{table}
+\centering
+\begin{tabular}{ |l|l|l|l| } 
+ \hline
+Filter & $\lambda$(\AA) & \footnotesize{RX2129--ID11002} & \footnotesize{RX2129--ID11022} \\ 
+\hline\hline
+F115W & 11543.01 & 27.540 $\pm$ 0.299 & 31.627 $\pm$ 6.190\\ 
+F150W & 15007.45 & 26.849 $\pm$ 0.090 & 28.481 $\pm$ 0.175\\ 
+F200W & 19886.48 & 27.397 $\pm$ 0.180 & 29.614 $\pm$ 0.693\\ 
+F277W & 27577.96 & 27.033 $\pm$ 0.104 & 28.539 $\pm$ 0.229\\ 
+F356W & 35682.28 & 26.885 $\pm$ 0.072 & 29.472 $\pm$ 0.304\\ 
+F444W & 44036.71 & 26.124 $\pm$ 0.077 & 28.120 $\pm$ 0.212\\ 
+ \hline
+\end{tabular}
+\caption{Measured NIRCam photometry (and $1\sigma$ uncertainty) of the RX2129--ID11002 and RX2129--ID11022 galaxies, in magnitudes.}
+\label{table: photometry}
+\end{table}
+
+\subsection{SMACS0723 galaxies}
+
+The NIRCam and MIRI imaging as well as the NIRSpec multi-object spectroscopy of the SMACS\,J0723.3$-$7327 galaxy cluster (SMACS0723 for short) was obtained as part of the \jwst\ Early Release Observations \citep{ERO}. The cluster was observed in the NIRCam F090W, F150W, F200W, F277W, F356W, and F444W filters and MIRI F770W, F1000W, F1500W, and F1800W filters. \cite{carnall+2022} analysed the spectra and measured secure redshifts for 10 galaxies (out of the total available 35 objects), 3 of which turned out to be at $z \approx 8$: SMACS0723--ID4590 ($z_{\textnormal{\scriptsize spec}} = 8.498$), SMACS0723--ID6355 ($z_{\textnormal{\scriptsize spec}} = 7.665$), and SMACS0723--ID10612 ($z_{\textnormal{\scriptsize spec}} = 7.663$).
+
+\subsection{Pre-JWST sample} 
+
+Among the $z \approx 8$ galaxies that have been spectroscopically confirmed prior to the launch of \jwst, direct metallicity measurements for six galaxies have been measured by \cite{jones+2020} using the ALMA-measured intensity of the $[$O{\footnotesize\;III}$]\lambda88\mu$m emission line. Multi-band photometry for five galaxies from the \cite{jones+2020} sample are available in the literature \citep[see][for references]{jones+2020}. In the case of the BDF--3299 galaxy, the 6th galaxy in \cite{jones+2020} sample, there is a significant spatial offset between the far-infrared emission line and the rest-frame UV continuum. Therefore the measured metallicity does not correspond to the same region probed by photometry. Moreover, this galaxy has been detected in only one photometric band \citep{2011ApJ...730L..35V}, and we therefore do not include it in our sample. 
+
+\begin{table}
+\centering
+\begin{tabular}{ |l|l|l| } 
+ \hline
+emission line $[$\AA$]$& RX2129--ID11002 & RX2129--ID11022 \\ 
+\hline\hline
+$\textnormal{$[$O{\footnotesize\;II}$]\lambda\lambda 3727,3729$}$ & $3.83 \pm 1.99$ & $1.32$\footnote{$1\sigma$ upper limit\label{upper limit}}\\ 
+$\textnormal{$[$Ne{\footnotesize\;III}$]\lambda 3869$}$ & $4.33 \pm 1.79$ & $1.02 \pm 1.01$ \\ 
+$\textnormal{$[$Ne{\footnotesize\;III}$]\lambda 3968$}$ & $2.83 \pm 1.59$ & $0.91 \pm 1.06$ \\ 
+$\textnormal{H$\delta$}$ & $4.35 \pm 1.61$ & $1.16 \pm 0.88$ \\ 
+$\textnormal{H$\gamma$}$ & $5.76 \pm 1.36$ & $2.14 \pm 1.04$ \\ 
+$\textnormal{$[$O{\footnotesize\;III}$]\lambda 4363$}$ & $2.57 \pm 1.24$ & $0.92$\footnoteref{upper limit} \\ 
+$\textnormal{H$\beta$}$ & $10.29 \pm 1.21$ & $2.04 \pm 0.79$ \\ 
+$\textnormal{$[$O{\footnotesize\;III}$]\lambda\lambda 4959,5007$}$ & $91.05 \pm 2.11$ & $10.92 \pm 1.38$ \\ 
+\hline\hline
+$\textnormal{Redshift}$ & 8.16 & 8.15 \\ 
+\textnormal{Magnification\footnote{based on the model from \cite{williams+2022}}} & $2.23 \pm 0.15$ & $3.29 \pm 0.33$ \\ 
+$\textnormal{$12 + \log(\textnormal{O}/\textnormal{H})$}$ & $7.65 \pm 0.07\footnote{includes both the statistical and systematic $1\sigma$ uncertainty}$ & $7.51$\footnoteref{upper limit} \\ 
+ \hline
+\end{tabular}
+\caption{Strong emission line flux measurements from the NIRSpec 1D spectrum of the RX2129--ID11002 and RX2129--ID11022 galaxies (see Figures \ref{fig: spectra 11002} and \ref{fig: spectra 11022}). The flux and its $1\sigma$ uncertainties are reported in units of $10^{-20}$ erg s$^{-1}$ cm$^{-2}$. In the bottom row we report the measured metallicities using the strong line method from \cite{izotov+2019}.}
+\label{table: line fluxes}
+\end{table}
+
+\section{Strong line analysis} \label{sec: strong line}
+
+\subsection{Line intensity measurement}
+
+We measure the intensity of emission lines in the NIRSpec 1D spectrum of RX2129--ID11002 and RX2129--ID11022 using the Penalized PiXel-Fitting package \citep[\texttt{pPXF;}][]{2004PASP..116..138C, 2017MNRAS.466..798C, 2022arXiv220814974C}, which adopts a maximum penalized likelihood method \citep{1997AJ....114..228M} to subtract the stellar continuum by modelling it with a stellar population and measures the line fluxes by fitting them with Gaussian profiles. We use the same \texttt{pPXF} setup as described by \cite{williams+2022}. The $[$O{\footnotesize\;III}$]\lambda \lambda 4959, 5007$\AA\ doublet is not resolved in our NIRSpec spectra. As in \cite{williams+2022}, throughout this work we set the flux ratio of the unresolved $[$O{\footnotesize\;III}$]\lambda \lambda 4959, 5007$\AA\ doublet equal to 0.33, which is the theoretically expected value. The measured emission line fluxes are presented in Table \ref{table: line fluxes}.
+
+\cite{izotov+2019} suggested the use of two emission line diagnostic diagrams to select extremely low-metallicity galaxies\footnote{O32 is defined as $[$O{\footnotesize\;III}$]\lambda 5007$\AA/$[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA, and R23 is defined as ($[$O{\footnotesize\;II}$]\lambda \lambda 3727,3729$\AA\ + $[$O{\footnotesize\;III}$]\lambda 4959$\AA\ + $[$O{\footnotesize\;III}$]\lambda 5007$\AA)/H$\beta$.}: $[$O{\footnotesize\;III}$]\lambda 5007$\AA/H$\beta$ vs $[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA/H$\beta$ and O32 vs (R23$-$0.08O32). This was motivated by their calibration of the ``strong-line" metallicity measurement method, where metallicity is calculated as a function of O32 and R23 (see Equation \ref{eq: metallicity} and Section \ref{sec: metallicity}). In this Section, we compare the location of the $z \approx 8$ galaxies on these diagnostic plots with those of the proposed low-metallicity local Universe analogs: EELGs, green peas, and blueberry galaxies. 
+
+Figure \ref{fig: OIII_to_OII} shows the $[$O{\footnotesize\;III}$]\lambda 5007$\AA/H$\beta$ flux ratio plotted against the $[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA/H$\beta$ flux ratio for the galaxies in our $z \approx 8$ sample (large colored data points) for which these line intensity measurements are available; this only includes the six NIRSpec emission line-detected galaxies in RX2129 and SMACS0723. For the RX2129--ID11027 galaxy we use the line ratios as calculated in \cite{williams+2022}. For the SMACS0723 galaxies we use the line ratios from \citet{curti+2022}. We do not adopt any extinction correction for the $z \approx 8$ galaxies, consistent with the negligible extinction reported for the RX2129--ID11027 and SMACS0723 galaxies \citep[see][respectively]{williams+2022, curti+2022} as well as our photometry analysis of RX2129--ID11002 and RX2129--ID11022 in Section \ref{sec: photometry}. Figure \ref{fig: R23} shows the O32 plotted against (R23$-$0.08O32) for the galaxies in our $z \approx 8$ sample (large colored data points). 
+
+%in the units of $10^{-20}$ erg s$^{-1}$ cm$^{-2}$.
+
+The high $[$O{\footnotesize\;III}$]\lambda 5007$\AA/$[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA\ ratio of the galaxies in the $z \approx 8$ sample is typical of EELGs. In Figures \ref{fig: OIII_to_OII} and \ref{fig: R23}, for comparison we also include the EELGs from the $z \lesssim 1$ sample compiled by \cite{eelgs} from the zCOSMOS spectroscopic follow up survey \citep{zCOSMOS} of the COSMOS field \citep{COSMOS}. These authors report extinction-uncorrected emission line flux measurements as well as the reddening constant $c(\textnormal{H}\beta)$ derived from either the H$\alpha$/H$\beta$ or H$\gamma$/H$\beta$ ratios where available or spectral energy distribution fitting otherwise. We correct for extinction assuming a \cite{1989ApJ...345..245C} extinction law with $R_V = 3.1$. 
+
+Young low-metallicity galaxies in the local Universe such as the green peas and blueberry galaxies \citep[see][]{2009MNRAS.399.1191C, yang+2017g, yang+2017b} are proposed as spectroscopic analogs of the high redshift galaxies. Both samples are selected as extreme emission line galaxies with systematically low metallicities at a fixed stellar mass. In Figure \ref{fig: OIII_to_OII} we also include the sample of green peas compiled in \cite{yang+2017g} as well as the blueberry galaxies from \cite{yang+2017b}. 
+
+Figures \ref{fig: OIII_to_OII} and \ref{fig: R23} also show the $1\sigma$ and $2\sigma$ \citep[determined using the \texttt{seaborn} package][]{seaborn} confidence intervals for the sample of $z \approx 8$ galaxies (dashed red contours) as well as the zCOSMOS EELGs (shaded green region), both calculated by weighting each entry in the sample by its error bars. We note that the confidence interval of the $z \approx 8$ sample is dominated by the SMACS0723--ID6355 galaxy which has much smaller error bars compared to the rest of the sample; therefore we also show the unweighted $1\sigma$ and $2\sigma$ confidence intervals for the $z \approx 8$ sample (shaded red region). The lack of overlap between the confidence interval regions of $z \sim 8$ galaxies and EELGs, even at the $2\sigma$ level, strongly suggests that these galaxies are drawn from intrinsically different populations.
+
+Blueberry galaxies and to a lesser degree green peas show significant similarities with the $z \sim 8$ galaxies, with almost all the blueberry galaxies and $\sim$half the green peas occupying the region within the $2\sigma$ confidence interval of $z \sim 8$ galaxies; this suggests that these galaxies have similarly low metallicities. We will address this similarity in the context of the mass-metallicity relation, where the addition of the stellar mass parameter may potentially break the apparent degeneracy. 
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/OIII_vs_OII.pdf}
+    \caption{$[$O{\footnotesize\;III}$]\lambda 5007$\AA/H$\beta$ flux ratio plotted against $[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA/H$\beta$ flux ratio for 6 galaxies at $z_{\textnormal{\scriptsize spec}} \approx 8$, as inferred from the \jwst\ NIRSpec observations of the RX2129 and SMACS0723 lensing clusters. The green data points show the measurements for the extreme emission line galaxies (EELGs) at $z_{\textnormal{\scriptsize spec}} \lesssim 1$ from the zCOSMOS survey. The dashed red contours indicate the weighted $1\sigma$ and $2\sigma$ confidence intervals for the $z \approx 8$ sample; since the weighted confidence intervals for this sample are dominated by the tight constraints on the SMACS0723--ID6355 galaxy we also show the unweighted $1\sigma$ and $2\sigma$ confidence intervals as the shaded red region. The shaded green region indicates the $1\sigma$ and $2\sigma$ confidence interval for the $z_{\textnormal{\scriptsize spec}} \lesssim 1$ EELGs sample. Moreover, we show the blueberry (purple data points) and green pea (light green data points) galaxies from \cite{yang+2017b, yang+2017g}, confirming their remarkable strong line emission similarities (see also Figure \ref{fig: R23}) with the emission line-detected galaxies at $z \approx 8$; this is especially the case for blueberry galaxies, almost all of which lie within the $2\sigma$ credible interval of the $z \approx 8$ galaxies. }
+    \label{fig: OIII_to_OII}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/O32_vs_R23.pdf}
+    \caption{Strong line metallicity indicator comparison. This Figure shows O32 ($[$O{\footnotesize\;III}$]\lambda 5007$\AA/$[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA) plotted against R23$-$0.0$\times$8O32 (R23$\times$H$\beta$ = $[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA + $[$O{\footnotesize\;III}$]\lambda 4959$\AA + $[$O{\footnotesize\;III}$]\lambda 5007$\AA) for 6 galaxies at $z \approx 8$ with available NIRSpec strong emission line measurements (colored data points). The shaded red region (dashed red line) show the unweighted (weighted) $1\sigma$ and $2\sigma$ confidence intervals of the $z \approx 8$ sample. For comparison we show the zCOSMOS extreme emission line galaxies (EELGs) at $z_{\textnormal{\scriptsize spec}} \lesssim 1$ (dark green data points) as well as their weighted $1\sigma$ and $2\sigma$ confidence intervals. We also show the blueberry (purple data points) and green pea (light green data points) galaxies from \cite{yang+2017b, yang+2017g}. Both here and in Figure \ref{fig: OIII_to_OII}, blueberry galaxies (and green peas to a lesser degree) occupy a region similar to $z \approx 8$ emission line-detected galaxies, which indicates that they have similar metallicities. This degeneracy can be broken by investigating the locations of these galaxies on the mass-metallicity plot, as shown in Figure \ref{fig: MZ lowz}).} 
+    \label{fig: R23}
+\end{figure*}
+
+\subsection{Metallicity measurement} \label{sec: metallicity}
+
+We measure the gas-phase metallicity\footnote{We use the terms ``gas phase metallicity" and ``oxygen abundance" ($12 + \log\;$O/H) interchangeably throughout this work.} of the RX2129--ID11002 and RX2129--ID11022 galaxies using the ``strong-line" method empirical calibration from \cite{izotov+2019} 
+
+\begin{equation}
+    12 + \log\left (\frac{\textnormal{O}}{\textnormal{H}}\right) = 0.950 \log\left(\textnormal{R23} - 0.08 \times \textnormal{O32}\right),
+\label{eq: metallicity}
+\end{equation}
+
+\noindent
+where O32 $=$ $[$O{\footnotesize\;III}$]\lambda 5007$\AA/$[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA, and R23 = ($[$O{\footnotesize\;III}$]\lambda \lambda 3727,3729$\AA\ + $[$O{\footnotesize\;III}$]\lambda 4959$\AA\ + $[$O{\footnotesize\;III}$]\lambda 5007$\AA)/H$\beta$. This choice is motivated by the lack of significantly detected $[$O{\footnotesize\;III}$]\lambda 4363$\AA\ emission lines and is shown to measure accurate oxygen abundances for low-metallicity EELGs \citep[see][for a full discussion]{izotov+2019}. The measured metallicities ($12 + \log\;$O/H) of RX2129--ID11002 and RX2129--ID11022 are reported in Table \ref{table: line fluxes}. We report the total uncertainty which includes both the statistical and systematic uncertainties; the former is the propagation of flux measurement uncertainties and the latter is the 0.05 systematic uncertainty of the \cite{izotov+2019} ``strong-line" method.
+
+For the remaining galaxies in our $z \approx 8$ sample we use the metallicity measurements as reported in the literature. The metallicity of the RX2129--ID11027 galaxy was measured in \cite{williams+2022} using the ``strong-line" method. The metallicities of the SMACS0723 galaxies were measured in \cite{curti+2022} and \cite{schaerer+2022} using the direct $T_e$ method, with significant discrepancies in the reported values. The main source of discrepancy seems to be the method used to reduce the NIRSpec data; we adopt the values reported by \cite{curti+2022} since the NIRSpec data used in this work had undergone extra reduction beyond the level 2 data products available on MAST\footnote{\href{https://archive.stsci.edu}{The Barbara A. Mikulski Archive for Space Telescopes}} through the NIRSpec GTO pipeline (NIRSpec/GTO collaboration, in preparation). Nevertheless, in Section \ref{sec: MZ} we investigate the effect of adopting the values reported in \cite{schaerer+2022}. 
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/11002_nonpar_1_22Dec05.pdf}
+    \caption{SED-fitting results for the RX2129--ID11002 galaxy. Top panel shows the observed (orange circles) and best-fit photometry (green squares) as well as the best-fit spectra (green line). The six smaller panels on the bottom right show the probability distribution functions (PDFs) of the stellar population synthesis parameters; the stellar mass here refers to the total stellar mass formed before correcting for the dead stars and the dotted lines show the assumed priors. Bottom left panel shows the star formation history (SFH) modelled non-parametrically with 5 temporal. The stellar mass and SFH are corrected for lensing magnification.}
+    \label{fig: 11002}
+\end{figure*}
+
+The metallicities of the pre-\jwst\ sample were measured in \cite{jones+2020}. These authors used a combination of the nebular $[$O{\footnotesize\;III}$]\lambda88\mu$m emission line and photometrically-measured star-formation rate (SFR) as a direct-method metallicity estimator. They report that their calibration yields $12 + \log\;$O/H values that are systematically offset by 0.2 from the direct $T_e$ method; we correct for this offset before adopting their measured metallicities. \cite{jones+2020} report both the statistical and the systematic uncertainties of their measurements, both of which are adopted in our work. 
+
+% The metallicities of our entire sample of $z \approx 8$ galaxies, as well the method used to derive them and the original literature references are listed in Table \ref{}.
+
+\section{Photometry analysis} \label{sec: photometry}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/11022_nonpar_1_22Dec05.pdf}
+    \caption{SED-fitting results for the RX2129--ID11022 galaxy. Top panel shows the observed (orange circles) and best-fit photometry (green squares) as well as the best-fit spectra (green line). The six smaller panels on the bottom right show the probability distribution functions (PDFs) of the stellar population synthesis parameters; the stellar mass here refers to the total stellar mass formed before correcting for the dead stars and the dotted lines show the assumed priors. Bottom left panel shows the star formation history (SFH) modelled non-parametrically with 5 temporal. The stellar mass and SFH are corrected for lensing magnification.}
+    \label{fig: 11022}
+\end{figure*}
+
+In this Section, we use the available photometry for the $z \approx 8$ sample (see Section \ref{sec: sample}) to infer the stellar mass of each source by using \texttt{prospector} \citep{prospector} to fit its SED. The \texttt{prospector} package explores the parameter space of stellar populations to sample the posterior parameter distribution using the \texttt{python} bindings \citep{2014zndo.....12157F} to Flexible Stellar Population Synthesis package \citep[\texttt{FSPS;}][]{FSPS1, FSPS2}. Here we use the built-in \texttt{DYNESTY} sampler \citep{dynesty}, a \texttt{python}-based sampler adopting the dynamic nested sampling method developed by \cite{2019S&C....29..891H}. 
+
+The \texttt{prospector} setup used in this work closely resembles that used in \cite{prospector} to fit the measured photometry of GN-z11, the highest redshift spectroscopically-confirmed galaxy to date \citep{gnz11}. We adopt the \cite{chabrier+2003} initial mass function (IMF). The free parameters include stellar mass, stellar metallicity, nebular metallicity, and dust attenuation. Moreover, the intergalactic medium (IGM) attenuation is included as a free parameter, since the rest-frame photometry at wavelengths below 1216\AA\ is affected by IGM attenuation; \texttt{prospector} adopts the redshift-dependent IGM attenuation model suggested by \cite{1995ApJ...441...18M}. Unlike \cite{prospector} we fix the redshift to the spectroscopically measured value. The star-formation history (SFH) is modelled non-parametrically with 5 temporal bins where the last bin spans 0--10 Myr (lookback time) and the rest are evenly spaced in the $\log(\textnormal{lookback time})$ space up to the maximum allowed age of the galaxy as determined by its spectroscopic redshift.
+
+The top panels in Figures \ref{fig: 11002} and \ref{fig: 11022} show the observed photometry and the best-fit (maximum a posteriori solution) spectra, respectively for RX2129--ID11002 and RX2129--ID11022. The 6 small panels at the bottom right of each Figure show the posterior probability distribution functions (PDFs) for a selection of free parameters. These include the stellar metallicity $\textnormal{Z}_{\star}$; the total stellar mass formed $\textnormal{M}_{\star,\;\textnormal{{\scriptsize formed}}}$; the dust index $\Gamma_{\textnormal{\scriptsize dust}}$ controlling the shape of the dust attenuation curve; the dust optical depth $\tau_{\textnormal{\tiny V}}$ at 5500\AA; the nebular ionization parameter $\textnormal{U}_{\textnormal{\scriptsize neb}}$ indicating the ratio of ionizing photons to the total hydrogen density; and the IGM factor which determines the normalization of \cite{1995ApJ...441...18M} IGM attenuation. The dotted lines show the assumed priors. The bottom left panel shows the SFH. Similar Figures for the remaining 9 galaxies in our sample are available in Appendix \ref{app: prospector}. 
+
+The stellar mass posterior PDFs in Figures \ref{fig: 11002} and \ref{fig: 11022} show the total formed stellar mass without subtracting the accumulated mass of dead stars. We apply the correction factors calculated by \texttt{prospector} for each stellar population model. The 50th percentile and the $1\sigma$ error bars of the stellar mass PDFs for each galaxy are reported in Table \ref{table: mass}; however, throughout this work the full posterior PDFs are used wherever stellar mass measurements are needed. 
+
+Our best-fit stellar mass measurements agree within $1\sigma$ with the lensing-corrected values used in \cite{jones+2020} which are adopted from \cite{rb2020}. These authors fit the photometry and the ALMA measures of the $[$O{\footnotesize\;III}$]\lambda88\mu$m emission intensity and dust continuum with two-component SED models. The first component is a young starburst with strong nebular emission lines that contribute most of the flux in broad-band photometry and determines the $[$O{\footnotesize\;III}$]\lambda88\mu$m emission. The second component is a more mature stellar population that does not necessarily dominate the photometry but dominates the dust continuum detected in ALMA Band 7 and constitutes the majority of stellar mass. The authors show that unlike the models which fit the SFH with a single parameterized young component, these two-component models can simultaneously reproduce the dust continuum constraints and the broad-band photometry especially for MACS1149--JD1 and A2744--YD4. Based on a log-likelihood comparison between their two-component and single-component fits the authors conclude that the two-component model provide superior fits to the data; this is further validated by our measurements which strongly rule out the values inferred by their single-component SED fits. We do not measure a significant systematic offset between our mass measurements and those of \cite{rb2020} \citep[$< 0.1$ dex if the B14--65666 galaxy, which has 1 dex errorbars in][is excluded]{rb2020}.
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/metallicity_vs_mass_lines.pdf}
+    \caption{Mass-metallicity relation at $z \approx 8$. 
+    Colored data points show the distribution of the measured masses and metallicities for the sources in our sample of $z \approx 8$ galaxies. The orange solid line and the shaded orange region respectively show the best-fit $z \sim 8$ mass-metallicity relation and its $1\sigma$ uncertainty, as inferred by fixing the slope to the empirical value at lower redshifts, $\gamma_{\textnormal{\scriptsize g}} \sim 0.3$. The black solid line show the predicted mass-metallicity relation at $z \sim 8$ based on FIRE simulations \citep[see]{ma+2016}, showing remarkable agreement with out findings. The red solid line and the shaded pink region show the best-fit $z \sim 8$ mass-metallicity relation and its $1\sigma$ uncertainty, if the mass-metallicity relation is fitted with a free slope. For comparison, we show the best-fit mass-metallicity relation at lower redshifts. The green, blue, and dark purple lines respectively show the best-fit mass-metallicity relation at $z \sim 3.3$, 2.3, and 0 inferred by \cite{sanders+2021} based on the data from MOSDEF survey. The light purple line shows the best-fit line at $z \sim 0$ from \cite{curti+2020b}. There is a significant $\sim 1$ dex evolution in the normalization of the mass-metallicity relation from $z \sim 8$ to the local Universe; on average galaxies are 10 times more metal enriched at $z \sim 0$ compared to $z \sim 8$. The evolution persists by 0.5 and 0.4 dex with respect to the average galaxies at $z \sim 2.3$ and $z \sim 3.3$, respectively. The dashed section of each solid line indicates extrapolation beyond the investigated stellar mass range of the corresponding study.}
+    \label{fig: MZ lines}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/metallicity_vs_mass_lowz.pdf}
+    \caption{Mass-metallicity relation at $z \sim 8$ compared with the local analog candidates, the blueberry and green pea galaxies. The large colored data points show the measured mass and metallicity of the galaxies in our $z \sim 8$ sample; the orange solid (red solid) line shows the best-fit mass-metallicity relation with a fixed (free) slope and the shaded orange (shaded pink) region show its $1\sigma$ uncertainty region. Blueberry galaxies and green peas are shown with the small purple and light green data points, respectively. Only the green peas which lie within the $2\sigma$ confidence interval of the $z \sim 8$ galaxies in the $[$O{\footnotesize\;III}$]\lambda 5007$\AA/H$\beta$ vs $[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA/H$\beta$ and O32 vs R23$-$0.08$\times$O32 metallicity diagnostic plots (Figures \ref{fig: OIII_to_OII} and \ref{fig: R23}, respectively) are shown. We plot all the blueberry galaxies, because Figures \ref{fig: OIII_to_OII} and \ref{fig: R23} indicate that they have similar metallicities to the $z \sim 8$ emission line galaxies. This Figure shows that although blueberry galaxies and green peas have similar metallicities to the $z \sim 8$ galaxies, this degeneracy is broken down by considering the mass-metallicity relation; at a fixed stellar mass, green peas and blue berries are at systematically higher metallicity compare to $z \sim 8$ galaxies.}
+    \label{fig: MZ lowz}
+\end{figure*}
+
+We note that there is a significant 1 dex discrepancy between the stellar mass measurements of SMACS0723 galaxies reported in the literature \citep[see, e.g.,][]{curti+2022, schaerer+2022, carnall+2022}. The NIRCam photometry used in \cite{curti+2022} and \cite{schaerer+2022} were calibrated using the earlier versions of the calibration reference files (before the \texttt{jwst$-$0989.map}) where flux calibration offsets as high as 0.2 mag are measured between different filters \citep[see, e.g.,][]{2022RNAAS...6..191B}. This can significantly bias the inferred stellar mass, as is implied by the systematically higher stellar mass measured in both studies compared to \cite{carnall+2022} despite the relatively similar SFH models adopted. The photometry used in our analysis is identical to that used in \cite{carnall+2022} which has undergone extensive flux calibration as detailed in Appendix C of \cite{donnan+2022} and is believed to be significantly better calibrated than the calibrations achieved using the early NIRCam reference files. Nevertheless, the values reported in \cite{carnall+2022} are systematically lower than our measurements by $> 0.7$ dex. These authors fit the photometry with a single-component parameterized (delayed exponential) SFH, which as shown in \cite{rb2020} (see their Table 3) does not account for the more mature stellar population which constitutes the overwhelming majority of stellar mass. \cite{rb2020} suggest that depending on the SFH this approach can underestimate the stellar mass by as much as 1.5 dex, well in line with the large offsets between our measurements and those of \cite{carnall+2022}. 
+
+\section{Mass--metallicity relation} \label{sec: MZ}
+
+In this Section we combine the metallicity measurements from Section \ref{sec: metallicity} and the stellar mass measurements from Section \ref{sec: photometry} to infer the mass--metallicity relation at $z \approx 8$. The colored data points in Figure \ref{fig: MZ lines} show the distribution of measured metallicities for the galaxies in our $z \approx 8$ sample plotted against their measured stellar mass. We use the method described in Appendix \ref{app: outlier} to fit the distribution of masses and metallicities with a linear relation of the form \citep[adopted from][]{ma+2016}
+
+\begin{equation}
+    12 + \log\left (\frac{\textnormal{O}}{\textnormal{H}}\right) - 9.0 = \gamma_{\textnormal{\scriptsize g}}\bigg[\log\left(\frac{M_{\star}}{M_{\odot}}\right) - 10\bigg] + \textnormal{Z}_{\textnormal{\scriptsize g,10}}\;,
+\label{eq: forward}
+\end{equation}
+
+\noindent
+where we search for the best-fit normalization $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$ (gas-phase metallicity at $10^{10} M_{\odot}$ stellar mass) and slope $\gamma_{\textnormal{\scriptsize g}}$, and their posterior PDFs. The method adopted here (see Appendix \ref{app: outlier} for details) is best suited if it cannot be safely assumed that there is no outlier data point with severely underestimated uncertainties; as discussed in Section \ref{sec: metallicity}, this is likely the case for the measured metallicities. We find the best-fit values of $\gamma_{\textnormal{\scriptsize g}} = 0.24^{+0.13}_{-0.10}$ and $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -1.08^{+0.15}_{-0.15}$. 
+
+%; the full PDFs of both parameters are available in Appendix \ref{app: outlier}. 
+
+We also tested if using the metallicities as reported in \cite{schaerer+2022} instead of the values adopted above from \cite{curti+2022} can significantly affect our results \citep[see][for a discussion of the different determinations of the metallicities of the three SMACS galaxies]{2022ApJ...939L...3T}. Although this results in inferring a slightly shallower best-fit slope $\gamma_{\textnormal{\scriptsize g}} = 0.21^{+0.15}_{-0.10}$, we do not report any meaningful change in its $1\sigma$ credible region. Similarly, the best-fit normalization does not change meaningfully.  
+
+Moreover, we tested if defining the normalization at a stellar mass other than $M_{\star} = 10^{10}M_{\odot}$, which is the standard at lower redshifts, can affect our results. Equation \ref{eq: forward} explicitly assumes that the best-fit line passes from $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$ at $M_{\star} = 10^{10}M_{\odot}$, which is $\sim 1$ dex higher than the average stellar mass of our $z \approx 8$ sample, $M_{\star} = 10^{8.8}M_{\odot}$. We modified this relation to instead infer the normalization at $M_{\star} = 10^{8.8}M_{\odot}$ (by replacing 10 with 8.8 in Equation \ref{eq: forward}). The results remain intact; we report a best-fit $\textnormal{Z}_{\textnormal{\scriptsize g,8.8}} = -1.31^{+0.09}_{-0.08}$ (which corresponds to $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -1.04^{+0.09}_{-0.08}$) and $\gamma_{\textnormal{\scriptsize g}} = 0.23^{+0.12}_{-0.11}$. In the discussion of Section \ref{sec: discussion} and the rest of this work we adopt the best-fit mass-metallicity relation that was inferred above using the metallicities reported in \cite{curti+2022}, normalized at the standard stellar mass of $M_{\star} = 10^{10}M_{\odot}$. 
+
+% For comparison, in Figure \ref{fig: MZ lines} we also show the distribution of metallicities for the zCOSMOS EELGs as a function of their stellar mass. Depending on the available emission line measurements \cite{eelgs} used either the direct $T_e$ method from \cite{2008MNRAS.383..209H}, their own calibration of the $T(\textnormal{O \scriptsize III})-\textnormal{metallicity}$ relation, the N$_2$ calibration from \cite{2009MNRAS.398..949P}, or the R$_{23}$ calibration of \cite{1991ApJ...380..140M} scaled to the N$_2$ method using the linear relation from \citep{2006A&A...448..907L}. Since different metallicity diagnostics were adopted to measure the metallicities of this sample, we adopt the same method as above (from \ref{app: outlier}) to find the best-fit line of the form given by Equation \ref{eq: forward}. We find the best-fit values of $\gamma_{\textnormal{\scriptsize g}} = X^{+x}_{-x}$ and $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = X^{+x}_{-x}$. The best-fit mass-metallicity relation to the zCOSMOS EELGs is shown as the solid dark green line in Figure \ref{fig: MZ lines}.
+
+\section{Discussion} \label{sec: discussion}
+
+\subsection{Evolution of the mass-metallicity relation} \label{sec: MZR}
+
+The best-fit $z \approx 8$ mass--metallicity relation as well as its $1\sigma$ uncertainty are shown in Figure \ref{fig: MZ lines} as the solid red line and the pink shaded region, respectively. First we compare the normalization of the best-fit mass-metallicity relation at $z \approx 8$ with empirical constraints at lower redshifts, out to $z \sim 3.3$, based on the results of \cite{sanders+2021}. Our inferred normalization $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -1.08^{+0.15}_{-0.15}$ indicates a substantial $\sim 0.9$ dex evolution in metallicity at a fixed stellar mass with respect to the $z = 0$ measurements\footnote{this is measured at $10^{10} M_{\odot}$, and the evolution will be slightly smaller at lower stellar mass, due to the different slopes of our best-fit line and that of \cite{sanders+2021}}, where $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -0.18$ \citep[see also,][]{ma+2016, maiolino+2019}. The inferred normalization at $z \approx 8$ also indicates significant evolution with respect to the $z \sim 2.3$ and $z \sim 2.3$ normalization of \cite{sanders+2021}, where $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -0.49$ and $-0.59$, respectively.
+
+The slope $\gamma_{\textnormal{\scriptsize g}} = 0.24^{+0.13}_{-0.10}$ of the inferred mass-metallicity relation at $z \approx 8$ is slightly shallower than the measured slope at $z \sim 0$, 2.3, or 3.3 \citep[0.28, 0.30, 0.29, respectively; see][]{sanders+2021}, but they are consistent within $1\sigma$ uncertainties. To investigate this further, we adopted a fixed slope of $\gamma_{\textnormal{\scriptsize g}} = 0.3$ (consistent with the lower redshift observations) in Equation \ref{eq: forward} and repeated the method of Section \ref{sec: MZ} to find the best-fit normalization. This does not affect our inferred normalization $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -1.01^{+0.14}_{-0.09}$, still showing substantial evolution with respect to the lower redshifts; this line and its $1\sigma$ uncertainty are shown as the orange solid line and the orange shaded region in Figure \ref{fig: MZ lines}.
+For comparison, \cite{sanders+2021} measurements of the mass-metallicity relation at $z \sim 0$, 2.3, and 3.3 are shown in Figure \ref{fig: MZ lines} as the dark purple, blue, and green lines, respectively. We also show the best-fit $z \sim 0$ mass-metallicity relation from \cite{curti+2020b} (light pink line), which extends to lower stellar masses compared to the \cite{sanders+2021} study. The dashed segments of each line shows where mass-metallicity relation was extrapolated beyond the range of the corresponding study.
+
+\cite{ma+2016} inferred the mass-metallicity relation out to $z = 6$ from the simulated galaxies in the FIRE project, showing good agreement with the available empirical measurements out to $z \sim 3.5$. Their inferred redshift evolution of $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$ can be extrapolated beyond $z = 6$. They predict $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -0.98$ at $z = 6$ and $\textnormal{Z}_{\textnormal{\scriptsize g,10}} = -1.02$ at extrapolated $z = 8$, both within $1\sigma$ agreement of our measured normalization at $z \approx 8$. Nevertheless, our measurement mildly favors the extrapolated normalization at $z = 8$. Similar to the case of empirical measurements at lower redshifts, our measurement at $z \approx 8$ favors a shallower slope for the mass-metallicity relation compared to the \cite{ma+2016} predictions ($\gamma_{\textnormal{\scriptsize g}} = 0.35$), but the measurements are within $1\sigma$ uncertainties. The predicted $z = 8$ mass-metallicity relation of \cite{ma+2016} is shown as the solid black line in Figure \ref{fig: MZ lines}.
+
+\subsection{Comparison with the low-redshift analogs}
+
+Figures \ref{fig: OIII_to_OII} and \ref{fig: R23} show that the $z \approx 8$ galaxies possess strong emission line features that are generally distinct from extreme emission lines galaxies (EELGs) at $z < 1$, but are similar to blueberry galaxies and, to some degree, green peas. Based on these plots we expect the $z \approx 8$ galaxies to have similar metallicities to blueberry galaxies and a subset of green peas. This might suggest blueberry galaxies (and green peas to a lesser degree) as local analogs of the $z \approx 8$ emission line galaxies. However, this analogy should be further considered in the context of mass-metallicity diagram.
+
+Figure \ref{fig: MZ lowz} shows the distribution of the measured stellar masses and metallicities of our $z \approx 8$ galaxies (large colored data points), as well as the $1\sigma$ uncertainty of their distribution around the best-fit mass-metallicity relation (shaded pink and shaded orange regions, respectively for a free and fixed slope, see Section \ref{sec: MZR}). The small purple data points show the distribution of blueberry galaxies, all of which show similar strong emission line features to those of $z \approx 8$ emission line galaxies based on Figures \ref{fig: OIII_to_OII} and \ref{fig: R23}. We also show a sub-sample of green peas (small green data points), consisting of the green peas that lie within the $2\sigma$ credible interval of the $z \approx 8$ galaxies in Figures \ref{fig: OIII_to_OII} and \ref{fig: R23}. Both the blueberry galaxies and green peas have metallicities similar to the $z \approx 8$ galaxies, as expected. However, at fixed stellar mass, the $z \approx 8$ galaxies populate a region with lower metallicity compared to green peas and blueberry galaxies, and hence stand out in the mass-metallicity diagram.
+
+In Figure \ref{fig: MZ lowz}, we also show the \cite{berg+2012} $z \sim 0$ mass-metallicity relation for dwarf galaxies in the \textit{Spitzer} Local Volume Legacy (LVL) survey \citep{2009ApJ...703..517D}. We converted the stellar masses reported in \cite{berg+2012} from Salpeter IMF to Chabrier IMF. This is not a representative sample of galaxies at but rather biased toward lower metallicities $z \sim 0$ \citep[e.g. see the discussion in][]{curti+2020b}. Nevertheless, it is interesting to note that the \cite{berg+2012} mass-metallicity relation coincides with the location of blueberries in this diagram. The \cite{berg+2012} mass-metallicity relation is also consistent with the distribution of low metallicity galaxies from the Dark Energy Survey \citep{2022arXiv221102094L}. Despite the lower normalisation of this relation compared to the representative mass-metallicity relation at $z \sim 0$ (the \cite{curti+2020b} relation is shown as the solid pink line in Figure \ref{fig: MZ lowz}), it is systematically at higher normalization than that of the $z\approx8$ galaxies. 
+
+
+% ----> the best-fit line if the larger systematic uncertainties suggested in \cite{jones+2020} are used
+% ----> evolution of the EELGs alone in redshift bins; is this different than the MOZDEF sample? 
+
+\section{Conclusion} \label{sec: conclusion}
+
+We present the \jwst\ NIRCam photometry and NIRSpec spectra of two galaxies at $z \sim 8.15$ detected in the field towards the lensing cluster RX2129. We used these galaxies as well as 9 other galaxies at $7 < z < 9$ from the literature to compile a sample of 11 galaxies at $z \sim 8$. Using this sample we established the mass-metallicity relation at $z \sim 8$.
+
+The normalization of the mass-metallicity relation has evolved significantly from $z \sim 8$ to the local Universe; metallicity at a fixed stellar mass has increased significantly from $z \sim 8$ to $z \sim 0$. We compared our results with the mass-metallicity relation inferred by \cite{sanders+2021} at $z \sim 0$. The normalization of our best-fit mass-metallicity relation at $z \sim 8$ is $\sim 1$ dex lower than the normalization at $z \sim 0$; galaxies are on average 10 times less metal enriched at $z \sim 8$ compared to the local Universe. Furthermore, the evolution persists by $\sim 0.5$ dex and $\sim 0.4$ dex respectively, compared to the $z \sim 2.3$, 3.3 results of \cite{sanders+2021}. The galaxies observed at $z \sim 8$ are on average half as enriched as the galaxies at $z \sim 3.3$, the highest redshift up to which the mass-metallicity relation has been probed prior to \jwst. This implies a remarkably rapid enrichment epoch in the early Universe, when in less than $3.5\%$ of the lifetime of an average galaxy ($ < 450$ Myr at $z \sim 8$, assuming the galaxy starts forming at $z = 20$) almost $10\%$ of its enrichment has already happened. 
+    
+In general, our results agree well with the evolution of the mass-metallicity relation as predicted by the FIRE simulations \citep{ma+2016}. Our measured normalization of the mass-metallicity relation at $z \sim 8$ agrees within a few $0.01$ dex with \cite{ma+2016} predictions, well below the statistical uncertainty of our measurement. 
+    
+We tested the particular case where we did not fix the slope of the best-fit mass-metallicity relation to the slope suggested based on simulations or lower redshift observations. In this case, our inferred slope ($\gamma_{\textnormal{\scriptsize g}} = 0.24$) is slightly shallower than the measured slope at lower redshift ($\gamma_{\textnormal{\scriptsize g}} \sim 0.3$) or the slope predicted by simulation ($\gamma_{\textnormal{\scriptsize g}} \sim 0.35$). However, we cannot rule out these slopes, since they are within the $1\sigma$ uncertainty of our measurement. Compiling larger samples of $z \sim 8$ galaxies will address this further. 
+    
+We compared the $z \sim 8$ galaxies with potential analogs in the low redshift Universe, based on the $[$O{\footnotesize\;III}$]\lambda 5007$\AA/H$\beta$ vs $[$O{\footnotesize\;II}$]\lambda \lambda 3727, 3729$\AA/H$\beta$ and the O32 vs (R23-0.08O32) diagnostic plots. We find that the emission line galaxies detected at $z \sim 8$ are spectroscopically different from the extreme emission line galaxies at $z \sim 0-1$, and have systematically higher metallicities. However, there seems to be remarkable similarities in the emission line features of the blueberry galaxies (and to some degree green peas) and the $z \sim 8$ emission line galaxies. We investigated this further in the context of the mass-metallicity diagram; at fixed stellar mass, the $z \approx 8$ galaxies have systematically lower metallicities compared to blueberry galaxies and therefore stand out in the mass--metallicity diagram. 
+
+\begin{acknowledgments}
+%We thank Program Coordinators Tricia Royle, as well as Instrument Scientists Armin Rest, Diane Karakala, and Patrick Ogle of STScI for their help carrying out the {\it HST} observations. 
+We thank Gabe Brammer for his identification of the high-redshift galaxy targets we present during the mask design process, and his contributions to their analysis. We also appreciate Program Coordinator Patricia Royle, and Program Scientists Armin Rest, Diane Karakala, and Patrick Ogle for their efforts with short turnaround that made the follow-up observations a success. D.L. and J.H. were supported by a VILLUM FONDEN Investigator grant (project number 16599).
+P.L.K. is supported by NSF grant AST-1908823 and anticipated funding from {\it JWST} DD-2767. % and MRI-1908823. %, and NASA/Keck JPL RSA 1644110.
+%The Cosmic Dawn Center is funded by the Danish National Research Foundation (DNRF) under grant \#140. 
+A.Z. acknowledges support by Grant No. 2020750 from the United States-Israel Binational Science Foundation (BSF) and Grant No.\ 2109066 from the United States National Science Foundation (NSF), and by the Ministry of Science \& Technology, Israel.
+J.M.D. acknowledges the support of projects PGC2018-101814-B-100 and MDM-2017-0765. 
+A.V.F. is grateful for financial assistance from the Christopher R. Redlich Fund and numerous individual donors.  
+The UCSC team is supported in part by NSF grant AST--1815935, the Gordon \& Betty Moore Foundation, and by a fellowship from the David and Lucile Packard Foundation to R.J.F.
+M.O. acknowledges support by JSPS KAKENHI grants JP20H00181, JP20H05856, and JP22H01260.
+I.P.-F. and F.P. acknowledge support from the Spanish State Research Agency (AEI) under grant number PID2019-105552RB-C43.
+J.P. was supported by HST program GO-16264 through the Space Telescope Science Institute, which is operated by the Association of Universities for Research in Astronomy, Inc.\ for NASA, under contract NAS5-26555.
+%T.T. acknowledges the support of NSF grant AST-1906976.
+\end{acknowledgments}
+
+\bibliography{main}
+\bibliographystyle{aasjournal}
+
+\begin{table*}
+\centering
+\begin{tabular}{ |l|l|l|l|l| } 
+ \hline
+Galaxy & $z_{\textnormal{\scriptsize spec}}$ & $\log(M_{\star}/M_{\odot})$ & $12 + \log(\textnormal{O/H})$ & Magnification \\ 
+\hline\hline
+RX2129--ID11002 & 8.160 & $8.49^{+0.24}_{-0.32}$ & $7.65^{+0.07}_{-0.07}$ & 2.23\\ 
+RX2129--ID11022 & 8.150 & $7.52^{+0.33}_{-0.35}$ & $7.51$\footnote{$1\sigma$ upper limit} & 3.29\\ 
+RX2129--ID11027 & 9.510 & $7.74^{+0.23}_{-0.29}$ & $7.47^{+0.09}_{-0.09}$ & 19.60\\ 
+SMACS0723--ID4590 & 8.498 & $8.00^{+0.36}_{-0.51}$ & $6.99^{+0.11}_{-0.11}$ & 10.09\\ 
+SMACS0723--ID6355 & 7.665 & $8.22^{+0.20}_{-0.18}$ & $8.24^{+0.07}_{-0.07}$ & 2.69\\ 
+SMACS0723--ID10612 & 7.663 & $8.40^{+0.15}_{-0.24}$ & $7.73^{+0.12}_{-0.12}$ & 1.58\\ 
+SXDF--NB1006--2 & 7.212 & $9.31^{+0.41}_{-0.47}$ & $7.36^{+0.71}_{-0.21}$ \footnote{Only the statistical uncertainty; an extra $\pm 0.2$ dex systematic uncertainty should be considered, see \cite{jones+2020}. These metallicities are corrected for the 0.2 dex offset reported in \cite{jones+2020}\label{jones unc}} & 1.00\\ 
+B14--65666 & 7.152 & $9.90^{+0.25}_{-0.33}$ & $7.94^{+0.10}_{-0.16}$ \footnoteref{jones unc} & 1.00\\ 
+MACS0416--Y1 & 8.312 & $9.96^{+0.28}_{-0.23}$ & $8.03^{+0.10}_{-0.69}$ \footnoteref{jones unc} & 1.60\\ 
+A2744--YD4 & 8.382 & $10.03^{+0.40}_{-0.38}$ & $7.44^{+0.28}_{-0.32}$ \footnoteref{jones unc} & 1.50\\ 
+MACS1149--JD1 & 9.110 & $9.31^{+0.19}_{-0.14}$ & $7.95^{+0.15}_{-0.14}$ \footnoteref{jones unc} & 11.50\\  \hline
+\end{tabular}
+\caption{Measured stellar mass (lensing corrected) and metallicity for the galaxies in our $z \sim 8$ sample.}
+\label{table: mass}
+\end{table*}
+
+% \clearpage
+
+% \begin{figure*}
+%     \centering
+%     \includegraphics[width=17cm]{plots/full_spec_11002.pdf}
+%     \caption{2D (top panel) and 1D (bottom panel) spectra and emission line identification for the RXJ-11002 galaxy.}
+%     \label{fig: spectra 11002}
+% \end{figure*}
+
+% \begin{figure*}
+%     \centering
+%     \includegraphics[width=17cm]{plots/full_spec_11022.pdf}
+%     \caption{2D (top panel) and 1D (bottom panel) spectra and emission line identification for the RXJ-11022 galaxy.}
+%     \label{fig: specta 11022}
+% \end{figure*}
+
+% \begin{figure*}
+%     \centering
+%     \includegraphics[width=15cm]{plots/lOH12_vs_mass.pdf}
+%     \caption{O/H as inferred from strong emission line analysis, plotted against the stellar mass ($M_{\star}$) inferred from SED fitting.}
+%     \label{fig: OH_vs_mass}
+% \end{figure*}
+
+
+%\begin{figure*}
+%    \centering
+%    \includegraphics[width=15cm]{MUV_vs_photoz.pdf}
+%    \caption{$M_{\textnormal{UV}}$ vs redshift for galaxies at $z > 8$. High redshift candidates detected in NIRCam photometry of the lensing cluster SMACS J0723 \citep[see][]{atek+2022} are marked in dark green. }
+%    \label{fig: MUV_vs_photoz}
+%\end{figure*}
+
+%\begin{figure*}
+%    \centering
+%    \includegraphics[width=15cm]{betaUV_vs_MUV.pdf}
+%    \caption{UV-continuum slope ($\beta_{\textnormal{UV}}$) vs $M_{\textnormal{UV}}$ for $z > 8$ galaxies.}
+%    \label{fig: betaUV_vs_MUV}
+%\end{figure*}
+
+
+\appendix
+
+\section{Fitting the mass-metallicity relation} \label{app: MZ relation}
+
+In this Section we describe the method adopted in Section \ref{sec: MZ} to find the best-fit mass-metallicity relation. First we describe the method used when it can be safely assumed that there is no outlier data points with severely underestimated uncertainties (\ref{app: no outlier}); later in this Appendix we describe the method used when this assumption is prohibited (\ref{app: outlier}).
+
+\subsection{Assuming that there is are outlier data points} \label{app: no outlier}
+
+In order to find the best linear fit of the form given in Equation \ref{eq: forward} we explore the parameter space of $\gamma_{\textnormal{\scriptsize g}}$ and $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$ to find the posterior PDFs that best describe the measured masses and metallicities as well as their uncertainties. For this purpose we use the \texttt{EMCEE} package \citep{emcee}, a \texttt{python} implementation of the affine-invariant ensemble sampler \citep{2010CAMCS...5...65G} for Markov chain Monte Carlo (MCMC). At each MCMC step, we draw the stellar mass of each source $M_{\star, i}$ from its full PDF (see Section \ref{sec: photometry}) and search for the $\gamma_{\textnormal{\scriptsize g}}$ and $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$ values which maximize the probability defined as
+
+\begin{equation}
+\begin{split}
+    \ln\mathcal{L}_{\textnormal{normal}} = \ln p\bigg(\big\{12+\log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}}\big\}_{i=1}^N\bigg| \big\{M_{\star, i}\big\}_{i=1}^N, \gamma_{\textnormal{\scriptsize g}}, \textnormal{Z}_{\textnormal{\scriptsize g,10}}\bigg) = \\
+    \sum_{i=1}^{N} \ln\left( \frac{1}{\sigma_i \sqrt{2\pi}} \right) - 0.5 \frac{\big(\log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}} - \log(\textnormal{O/H})_{i, \textnormal{\scriptsize model}}\big)^2}{\sigma_i^2}\;,
+\end{split}
+\end{equation}
+
+\noindent
+where the sum is over the entire sample of galaxies; $\log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}}$ is the measured metallicity of each source (from Section \ref{sec: metallicity}); $\log(\textnormal{O/H})_{i, \textnormal{\scriptsize model}}$ is calculated by inserting the drawn stellar mass, $\gamma_{\textnormal{\scriptsize g}}$, and $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$ in Equation \ref{eq: forward}; and
+
+\begin{equation}
+    \sigma_i =     
+    \begin{cases}
+      \textnormal{positive uncertainty of } \log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}}, 
+      \;\;\;\text{if}\ \log(\textnormal{O/H})_{i, \textnormal{\scriptsize model}} \ge \log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}} \\
+      \textnormal{negative uncertainty of } \log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}},
+      \;\;\;\text{if}\ \log(\textnormal{O/H})_{i, \textnormal{\scriptsize model}} < \log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}}
+    \end{cases}
+    .
+\label{eq: sigma}
+\end{equation}
+
+\noindent
+Following this approach we use the full posterior PDFs of the mass measurements and assume that the posterior PDFs of metallicity measurements are described by split normal distributions. It is easy to see that in the limit where the mass PDFs approach delta functions centred on the maximum a posteriori value, our method approaches the familiar case of log likelihood maximization where the uncertainty of the mass measurement is negligible. 
+
+\subsection{Assuming that there might be outlier data points} \label{app: outlier}
+
+The above approach is not robust when there is outlier measurements with severely underestimated uncertainties. As discussed in Section \ref{sec: metallicity} this is most likely the case for the metallicity measurements of the $z \approx 8$ sample; this can also be the case to some degree for the metallicity measurements of the zCOSMSO EELGs sample where multiple metallicity estimators have been used \citep[see][]{eelgs}. 
+In order to objectively prune the outliers we modify our probability function following the method suggested in \cite{hogg+2010}. This corresponds to adding $3 + N$ new free binary parameters including $q_i$ (one per data point) each of which is zero if the corresponding data point is believed to be an outlier and is one if the corresponding data point is believed to not be an outlier; $P_b$ which is the prior probability that any individual data point is and outlier; and $Y_b$ and $V_b$ which determine the mean and variance of the outliers. 
+The modified probability function takes the form 
+
+\begin{equation}
+\begin{split}
+    \ln\mathcal{L}_{\textnormal{prune}} = \sum_{i=1}^{N} \bigg[ \ln( \frac{1}{\sigma_i \sqrt{2\pi}} ) - 0.5 \frac{\big(\log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}} - \log(\textnormal{O/H})_{i, \textnormal{\scriptsize model}}\big)^2}{\sigma_i^2} \bigg] \times q_i \; + 
+    \\
+    \sum_{i=1}^N \bigg[\ln(\frac{1}{\sqrt{2\pi (V_b + \sigma_i^2})}) - 0.5 \frac{(12 + \log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}} - Y_b)^2}{V_b + \sigma_i^2} \bigg] \times (1-q_i) \;,
+\end{split}
+\end{equation}
+
+\noindent
+where $\sigma_i$ is given by Equation \ref{eq: sigma}. In order to penalize data rejection we include a prior probability on $q_i$, given by Equation 14 in \cite{hogg+2010}
+
+\begin{equation}
+    \ln p(\big\{q_i\big\}_{i=1}^N \big| P_b) = \sum_{i=1}^{N} q_i \ln(1-P_b) + (1-q_i) \ln P_b \;.
+\end{equation}
+
+\noindent
+We adopt a flat prior in the range $[0,1]$ on $P_b$, and a flat prior in the range $[6,9]$ and $[0,6]$ on $Y_b$ and $V_b$ motivated by the range of $12 + \log(\textnormal{O/H})_{i, \textnormal{\scriptsize truth}}$. We marginalize over the nuisance parameters, $\{q_i\}_{i=1}^N, P_b, Y_b, V_b$, to report the best-fit $\gamma_{\textnormal{\scriptsize g}}$ and $\textnormal{Z}_{\textnormal{\scriptsize g,10}}$. The strength of this method is that apart from the parameters of interest it also constraints the posterior PDF of a given data point being an outlier ($q_i$).
+
+\section{Best-fit stellar populations to our sample of \titlelowercase{$z \approx 8$} galaxies} \label{app: prospector}
+
+In this Appendix we show the best-fit photometry and spectrum, posterior PDFs of the stellar populations, and SFH for the remaining 9 sources in our sample of $z \approx 8$ galaxies; the same plots for the RX2129--ID11002 and RX2129--ID11022 were shown in Section \ref{sec: photometry}, Figures \ref{fig: 11002} and \ref{fig: 11022}.
+
+\begin{figure*}[hb]
+    \centering
+    \includegraphics[width=18cm]{plots/11027_nonpar_1_22Nov16.pdf}
+    \caption{SED-fitting results for the RX2129--ID11027 galaxy.}
+    \label{fig: 11027}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/34086_nonpar_22Nov16.pdf}
+    \caption{SED-fitting results for the SMACS0723--ID4590 galaxy.}
+    \label{fig: 4590}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/44566_nonpar_22Nov16.pdf}
+    \caption{SED-fitting results for the SMACS0723--ID6355 galaxy.}
+    \label{fig: 6355}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/44711_nonpar_22Nov16.pdf}
+    \caption{SED-fitting results for the SMACS0723--ID10612 galaxy.}
+    \label{fig: 10612}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/11491_nonpar_1_22Nov20.pdf}
+    \caption{SED-fitting results for the MACS1149--JD1 galaxy.}
+    \label{fig: MACS1149--JD1}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/27444_nonpar_1_22Nov20.pdf}
+    \caption{SED-fitting results for the A2744--YD4 galaxy.}
+    \label{fig: A2744--YD4}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/4161_nonpar_1_22Nov20.pdf}
+    \caption{SED-fitting results for the MACS0416--Y1 galaxy.}
+    \label{fig: MACS0416--Y1}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/10062_nonpar_1_22Nov20.pdf}
+    \caption{SED-fitting results for the SXDF--NB1006--2 galaxy.}
+    \label{fig: SXDF--NB1006--2}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=18cm]{plots/1465666_nonpar_1_22Nov20.pdf}
+    \caption{SED-fitting results for the B14--65666 galaxy.}
+    \label{fig: B14--65666}
+\end{figure*}
+
+\end{document}
